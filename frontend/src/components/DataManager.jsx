@@ -100,7 +100,8 @@ const DataManager = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/admin/${collection}`);
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const response = await fetch(`${apiUrl}/api/admin/${collection}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -116,7 +117,8 @@ const DataManager = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/admin/stats');
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const response = await fetch(`${apiUrl}/api/admin/stats`);
       if (response.ok) {
         const result = await response.json();
         setStats(result);
@@ -128,7 +130,8 @@ const DataManager = () => {
 
   const handleEdit = async (item) => {
     try {
-      const response = await fetch(`/api/admin/${selectedCollection}/${item._id}`, {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const response = await fetch(`${apiUrl}/api/admin/${selectedCollection}/${item._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -149,7 +152,8 @@ const DataManager = () => {
 
   const handleDelete = async (item) => {
     try {
-      const response = await fetch(`/api/admin/${selectedCollection}/${item._id}`, {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const response = await fetch(`${apiUrl}/api/admin/${selectedCollection}/${item._id}`, {
         method: 'DELETE',
       });
 
@@ -166,7 +170,8 @@ const DataManager = () => {
 
   const handleAdd = async (item) => {
     try {
-      const response = await fetch(`/api/admin/${selectedCollection}`, {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const response = await fetch(`${apiUrl}/api/admin/${selectedCollection}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
