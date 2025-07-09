@@ -40,7 +40,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (loginData) => {
     try {
-      const response = await fetch('/api/users/login', {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,26 +49,26 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(loginData),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
 
-      if (response.ok) {
-        const userData = {
-          ...data.user,
-          isLoggedIn: true,
-          loginTime: new Date().toISOString(),
-        };
-        
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('token', data.token);
-        
-        setUser(userData);
-        setIsAuthenticated(true);
-        
-        return { success: true, user: userData };
-      } else {
-        return { success: false, error: data.error || 'Wystąpił błąd podczas logowania' };
-      }
+      const userData = {
+        ...data.user,
+        isLoggedIn: true,
+        loginTime: new Date().toISOString(),
+      };
+      
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('token', data.token);
+      
+      setUser(userData);
+      setIsAuthenticated(true);
+      
+      return { success: true, user: userData };
     } catch (error) {
       console.error('Błąd logowania:', error);
       return { success: false, error: 'Wystąpił błąd podczas logowania' };

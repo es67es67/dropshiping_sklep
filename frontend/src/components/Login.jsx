@@ -332,6 +332,7 @@ export default function Login() {
             onChange={handleInputChange}
             placeholder="Wprowadź email lub nazwę użytkownika"
             disabled={isLoading}
+            autoComplete="username"
           />
           {errors.emailOrUsername && <ErrorMessage>{errors.emailOrUsername}</ErrorMessage>}
         </FormGroup>
@@ -345,6 +346,7 @@ export default function Login() {
             onChange={handleInputChange}
             placeholder="Wprowadź swoje hasło"
             disabled={isLoading}
+            autoComplete="current-password"
           />
           {errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}
         </FormGroup>
