@@ -30,7 +30,8 @@ const io = socketIo(server, {
     origin: [
       "http://localhost:3000",
       "https://portal-frontend.onrender.com",
-      "https://portal-frontend-igf9.onrender.com"
+      "https://portal-frontend-igf9.onrender.com",
+      "https://portal-frontend-ysqz.onrender.com"
     ],
     methods: ["GET", "POST"],
     credentials: true
@@ -41,7 +42,8 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'https://portal-frontend.onrender.com',
-    'https://portal-frontend-igf9.onrender.com'
+    'https://portal-frontend-igf9.onrender.com',
+    'https://portal-frontend-ysqz.onrender.com'
   ],
   credentials: true
 }));
