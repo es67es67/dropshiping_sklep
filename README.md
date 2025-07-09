@@ -255,4 +255,10 @@ MIT License - zobacz [LICENSE](LICENSE) dla szczegółów.
 
 ---
 
-⭐ **Jeśli projekt Ci się podoba, daj gwiazdkę na GitHub!** 
+⭐ **Jeśli projekt Ci się podoba, daj gwiazdkę na GitHub!**
+
+---
+
+## 📝 O projekcie
+
+Ten projekt został przeniesiony z lokalnego repozytorium do GitHub jako **Portal - Modular Community Platform**. Oryginalna nazwa repozytorium "dropshiping_sklep" została zachowana dla kompatybilności.
