@@ -27,14 +27,40 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"]
+    origin: [
+      "http://localhost:3000",
+      "https://portal-frontend.onrender.com",
+      "https://portal-frontend-igf9.onrender.com"
+    ],
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://portal-frontend.onrender.com',
+    'https://portal-frontend-igf9.onrender.com'
+  ],
+  credentials: true
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Dodaj middleware dla CSP
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-src 'self';"
+  );
+  next();
+});
+
+// Dodaj favicon route
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end(); // No content
+});
 
 // Statyczne pliki (zdjęcia)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
