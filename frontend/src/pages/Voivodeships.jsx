@@ -191,7 +191,8 @@ export default function Voivodeships() {
   const fetchVoivodeships = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/locations/voivodeships');
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const response = await fetch(`${apiUrl}/api/locations/voivodeships`);
       if (!response.ok) {
         throw new Error('Błąd podczas pobierania województw');
       }

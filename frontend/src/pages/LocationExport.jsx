@@ -308,7 +308,8 @@ export default function LocationExport() {
     setDownloadUrl(null);
 
     try {
-      const response = await fetch('/api/locations/export', {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const response = await fetch(`${apiUrl}/api/locations/export`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

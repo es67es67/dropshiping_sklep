@@ -348,7 +348,8 @@ export default function LocationImport() {
       formData.append('file', selectedFile);
       formData.append('options', JSON.stringify(options));
 
-      const response = await fetch('/api/locations/import', {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const response = await fetch(`${apiUrl}/api/locations/import`, {
         method: 'POST',
         body: formData
       });

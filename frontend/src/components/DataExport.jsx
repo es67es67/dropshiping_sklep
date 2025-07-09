@@ -219,7 +219,8 @@ const DataExport = () => {
 
       addLog(`Eksportowanie kolekcji: ${selectedCollections.join(', ')}`, 'info');
 
-      const response = await fetch('/api/admin/export', {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const response = await fetch(`${apiUrl}/api/admin/export`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
