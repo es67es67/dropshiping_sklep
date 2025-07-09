@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Podgląd danych GUS w MongoDB</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
+        .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+        h1 { color: #1976d2; }
+        button { padding: 12px 24px; background: #1976d2; color: #fff; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-bottom: 24px; }
+        button:hover { background: #125ea2; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #e0e0e0; padding: 8px 12px; text-align: left; }
+        th { background: #e3f2fd; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        .error { color: #d32f2f; margin-top: 20px; }
+        .success { color: #388e3c; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Podgląd przykładowych danych GUS w MongoDB</h1>
+        <button onclick="fetchSample()">Pobierz próbkę danych</button>
+        <div id="result"></div>
+    </div>
+    <script>
+        async function fetchSample() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '⏳ Pobieranie...';
+            try {
+                const response = await fetch('http://localhost:5000/api/export/sample');
+                const data = await response.json();
+                if (!data.success) {
+                    resultDiv.innerHTML = `<div class='error'>Błąd: ${data.error}</div>`;
+                    return;
+                }
+                if (!data.sample || data.sample.length === 0) {
+                    resultDiv.innerHTML = '<div class="error">Brak danych w bazie.</div>';
+                    return;
+                }
+                // Zbierz wszystkie unikalne klucze z rekordów
+                const allKeys = Array.from(new Set(data.sample.flatMap(obj => Object.keys(obj))));
+                let html = '<table><thead><tr>';
+                allKeys.forEach(key => html += `<th>${key}</th>`);
+                html += '</tr></thead><tbody>';
+                data.sample.forEach(row => {
+                    html += '<tr>';
+                    allKeys.forEach(key => {
+                        let val = row[key];
+                        if (typeof val === 'object' && val !== null) val = JSON.stringify(val);
+                        html += `<td>${val !== undefined ? val : ''}</td>`;
+                    });
+                    html += '</tr>';
+                });
+                html += '</tbody></table>';
+                resultDiv.innerHTML = html;
+            } catch (err) {
+                resultDiv.innerHTML = `<div class='error'>Błąd połączenia: ${err.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html> 

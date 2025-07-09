@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel administracyjny bazy lokalizacji</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
+        .container { max-width: 1200px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+        h1 { color: #1976d2; }
+        .toolbar { display: flex; gap: 16px; margin-bottom: 24px; align-items: center; flex-wrap: wrap; }
+        input[type="text"], select { padding: 8px 12px; border: 1px solid #bdbdbd; border-radius: 6px; font-size: 16px; }
+        button { padding: 8px 18px; background: #1976d2; color: #fff; border: none; border-radius: 6px; font-size: 15px; cursor: pointer; }
+        button:hover { background: #125ea2; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #e0e0e0; padding: 7px 10px; text-align: left; }
+        th { background: #e3f2fd; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        .actions { display: flex; gap: 8px; }
+        .danger { background: #d32f2f; }
+        .danger:hover { background: #a31515; }
+        .success { background: #388e3c; }
+        .success:hover { background: #256029; }
+        .warning { background: #f57c00; }
+        .warning:hover { background: #e65100; }
+        .pagination { margin: 20px 0; display: flex; gap: 8px; align-items: center; }
+        .info { color: #1976d2; margin-bottom: 10px; }
+        .error { color: #d32f2f; margin-bottom: 10px; }
+        .editable { background: #fffde7; border: 1px solid #ffe082; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 24px; font-weight: bold; color: #1976d2; }
+        .stat-label { color: #666; font-size: 14px; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border-radius: 10px; width: 80%; max-width: 500px; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: #000; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Panel administracyjny bazy lokalizacji</h1>
+        
+        <!-- Statystyki -->
+        <div class="stats" id="stats"></div>
+        
+        <div class="toolbar">
+            <input type="text" id="search" placeholder="Szukaj po nazwie lub kodzie...">
+            <select id="typeFilter">
+                <option value="">Wszystkie typy</option>
+                <option value="województwo">Województwo</option>
+                <option value="powiat">Powiat</option>
+                <option value="gmina">Gmina</option>
+                <option value="miejscowość">Miejscowość</option>
+                <option value="ulica">Ulica</option>
+            </select>
+            <button onclick="loadData(1)">Szukaj</button>
+            <button onclick="resetSearch()">Wyczyść</button>
+            <button onclick="loadData(currentPage)">Odśwież</button>
+            <button class="success" onclick="showAddModal()">+ Dodaj nowy</button>
+            <button class="warning" onclick="exportCSV()">📊 Eksport CSV</button>
+            <span id="totalInfo" class="info"></span>
+        </div>
+        
+        <div class="table-wrap">
+            <table id="dataTable">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+        
+        <div class="pagination" id="pagination"></div>
+        <div id="msg"></div>
+    </div>
+
+    <!-- Modal dodawania -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddModal()">&times;</span>
+            <h2>Dodaj nową lokalizację</h2>
+            <form id="addForm">
+                <div class="form-group">
+                    <label>Nazwa *</label>
+                    <input type="text" id="addName" required>
+                </div>
+                <div class="form-group">
+                    <label>Typ *</label>
+                    <select id="addType" required>
+                        <option value="">Wybierz typ</option>
+                        <option value="województwo">Województwo</option>
+                        <option value="powiat">Powiat</option>
+                        <option value="gmina">Gmina</option>
+                        <option value="miejscowość">Miejscowość</option>
+                        <option value="ulica">Ulica</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Kod *</label>
+                    <input type="text" id="addCode" required>
+                </div>
+                <div class="form-group">
+                    <label>Unique ID</label>
+                    <input type="text" id="addUniqueId">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="addIsActive" checked> Aktywna
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="addIsVerified" checked> Zweryfikowana
+                    </label>
+                </div>
+                <button type="submit" class="success">Dodaj</button>
+                <button type="button" onclick="closeAddModal()">Anuluj</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        let lastSearch = '';
+        let lastType = '';
+        let lastLimit = 20;
+        let editingId = null;
+        let editingRow = null;
+        let lastData = [];
+
+        async function loadStats() {
+            try {
+                const res = await fetch('http://localhost:5000/api/export/stats');
+                const data = await res.json();
+                if (data.success) {
+                    let html = `<div class="stat-card"><div class="stat-number">${data.total}</div><div class="stat-label">Łącznie</div></div>`;
+                    data.stats.forEach(stat => {
+                        html += `<div class="stat-card"><div class="stat-number">${stat.count}</div><div class="stat-label">${stat._id}</div></div>`;
+                    });
+                    document.getElementById('stats').innerHTML = html;
+                }
+            } catch (err) {
+                console.error('Błąd ładowania statystyk:', err);
+            }
+        }
+
+        async function loadData(page = 1) {
+            const search = document.getElementById('search').value.trim();
+            const type = document.getElementById('typeFilter').value;
+            lastSearch = search;
+            lastType = type;
+            showMsg('');
+            document.getElementById('tableBody').innerHTML = '<tr><td colspan="99">⏳ Ładowanie...</td></tr>';
+            try {
+                const res = await fetch(`http://localhost:5000/api/export/list?page=${page}&limit=${lastLimit}&search=${encodeURIComponent(search)}&type=${encodeURIComponent(type)}`);
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                renderTable(data.data);
+                renderPagination(data.page, Math.ceil(data.total / data.limit));
+                document.getElementById('totalInfo').textContent = `Wyników: ${data.total}`;
+                currentPage = data.page;
+                totalPages = Math.ceil(data.total / data.limit);
+                lastData = data.data;
+            } catch (err) {
+                showMsg('Błąd: ' + err.message, true);
+                document.getElementById('tableBody').innerHTML = '';
+            }
+        }
+
+        function renderTable(rows) {
+            if (!rows.length) {
+                document.getElementById('tableHead').innerHTML = '';
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="99">Brak danych</td></tr>';
+                return;
+            }
+            const keys = Array.from(new Set(rows.flatMap(obj => Object.keys(obj))));
+            let head = '<tr>';
+            keys.forEach(k => head += `<th>${k}</th>`);
+            head += '<th>Akcje</th></tr>';
+            document.getElementById('tableHead').innerHTML = head;
+            
+            let body = '';
+            rows.forEach((row, idx) => {
+                body += `<tr data-id="${row._id}">`;
+                keys.forEach(key => {
+                    let val = row[key];
+                    if (typeof val === 'object' && val !== null) val = JSON.stringify(val);
+                    if (editingId === row._id && ['name','code','type'].includes(key)) {
+                        body += `<td><input class='editable' value="${val ?? ''}" data-key="${key}" style='width:95%'></td>`;
+                    } else {
+                        body += `<td>${val !== undefined ? val : ''}</td>`;
+                    }
+                });
+                body += `<td class='actions'>`;
+                if (editingId === row._id) {
+                    body += `<button class='success' onclick='saveEdit("${row._id}")'>Zapisz</button><button onclick='cancelEdit()'>Anuluj</button>`;
+                } else {
+                    body += `<button onclick='startEdit(${idx})'>Edytuj</button><button class='danger' onclick='deleteRow("${row._id}")'>Usuń</button>`;
+                }
+                body += `</td></tr>`;
+            });
+            document.getElementById('tableBody').innerHTML = body;
+        }
+
+        function renderPagination(page, total) {
+            let html = '';
+            if (total <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+            if (page > 1) html += `<button onclick='loadData(${page-1})'>&lt; Poprzednia</button>`;
+            html += `<span>Strona ${page} z ${total}</span>`;
+            if (page < total) html += `<button onclick='loadData(${page+1})'>Następna &gt;</button>`;
+            document.getElementById('pagination').innerHTML = html;
+        }
+
+        function showMsg(msg, error=false) {
+            document.getElementById('msg').innerHTML = msg ? `<div class='${error?'error':'info'}'>${msg}</div>` : '';
+        }
+
+        function resetSearch() {
+            document.getElementById('search').value = '';
+            document.getElementById('typeFilter').value = '';
+            loadData(1);
+        }
+
+        async function deleteRow(id) {
+            if (!confirm('Na pewno usunąć ten wpis?')) return;
+            try {
+                const res = await fetch(`http://localhost:5000/api/export/delete/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                showMsg('Wpis usunięty.');
+                loadData(currentPage);
+                loadStats();
+            } catch (err) {
+                showMsg('Błąd usuwania: ' + err.message, true);
+            }
+        }
+
+        function startEdit(idx) {
+            editingId = lastData[idx]._id;
+            editingRow = idx;
+            renderTable(lastData);
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            editingRow = null;
+            renderTable(lastData);
+        }
+
+        async function saveEdit(id) {
+            const tr = document.querySelector(`tr[data-id='${id}']`);
+            const inputs = tr.querySelectorAll('input.editable');
+            const update = {};
+            inputs.forEach(inp => update[inp.dataset.key] = inp.value);
+            try {
+                const res = await fetch(`http://localhost:5000/api/export/update/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(update)
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                showMsg('Zapisano zmiany.');
+                editingId = null;
+                editingRow = null;
+                loadData(currentPage);
+                loadStats();
+            } catch (err) {
+                showMsg('Błąd zapisu: ' + err.message, true);
+            }
+        }
+
+        function showAddModal() {
+            document.getElementById('addModal').style.display = 'block';
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').style.display = 'none';
+            document.getElementById('addForm').reset();
+        }
+
+        async function addNewLocation(event) {
+            event.preventDefault();
+            const formData = {
+                name: document.getElementById('addName').value,
+                type: document.getElementById('addType').value,
+                code: document.getElementById('addCode').value,
+                uniqueId: document.getElementById('addUniqueId').value || `${document.getElementById('addType').value}_${document.getElementById('addCode').value}`,
+                isActive: document.getElementById('addIsActive').checked,
+                isVerified: document.getElementById('addIsVerified').checked
+            };
+            
+            try {
+                const res = await fetch('http://localhost:5000/api/export/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                showMsg('Nowa lokalizacja dodana.');
+                closeAddModal();
+                loadData(1);
+                loadStats();
+            } catch (err) {
+                showMsg('Błąd dodawania: ' + err.message, true);
+            }
+        }
+
+        function exportCSV() {
+            const search = document.getElementById('search').value.trim();
+            const type = document.getElementById('typeFilter').value;
+            const url = `http://localhost:5000/api/export/export-csv?search=${encodeURIComponent(search)}&type=${encodeURIComponent(type)}`;
+            window.open(url, '_blank');
+        }
+
+        // Event listeners
+        document.getElementById('addForm').addEventListener('submit', addNewLocation);
+        document.getElementById('search').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') loadData(1);
+        });
+        document.getElementById('typeFilter').addEventListener('change', function() {
+            loadData(1);
+        });
+
+        // Inicjalne ładowanie
+        loadStats();
+        loadData(1);
+    </script>
+</body>
+</html> 
