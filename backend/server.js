@@ -48,13 +48,22 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Dodaj middleware dla CSP - usuń restrykcyjne ustawienia
+// Middleware do usuwania restrykcyjnych nagłówków bezpieczeństwa
 app.use((req, res, next) => {
-  // Usuń nagłówek CSP jeśli istnieje
-  res.removeHeader('Content-Security-Policy');
-  res.removeHeader('X-Content-Type-Options');
-  res.removeHeader('X-Frame-Options');
-  res.removeHeader('X-XSS-Protection');
+  // Przechwyć oryginalną metodę end
+  const originalEnd = res.end;
+  
+  res.end = function(chunk, encoding) {
+    // Usuń restrykcyjne nagłówki przed wysłaniem odpowiedzi
+    res.removeHeader('Content-Security-Policy');
+    res.removeHeader('X-Content-Type-Options');
+    res.removeHeader('X-Frame-Options');
+    res.removeHeader('X-XSS-Protection');
+    
+    // Wywołaj oryginalną metodę end
+    return originalEnd.call(this, chunk, encoding);
+  };
+  
   next();
 });
 
