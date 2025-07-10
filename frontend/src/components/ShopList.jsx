@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+  }
 `;
 
 const Header = styled.div`
@@ -12,6 +21,12 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
 `;
 
 const Title = styled.h1`
@@ -21,6 +36,15 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    text-align: center;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+  }
 `;
 
 const AddButton = styled.button`
@@ -41,6 +65,16 @@ const AddButton = styled.button`
     transform: translateY(-2px);
     box-shadow: ${props => props.theme.shadowHover};
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.75rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
 `;
 
 const Filters = styled.div`
@@ -48,6 +82,11 @@ const Filters = styled.div`
   gap: 1rem;
   margin-bottom: 2rem;
   flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 `;
 
 const FilterInput = styled.input`
@@ -60,6 +99,15 @@ const FilterInput = styled.input`
   &:focus {
     outline: none;
     border-color: ${props => props.theme.primary};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
   }
 `;
 
@@ -75,12 +123,31 @@ const Select = styled.select`
     outline: none;
     border-color: ${props => props.theme.primary};
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
 `;
 
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 `;
 
 const ShopCard = styled.div`
@@ -95,6 +162,22 @@ const ShopCard = styled.div`
     transform: translateY(-8px);
     box-shadow: ${props => props.theme.shadowHover};
   }
+  
+  @media (max-width: 768px) {
+    border-radius: 12px;
+    
+    &:hover {
+      transform: translateY(-4px);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    border-radius: 8px;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
 `;
 
 const ShopHeader = styled.div`
@@ -106,6 +189,16 @@ const ShopHeader = styled.div`
   font-size: 3rem;
   color: white;
   position: relative;
+  
+  @media (max-width: 768px) {
+    height: 100px;
+    font-size: 2.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    height: 80px;
+    font-size: 2rem;
+  }
 `;
 
 const ShopStatus = styled.div`
@@ -118,10 +211,25 @@ const ShopStatus = styled.div`
   font-weight: 600;
   background: ${props => props.status === 'open' ? '#10B981' : '#EF4444'};
   color: white;
+  
+  @media (max-width: 480px) {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+  }
 `;
 
 const ShopInfo = styled.div`
   padding: 1.5rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
 `;
 
 const ShopName = styled.h3`
@@ -129,12 +237,28 @@ const ShopName = styled.h3`
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: ${props => props.theme.text};
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const ShopDescription = styled.p`
   color: ${props => props.theme.textSecondary};
   margin-bottom: 1rem;
   line-height: 1.5;
+  
+  @media (max-width: 768px) {
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const ShopDetails = styled.div`
@@ -143,6 +267,13 @@ const ShopDetails = styled.div`
   align-items: center;
   margin-bottom: 1rem;
   font-size: 0.9rem;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
 `;
 
 const ShopLocation = styled.div`
@@ -165,6 +296,10 @@ const ShopStats = styled.div`
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   margin-bottom: 1rem;
+  
+  @media (max-width: 480px) {
+    gap: 0.75rem;
+  }
 `;
 
 const Stat = styled.div`
@@ -172,12 +307,24 @@ const Stat = styled.div`
   padding: 0.75rem;
   background: ${props => props.theme.background};
   border-radius: 8px;
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+  }
 `;
 
 const StatValue = styled.div`
   font-size: 1.25rem;
   font-weight: 700;
   color: ${props => props.theme.primary};
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
 `;
 
 const StatLabel = styled.div`
@@ -185,11 +332,20 @@ const StatLabel = styled.div`
   color: ${props => props.theme.textSecondary};
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  
+  @media (max-width: 480px) {
+    font-size: 0.7rem;
+  }
 `;
 
 const ShopActions = styled.div`
   display: flex;
   gap: 0.5rem;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 `;
 
 const ActionButton = styled.button`
@@ -219,12 +375,30 @@ const ActionButton = styled.button`
       background: ${props => props.theme.border};
     }
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
 `;
 
 const EmptyState = styled.div`
   text-align: center;
   padding: 4rem 2rem;
   color: ${props => props.theme.textSecondary};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 2rem 0.5rem;
+  }
 `;
 
 export default function ShopList() {
@@ -384,10 +558,10 @@ export default function ShopList() {
                 </ShopStats>
                 
                 <ShopActions>
-                  <ActionButton className="primary">
+                  <ActionButton className="primary" as={Link} to={`/shop/${shop.id}`}>
                     🛒 Przejdź do sklepu
                   </ActionButton>
-                  <ActionButton className="secondary">
+                  <ActionButton className="secondary" as={Link} to={`/shop/${shop.id}`}>
                     👁️ Szczegóły
                   </ActionButton>
                 </ShopActions>
