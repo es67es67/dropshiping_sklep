@@ -5,6 +5,14 @@ const Container = styled.div`
   max-width: 1000px;
   margin: 0 auto;
   padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+  }
 `;
 
 const Title = styled.h1`
@@ -16,6 +24,16 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const ProfileGrid = styled.div`
@@ -25,6 +43,11 @@ const ProfileGrid = styled.div`
   
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 1rem;
   }
 `;
 
@@ -34,11 +57,25 @@ const Sidebar = styled.div`
   padding: 2rem;
   box-shadow: ${props => props.theme.shadow};
   height: fit-content;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+  }
 `;
 
 const AvatarSection = styled.div`
   text-align: center;
   margin-bottom: 2rem;
+  
+  @media (max-width: 480px) {
+    margin-bottom: 1.5rem;
+  }
 `;
 
 const Avatar = styled.div`
@@ -58,6 +95,18 @@ const Avatar = styled.div`
   &:hover {
     transform: scale(1.05);
   }
+  
+  @media (max-width: 768px) {
+    width: 100px;
+    height: 100px;
+    font-size: 2.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+  }
 `;
 
 const UserName = styled.div`
@@ -65,17 +114,33 @@ const UserName = styled.div`
   font-weight: 700;
   color: ${props => props.theme.text};
   margin-bottom: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const UserEmail = styled.div`
   color: ${props => props.theme.textSecondary};
   font-size: 0.875rem;
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const StatsList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  
+  @media (max-width: 480px) {
+    gap: 0.75rem;
+  }
 `;
 
 const StatItem = styled.div`
@@ -85,16 +150,33 @@ const StatItem = styled.div`
   padding: 1rem;
   background: ${props => props.theme.background};
   border-radius: 12px;
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    border-radius: 8px;
+  }
 `;
 
 const StatLabel = styled.div`
   color: ${props => props.theme.textSecondary};
   font-size: 0.875rem;
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const StatValue = styled.div`
   font-weight: 600;
   color: ${props => props.theme.text};
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const MainContent = styled.div`
@@ -102,6 +184,16 @@ const MainContent = styled.div`
   border-radius: 20px;
   padding: 2rem;
   box-shadow: ${props => props.theme.shadow};
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+  }
 `;
 
 const TabNavigation = styled.div`
@@ -110,6 +202,17 @@ const TabNavigation = styled.div`
   margin-bottom: 2rem;
   border-bottom: 2px solid ${props => props.theme.border};
   padding-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const TabButton = styled.button`
@@ -125,12 +228,27 @@ const TabButton = styled.button`
   &:hover {
     background: ${props => props.active ? props.theme.primary : props.theme.primary}10;
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+  }
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  
+  @media (max-width: 480px) {
+    gap: 1rem;
+  }
 `;
 
 const FormGrid = styled.div`
@@ -140,6 +258,7 @@ const FormGrid = styled.div`
   
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 `;
 
@@ -153,6 +272,10 @@ const Label = styled.label`
   font-weight: 600;
   color: ${props => props.theme.text};
   font-size: 0.875rem;
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const Input = styled.input`
@@ -173,6 +296,17 @@ const Input = styled.input`
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
   }
 `;
 
@@ -197,6 +331,17 @@ const Button = styled.button`
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.75rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
   }
 `;
 

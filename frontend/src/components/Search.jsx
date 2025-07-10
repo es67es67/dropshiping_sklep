@@ -5,6 +5,14 @@ const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+  }
 `;
 
 const Title = styled.h1`
@@ -16,6 +24,16 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const SearchSection = styled.div`
@@ -24,6 +42,17 @@ const SearchSection = styled.div`
   padding: 2rem;
   box-shadow: ${props => props.theme.shadow};
   margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+  }
 `;
 
 const SearchBar = styled.div`
@@ -33,6 +62,7 @@ const SearchBar = styled.div`
   
   @media (max-width: 600px) {
     flex-direction: column;
+    gap: 0.75rem;
   }
 `;
 
@@ -55,6 +85,17 @@ const SearchInput = styled.input`
   &::placeholder {
     color: ${props => props.theme.textSecondary};
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
 `;
 
 const SearchButton = styled.button`
@@ -73,12 +114,31 @@ const SearchButton = styled.button`
     transform: translateY(-2px);
     box-shadow: ${props => props.theme.shadowHover};
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.75rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
 `;
 
 const FilterSection = styled.div`
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    gap: 0.75rem;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
 `;
 
 const FilterButton = styled.button`
@@ -95,6 +155,17 @@ const FilterButton = styled.button`
     border-color: ${props => props.theme.primary};
     background: ${props => props.active ? props.theme.primary : props.theme.primary}10;
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: 6px;
+  }
 `;
 
 const ResultsSection = styled.div`
@@ -104,6 +175,11 @@ const ResultsSection = styled.div`
   
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 1rem;
   }
 `;
 
@@ -112,6 +188,16 @@ const ResultsColumn = styled.div`
   border-radius: 20px;
   padding: 2rem;
   box-shadow: ${props => props.theme.shadow};
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+  }
 `;
 
 const ColumnTitle = styled.h2`
@@ -122,12 +208,26 @@ const ColumnTitle = styled.h2`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const ResultsList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  
+  @media (max-width: 480px) {
+    gap: 0.75rem;
+  }
 `;
 
 const ResultItem = styled.div`
@@ -144,6 +244,21 @@ const ResultItem = styled.div`
     transform: translateY(-2px);
     box-shadow: ${props => props.theme.shadow};
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    gap: 0.75rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    gap: 0.5rem;
+    border-radius: 8px;
+    
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
 `;
 
 const ItemIcon = styled.div`
@@ -155,6 +270,19 @@ const ItemIcon = styled.div`
   align-items: center;
   justify-content: center;
   background: ${props => props.theme.primary}20;
+  
+  @media (max-width: 768px) {
+    width: 50px;
+    height: 50px;
+    font-size: 1.75rem;
+  }
+  
+  @media (max-width: 480px) {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    border-radius: 8px;
+  }
 `;
 
 const ItemInfo = styled.div`
@@ -165,12 +293,28 @@ const ItemName = styled.div`
   font-weight: 600;
   color: ${props => props.theme.text};
   margin-bottom: 0.25rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const ItemDescription = styled.div`
   font-size: 0.875rem;
   color: ${props => props.theme.textSecondary};
   margin-bottom: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
+  }
 `;
 
 const ItemMeta = styled.div`
@@ -178,24 +322,49 @@ const ItemMeta = styled.div`
   gap: 1rem;
   font-size: 0.75rem;
   color: ${props => props.theme.textSecondary};
+  
+  @media (max-width: 480px) {
+    gap: 0.75rem;
+    font-size: 0.7rem;
+  }
 `;
 
 const ItemPrice = styled.div`
   font-weight: 600;
   color: ${props => props.theme.primary};
   font-size: 1.125rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const EmptyState = styled.div`
   text-align: center;
   padding: 4rem 2rem;
   color: ${props => props.theme.textSecondary};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 2rem 0.5rem;
+  }
 `;
 
 const LoadingState = styled.div`
   text-align: center;
   padding: 2rem;
   color: ${props => props.theme.textSecondary};
+  
+  @media (max-width: 480px) {
+    padding: 1.5rem;
+  }
 `;
 
 const SearchStats = styled.div`
