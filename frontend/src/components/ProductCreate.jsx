@@ -5,6 +5,14 @@ const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+  }
 `;
 
 const Title = styled.h1`
@@ -16,6 +24,16 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const Form = styled.form`
@@ -23,10 +41,24 @@ const Form = styled.form`
   border-radius: 20px;
   padding: 2rem;
   box-shadow: ${props => props.theme.shadow};
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+  }
 `;
 
 const FormSection = styled.div`
   margin-bottom: 2rem;
+  
+  @media (max-width: 480px) {
+    margin-bottom: 1.5rem;
+  }
 `;
 
 const SectionTitle = styled.h3`
@@ -37,6 +69,14 @@ const SectionTitle = styled.h3`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
 `;
 
 const FormGrid = styled.div`
@@ -46,6 +86,7 @@ const FormGrid = styled.div`
   
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 `;
 
@@ -59,6 +100,10 @@ const Label = styled.label`
   font-weight: 600;
   color: ${props => props.theme.text};
   font-size: 0.875rem;
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const Input = styled.input`
@@ -78,6 +123,17 @@ const Input = styled.input`
   
   &::placeholder {
     color: ${props => props.theme.textSecondary};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
   }
 `;
 
@@ -101,6 +157,19 @@ const TextArea = styled.textarea`
   &::placeholder {
     color: ${props => props.theme.textSecondary};
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+    min-height: 100px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    min-height: 80px;
+  }
 `;
 
 const Select = styled.select`
@@ -118,6 +187,17 @@ const Select = styled.select`
     border-color: ${props => props.theme.primary};
     box-shadow: 0 0 0 3px ${props => props.theme.primary}20;
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
 `;
 
 const ImageUpload = styled.div`
@@ -132,29 +212,69 @@ const ImageUpload = styled.div`
     border-color: ${props => props.theme.primary};
     background: ${props => props.theme.primary}05;
   }
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
 `;
 
 const UploadIcon = styled.div`
   font-size: 3rem;
   margin-bottom: 1rem;
   color: ${props => props.theme.textSecondary};
+  
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 2rem;
+  }
 `;
 
 const UploadText = styled.div`
   color: ${props => props.theme.textSecondary};
   margin-bottom: 0.5rem;
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const UploadHint = styled.div`
   font-size: 0.875rem;
   color: ${props => props.theme.textSecondary};
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const ImagePreview = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: ${props => props.theme.background};
+  border: 2px solid ${props => props.theme.border};
+  margin: 1rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  @media (max-width: 768px) {
+    width: 100px;
+    height: 100px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 80px;
+    height: 80px;
+  }
 `;
 
 const PreviewImage = styled.div`
@@ -224,6 +344,7 @@ const ButtonGroup = styled.div`
   
   @media (max-width: 600px) {
     flex-direction: column;
+    gap: 0.75rem;
   }
 `;
 
@@ -255,13 +376,24 @@ const Button = styled.button`
   }
   
   &.secondary {
-    background: ${props => props.theme.background};
+    background: ${props => props.theme.surface};
     color: ${props => props.theme.text};
     border: 2px solid ${props => props.theme.border};
     
     &:hover {
       background: ${props => props.theme.border};
     }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.75rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
   }
 `;
 

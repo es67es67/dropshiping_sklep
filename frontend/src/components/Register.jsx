@@ -7,6 +7,15 @@ const Container = styled.div`
   max-width: 500px;
   margin: 0 auto;
   padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+    max-width: 100%;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+  }
 `;
 
 const Title = styled.h1`
@@ -18,6 +27,16 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const Form = styled.form`
@@ -25,6 +44,16 @@ const Form = styled.form`
   border-radius: 20px;
   padding: 2rem;
   box-shadow: ${props => props.theme.shadow};
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+  }
 `;
 
 const FormGrid = styled.div`
@@ -43,6 +72,10 @@ const FormGroup = styled.div`
   &.full-width {
     grid-column: 1 / -1;
   }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 1rem;
+  }
 `;
 
 const Label = styled.label`
@@ -50,6 +83,10 @@ const Label = styled.label`
   font-weight: 600;
   color: ${props => props.theme.text};
   margin-bottom: 0.5rem;
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const Input = styled.input`
@@ -75,6 +112,17 @@ const Input = styled.input`
   &.error {
     border-color: ${props => props.theme.error};
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
 `;
 
 const Select = styled.select`
@@ -92,6 +140,17 @@ const Select = styled.select`
     outline: none;
     border-color: ${props => props.theme.primary};
     box-shadow: 0 0 0 3px ${props => props.theme.primary}20;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
   }
 `;
 
@@ -119,6 +178,17 @@ const Button = styled.button`
     cursor: not-allowed;
     transform: none;
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.75rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
 `;
 
 const Divider = styled.div`
@@ -141,6 +211,14 @@ const Divider = styled.div`
     padding: 0 1rem;
     color: ${props => props.theme.textSecondary};
     font-size: 0.875rem;
+  }
+  
+  @media (max-width: 480px) {
+    margin: 1rem 0;
+    
+    span {
+      font-size: 0.8rem;
+    }
   }
 `;
 
@@ -165,6 +243,17 @@ const SocialButton = styled.button`
     background: ${props => props.theme.primary}10;
     border-color: ${props => props.theme.primary};
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.75rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
 `;
 
 const LoginLink = styled.div`
@@ -181,12 +270,21 @@ const LoginLink = styled.div`
       text-decoration: underline;
     }
   }
+  
+  @media (max-width: 480px) {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
 `;
 
 const ErrorMessage = styled.div`
   color: ${props => props.theme.error};
   font-size: 0.875rem;
   margin-top: 0.5rem;
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const SuccessMessage = styled.div`
@@ -194,11 +292,18 @@ const SuccessMessage = styled.div`
   font-size: 0.875rem;
   margin-top: 0.5rem;
   text-align: center;
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const PasswordStrength = styled.div`
   margin-top: 0.5rem;
-  font-size: 0.875rem;
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const StrengthBar = styled.div`

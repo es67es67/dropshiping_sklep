@@ -5,6 +5,14 @@ const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+  }
 `;
 
 const Header = styled.div`
@@ -12,6 +20,12 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
 `;
 
 const Title = styled.h1`
@@ -21,6 +35,15 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    text-align: center;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+  }
 `;
 
 const AddButton = styled.button`
@@ -41,6 +64,16 @@ const AddButton = styled.button`
     transform: translateY(-2px);
     box-shadow: ${props => props.theme.shadowHover};
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.75rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
 `;
 
 const Filters = styled.div`
@@ -48,6 +81,11 @@ const Filters = styled.div`
   gap: 1rem;
   margin-bottom: 2rem;
   flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 `;
 
 const FilterInput = styled.input`
@@ -60,6 +98,15 @@ const FilterInput = styled.input`
   &:focus {
     outline: none;
     border-color: ${props => props.theme.primary};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
   }
 `;
 
@@ -75,12 +122,31 @@ const Select = styled.select`
     outline: none;
     border-color: ${props => props.theme.primary};
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
 `;
 
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 `;
 
 const ProductCard = styled.div`
@@ -95,6 +161,22 @@ const ProductCard = styled.div`
     transform: translateY(-8px);
     box-shadow: ${props => props.theme.shadowHover};
   }
+  
+  @media (max-width: 768px) {
+    border-radius: 12px;
+    
+    &:hover {
+      transform: translateY(-4px);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    border-radius: 8px;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
 `;
 
 const ProductImage = styled.div`
@@ -105,10 +187,28 @@ const ProductImage = styled.div`
   justify-content: center;
   font-size: 3rem;
   color: white;
+  
+  @media (max-width: 768px) {
+    height: 150px;
+    font-size: 2.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    height: 120px;
+    font-size: 2rem;
+  }
 `;
 
 const ProductInfo = styled.div`
   padding: 1.5rem;
+  
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
 `;
 
 const ProductName = styled.h3`
@@ -116,12 +216,28 @@ const ProductName = styled.h3`
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: ${props => props.theme.text};
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
 `;
 
 const ProductDescription = styled.p`
   color: ${props => props.theme.textSecondary};
   margin-bottom: 1rem;
   line-height: 1.5;
+  
+  @media (max-width: 768px) {
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const ProductPrice = styled.div`
@@ -129,11 +245,24 @@ const ProductPrice = styled.div`
   font-weight: 700;
   color: ${props => props.theme.primary};
   margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const ProductActions = styled.div`
   display: flex;
   gap: 0.5rem;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 `;
 
 const ActionButton = styled.button`
@@ -163,12 +292,30 @@ const ActionButton = styled.button`
       background: ${props => props.theme.border};
     }
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
 `;
 
 const EmptyState = styled.div`
   text-align: center;
   padding: 4rem 2rem;
   color: ${props => props.theme.textSecondary};
+  
+  @media (max-width: 768px) {
+    padding: 3rem 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 2rem 0.5rem;
+  }
 `;
 
 export default function ProductList() {
