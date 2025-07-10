@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
+import LocationSearch from '../components/LocationSearch';
+import LocationDetails from '../components/LocationDetails';
+import LocationAnalytics from '../components/LocationAnalytics';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -198,6 +201,59 @@ const ErrorMessage = styled.div`
   margin-bottom: 1rem;
 `;
 
+const ActionButton = styled.button`
+  background: ${props => props.theme.primary};
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${props => props.theme.primaryDark};
+    transform: translateY(-2px);
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+`;
+
+const TabContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+`;
+
+const Tab = styled.button`
+  background: ${props => props.active ? props.theme.primary : 'transparent'};
+  color: ${props => props.active ? 'white' : props.theme.text};
+  border: 2px solid ${props => props.theme.primary};
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: ${props => props.active ? props.theme.primaryDark : props.theme.primary}20;
+  }
+`;
+
 /**
  * Strona zarządzania powiatami dla wybranego województwa
  * Wyświetla listę powiatów z możliwością wyszukiwania i filtrowania
@@ -217,6 +273,13 @@ export default function Counties() {
     active: 0,
     municipalities: 0
   });
+  
+  // Nowe stany dla zaawansowanych funkcji
+  const [showSearch, setShowSearch] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [activeTab, setActiveTab] = useState('list');
 
   useEffect(() => {
     fetchCounties();
@@ -321,11 +384,42 @@ export default function Counties() {
 
       <Header>
         <Title>🏘️ Powiaty - {voivodeship?.name}</Title>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <ActionButton onClick={() => setShowSearch(true)}>
+            🔍 Zaawansowane wyszukiwanie
+          </ActionButton>
+          <ActionButton onClick={() => setShowAnalytics(true)}>
+            📊 Analityka
+          </ActionButton>
+        </div>
       </Header>
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
-      <StatsGrid>
+      <TabContainer>
+        <Tab 
+          active={activeTab === 'list'} 
+          onClick={() => setActiveTab('list')}
+        >
+          📋 Lista powiatów
+        </Tab>
+        <Tab 
+          active={activeTab === 'search'} 
+          onClick={() => setActiveTab('search')}
+        >
+          🔍 Wyszukiwanie
+        </Tab>
+        <Tab 
+          active={activeTab === 'analytics'} 
+          onClick={() => setActiveTab('analytics')}
+        >
+          📊 Analityka
+        </Tab>
+      </TabContainer>
+
+      {activeTab === 'list' && (
+        <>
+          <StatsGrid>
         <StatCard>
           <StatNumber>{stats.total}</StatNumber>
           <StatLabel>Wszystkie powiaty</StatLabel>
@@ -359,7 +453,15 @@ export default function Counties() {
 
       <CountiesGrid>
         {filteredCounties.map(county => (
-          <CountyCard key={county.id} to={`/municipalities/${county.code}`}>
+          <CountyCard 
+            key={county.id} 
+            to={`/municipalities/${county.code}`}
+            onClick={(e) => {
+              e.preventDefault();
+              setSelectedLocation(county);
+              setShowDetails(true);
+            }}
+          >
             <CountyHeader>
               <CountyIcon>🏘️</CountyIcon>
               <CountyInfo>
@@ -382,6 +484,60 @@ export default function Counties() {
           </CountyCard>
         ))}
       </CountiesGrid>
+      </>
+      )}
+
+      {activeTab === 'search' && (
+        <LocationSearch 
+          onLocationSelect={(location) => {
+            setSelectedLocation(location);
+            setShowDetails(true);
+            setActiveTab('list');
+          }}
+          onClose={() => setActiveTab('list')}
+        />
+      )}
+
+      {activeTab === 'analytics' && (
+        <LocationAnalytics locationId={voivodeshipCode} />
+      )}
+
+      {/* Modal szczegółów lokalizacji */}
+      {showDetails && selectedLocation && (
+        <ModalOverlay onClick={() => setShowDetails(false)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <LocationDetails 
+              locationId={selectedLocation.id} 
+              onClose={() => setShowDetails(false)}
+            />
+          </div>
+        </ModalOverlay>
+      )}
+
+      {/* Modal zaawansowanego wyszukiwania */}
+      {showSearch && (
+        <ModalOverlay onClick={() => setShowSearch(false)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <LocationSearch 
+              onLocationSelect={(location) => {
+                setSelectedLocation(location);
+                setShowDetails(true);
+                setShowSearch(false);
+              }}
+              onClose={() => setShowSearch(false)}
+            />
+          </div>
+        </ModalOverlay>
+      )}
+
+      {/* Modal analityki */}
+      {showAnalytics && (
+        <ModalOverlay onClick={() => setShowAnalytics(false)}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <LocationAnalytics locationId={voivodeshipCode} />
+          </div>
+        </ModalOverlay>
+      )}
     </Container>
   );
 } 

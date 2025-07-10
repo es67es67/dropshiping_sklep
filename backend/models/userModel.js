@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema({
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  subscribedLocations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Location' }],
   
   // Gamifikacja
   points: { type: Number, default: 0 },

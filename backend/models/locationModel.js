@@ -7,7 +7,7 @@ const locationSchema = new mongoose.Schema({
   name: { type: String, required: true },
   type: { 
     type: String, 
-    enum: ['województwo', 'powiat', 'gmina', 'miejscowość', 'ulica'], 
+    enum: ['województwo', 'powiat', 'miasto na prawach powiatu', 'gmina', 'miejscowość', 'ulica'], 
     required: true 
   },
   code: { type: String }, // Kod TERYT (może się duplikować w różnych jednostkach)
@@ -35,7 +35,9 @@ const locationSchema = new mongoose.Schema({
     totalShops: { type: Number, default: 0 },
     totalProducts: { type: Number, default: 0 },
     totalPosts: { type: Number, default: 0 },
-    totalEvents: { type: Number, default: 0 }
+    totalEvents: { type: Number, default: 0 },
+    averageRating: { type: Number, default: 0 },
+    totalRatings: { type: Number, default: 0 }
   },
   
   // Dodatkowe informacje

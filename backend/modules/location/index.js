@@ -3,6 +3,9 @@ const router = express.Router();
 const Location = require('../../models/locationModel');
 const User = require('../../models/userModel');
 const Shop = require('../../models/shopModel');
+const Post = require('../../models/postModel');
+const Product = require('../../models/productModel');
+const LocationRating = require('../../models/locationRatingModel');
 const eventSystem = require('../../core/eventSystem');
 
 class LocationModule {
@@ -16,19 +19,38 @@ class LocationModule {
     // Pobieranie lokalizacji po typie
     router.get('/locations', async (req, res) => {
       try {
-        const { type, parentId, limit = 50, page = 1 } = req.query;
+        const { type, parentId, limit = 50, page = 1, search, sort = 'name', order = 'asc' } = req.query;
         const query = {};
         
         if (type) query.type = type;
         if (parentId) query.parentLocation = parentId;
+        if (search) {
+          query.$or = [
+            { name: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+            { tags: { $in: [new RegExp(search, 'i')] } }
+          ];
+        }
         
         const skip = (page - 1) * limit;
+        const sortOrder = order === 'desc' ? -1 : 1;
+        
         const locations = await Location.find(query)
           .limit(parseInt(limit))
           .skip(skip)
-          .sort({ name: 1 });
+          .sort({ [sort]: sortOrder });
         
-        res.json(locations);
+        const total = await Location.countDocuments(query);
+        
+        res.json({
+          locations,
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            pages: Math.ceil(total / limit)
+          }
+        });
       } catch (error) {
         res.status(500).json({ error: error.message });
       }
@@ -39,7 +61,10 @@ class LocationModule {
       try {
         const location = await Location.findById(req.params.id)
           .populate('parentLocation')
-          .populate('childLocations');
+          .populate('childLocations')
+          .populate('wojewodztwo')
+          .populate('powiat')
+          .populate('gmina');
         
         if (!location) {
           return res.status(404).json({ error: 'Lokalizacja nie znaleziona' });
@@ -48,7 +73,14 @@ class LocationModule {
         // Pobieranie statystyk dla lokalizacji
         const stats = await this.getLocationStats(req.params.id);
         
-        res.json({ ...location.toObject(), stats });
+        // Pobieranie rekomendacji
+        const recommendations = await this.getLocationRecommendations(req.params.id);
+        
+        res.json({ 
+          ...location.toObject(), 
+          stats,
+          recommendations 
+        });
       } catch (error) {
         res.status(500).json({ error: error.message });
       }
@@ -87,6 +119,147 @@ class LocationModule {
       }
     });
 
+    // Zaawansowane wyszukiwanie
+    router.get('/locations/search/advanced', async (req, res) => {
+      try {
+        const { 
+          query, 
+          types, 
+          tags, 
+          features, 
+          minPopulation, 
+          maxPopulation,
+          hasCoordinates,
+          sortBy = 'name',
+          order = 'asc',
+          page = 1,
+          limit = 20
+        } = req.query;
+        
+        const searchQuery = {};
+        
+        if (query) {
+          searchQuery.$or = [
+            { name: { $regex: query, $options: 'i' } },
+            { description: { $regex: query, $options: 'i' } },
+            { tags: { $in: [new RegExp(query, 'i')] } }
+          ];
+        }
+        
+        if (types) {
+          searchQuery.type = { $in: types.split(',') };
+        }
+        
+        if (tags) {
+          searchQuery.tags = { $in: tags.split(',') };
+        }
+        
+        if (features) {
+          searchQuery.features = { $in: features.split(',') };
+        }
+        
+        if (minPopulation || maxPopulation) {
+          searchQuery.population = {};
+          if (minPopulation) searchQuery.population.$gte = parseInt(minPopulation);
+          if (maxPopulation) searchQuery.population.$lte = parseInt(maxPopulation);
+        }
+        
+        if (hasCoordinates === 'true') {
+          searchQuery['coordinates.lat'] = { $exists: true, $ne: null };
+          searchQuery['coordinates.lng'] = { $exists: true, $ne: null };
+        }
+        
+        const skip = (page - 1) * limit;
+        const sortOrder = order === 'desc' ? -1 : 1;
+        
+        const locations = await Location.find(searchQuery)
+          .limit(parseInt(limit))
+          .skip(skip)
+          .sort({ [sortBy]: sortOrder });
+        
+        const total = await Location.countDocuments(searchQuery);
+        
+        res.json({
+          locations,
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            pages: Math.ceil(total / limit)
+          }
+        });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Rekomendacje lokalizacji
+    router.get('/locations/:id/recommendations', async (req, res) => {
+      try {
+        const location = await Location.findById(req.params.id);
+        if (!location) {
+          return res.status(404).json({ error: 'Lokalizacja nie znaleziona' });
+        }
+        
+        const recommendations = await this.getLocationRecommendations(req.params.id);
+        res.json(recommendations);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // System ocen lokalizacji
+    router.post('/locations/:id/rate', async (req, res) => {
+      try {
+        const { userId, rating, comment } = req.body;
+        const locationId = req.params.id;
+        
+        const result = await this.rateLocation(locationId, userId, rating, comment);
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Pobieranie ocen lokalizacji
+    router.get('/locations/:id/ratings', async (req, res) => {
+      try {
+        const { page = 1, limit = 10 } = req.query;
+        const locationId = req.params.id;
+        
+        const ratings = await this.getLocationRatings(locationId, parseInt(page), parseInt(limit));
+        res.json(ratings);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Subskrypcja powiadomień o lokalizacji
+    router.post('/locations/:id/subscribe', async (req, res) => {
+      try {
+        const { userId } = req.body;
+        const locationId = req.params.id;
+        
+        const result = await this.subscribeToLocation(locationId, userId);
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Anulowanie subskrypcji
+    router.delete('/locations/:id/subscribe', async (req, res) => {
+      try {
+        const { userId } = req.body;
+        const locationId = req.params.id;
+        
+        const result = await this.unsubscribeFromLocation(locationId, userId);
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
     // Aktualizacja lokalizacji użytkownika
     router.put('/users/location', async (req, res) => {
       try {
@@ -116,6 +289,32 @@ class LocationModule {
       try {
         const result = await this.migrateLocations();
         res.json(result);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Analityka lokalizacji
+    router.get('/locations/:id/analytics', async (req, res) => {
+      try {
+        const locationId = req.params.id;
+        const { period = '30d' } = req.query;
+        
+        const analytics = await this.getLocationAnalytics(locationId, period);
+        res.json(analytics);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    // Eksport danych lokalizacji
+    router.get('/locations/:id/export', async (req, res) => {
+      try {
+        const locationId = req.params.id;
+        const { format = 'json' } = req.query;
+        
+        const exportData = await this.exportLocationData(locationId, format);
+        res.json(exportData);
       } catch (error) {
         res.status(500).json({ error: error.message });
       }
@@ -207,7 +406,8 @@ class LocationModule {
       };
       
       if (type === 'products' || type === 'all') {
-        // results.results.push(...await Product.find({ location: location._id }).limit(20));
+        const products = await Product.find({ location: location._id }).limit(20);
+        results.results.push(...products);
       }
       
       if (type === 'shops' || type === 'all') {
@@ -215,10 +415,316 @@ class LocationModule {
         results.results.push(...shops);
       }
       
+      if (type === 'posts' || type === 'all') {
+        const posts = await Post.find({ location: location._id }).limit(20);
+        results.results.push(...posts);
+      }
+      
       return results;
     } catch (error) {
       console.error('Błąd wyszukiwania w promieniu:', error);
       return { location: location.name, radius: radiusKm, results: [] };
+    }
+  }
+
+  async getLocationRecommendations(locationId) {
+    try {
+      const location = await Location.findById(locationId);
+      if (!location) return [];
+      
+      const recommendations = [];
+      
+      // Rekomendacje na podstawie podobnych tagów
+      if (location.tags && location.tags.length > 0) {
+        const similarByTags = await Location.find({
+          _id: { $ne: locationId },
+          tags: { $in: location.tags },
+          isActive: true
+        }).limit(5);
+        recommendations.push(...similarByTags);
+      }
+      
+      // Rekomendacje na podstawie typu
+      const similarByType = await Location.find({
+        _id: { $ne: locationId },
+        type: location.type,
+        isActive: true
+      }).limit(3);
+      recommendations.push(...similarByType);
+      
+      // Rekomendacje na podstawie sąsiedztwa
+      if (location.parentLocation) {
+        const nearby = await Location.find({
+          _id: { $ne: locationId },
+          parentLocation: location.parentLocation,
+          isActive: true
+        }).limit(3);
+        recommendations.push(...nearby);
+      }
+      
+      // Usuń duplikaty i zwróć unikalne rekomendacje
+      const uniqueRecommendations = recommendations.filter((item, index, self) => 
+        index === self.findIndex(t => t._id.toString() === item._id.toString())
+      );
+      
+      return uniqueRecommendations.slice(0, 10);
+    } catch (error) {
+      console.error('Błąd pobierania rekomendacji:', error);
+      return [];
+    }
+  }
+
+  async rateLocation(locationId, userId, rating, comment) {
+    try {
+      // Sprawdź czy użytkownik już ocenił tę lokalizację
+      const existingRating = await this.getUserLocationRating(locationId, userId);
+      
+      if (existingRating) {
+        // Aktualizuj istniejącą ocenę
+        existingRating.rating = rating;
+        existingRating.comment = comment;
+        existingRating.updatedAt = new Date();
+        await existingRating.save();
+      } else {
+        // Utwórz nową ocenę
+        const newRating = new LocationRating({
+          location: locationId,
+          user: userId,
+          rating,
+          comment
+        });
+        await newRating.save();
+      }
+      
+      // Aktualizuj średnią ocenę lokalizacji
+      await this.updateLocationAverageRating(locationId);
+      
+      return { success: true, message: 'Ocena została zapisana' };
+    } catch (error) {
+      console.error('Błąd oceniania lokalizacji:', error);
+      throw error;
+    }
+  }
+
+  async getLocationRatings(locationId, page = 1, limit = 10) {
+    try {
+      const skip = (page - 1) * limit;
+      
+      const ratings = await LocationRating.find({ location: locationId })
+        .populate('user', 'username email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+      
+      const total = await LocationRating.countDocuments({ location: locationId });
+      
+      return {
+        ratings,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      };
+    } catch (error) {
+      console.error('Błąd pobierania ocen:', error);
+      return { ratings: [], pagination: { page, limit, total: 0, pages: 0 } };
+    }
+  }
+
+  async subscribeToLocation(locationId, userId) {
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        throw new Error('Użytkownik nie znaleziony');
+      }
+      
+      // Sprawdź czy już subskrybuje
+      if (user.subscribedLocations && user.subscribedLocations.includes(locationId)) {
+        return { success: false, message: 'Już subskrybujesz tę lokalizację' };
+      }
+      
+      // Dodaj do subskrypcji
+      if (!user.subscribedLocations) user.subscribedLocations = [];
+      user.subscribedLocations.push(locationId);
+      await user.save();
+      
+      return { success: true, message: 'Subskrypcja została dodana' };
+    } catch (error) {
+      console.error('Błąd subskrypcji:', error);
+      throw error;
+    }
+  }
+
+  async unsubscribeFromLocation(locationId, userId) {
+    try {
+      const user = await User.findById(userId);
+      if (!user) {
+        throw new Error('Użytkownik nie znaleziony');
+      }
+      
+      if (!user.subscribedLocations) {
+        return { success: false, message: 'Brak subskrypcji' };
+      }
+      
+      user.subscribedLocations = user.subscribedLocations.filter(
+        id => id.toString() !== locationId
+      );
+      await user.save();
+      
+      return { success: true, message: 'Subskrypcja została usunięta' };
+    } catch (error) {
+      console.error('Błąd anulowania subskrypcji:', error);
+      throw error;
+    }
+  }
+
+  async getLocationAnalytics(locationId, period = '30d') {
+    try {
+      const location = await Location.findById(locationId);
+      if (!location) return null;
+      
+      const now = new Date();
+      let startDate;
+      
+      switch (period) {
+        case '7d':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case '30d':
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        case '90d':
+          startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+          break;
+        default:
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      }
+      
+      // Pobierz wszystkie podlokalizacje
+      const allChildren = await location.getAllChildren();
+      const allLocationIds = [locationId, ...allChildren.map(child => child._id)];
+      
+      const analytics = {
+        location: {
+          id: location._id,
+          name: location.name,
+          type: location.type
+        },
+        period,
+        stats: {
+          totalUsers: await User.countDocuments({ location: { $in: allLocationIds } }),
+          totalShops: await Shop.countDocuments({ location: { $in: allLocationIds } }),
+          totalProducts: await Product.countDocuments({ location: { $in: allLocationIds } }),
+          totalPosts: await Post.countDocuments({ location: { $in: allLocationIds } }),
+          newUsers: await User.countDocuments({ 
+            location: { $in: allLocationIds },
+            createdAt: { $gte: startDate }
+          }),
+          newShops: await Shop.countDocuments({ 
+            location: { $in: allLocationIds },
+            createdAt: { $gte: startDate }
+          }),
+          newProducts: await Product.countDocuments({ 
+            location: { $in: allLocationIds },
+            createdAt: { $gte: startDate }
+          }),
+          newPosts: await Post.countDocuments({ 
+            location: { $in: allLocationIds },
+            createdAt: { $gte: startDate }
+          })
+        },
+        trends: {
+          // Tutaj można dodać trendy w czasie
+          userGrowth: 0,
+          shopGrowth: 0,
+          productGrowth: 0,
+          postGrowth: 0
+        }
+      };
+      
+      return analytics;
+    } catch (error) {
+      console.error('Błąd pobierania analityki:', error);
+      return null;
+    }
+  }
+
+  async exportLocationData(locationId, format = 'json') {
+    try {
+      const location = await Location.findById(locationId)
+        .populate('parentLocation')
+        .populate('wojewodztwo')
+        .populate('powiat')
+        .populate('gmina');
+      
+      if (!location) {
+        throw new Error('Lokalizacja nie znaleziona');
+      }
+      
+      // Pobierz wszystkie podlokalizacje
+      const allChildren = await location.getAllChildren();
+      const allLocationIds = [locationId, ...allChildren.map(child => child._id)];
+      
+      // Pobierz powiązane dane
+      const [users, shops, products, posts] = await Promise.all([
+        User.find({ location: { $in: allLocationIds } }).select('-password'),
+        Shop.find({ location: { $in: allLocationIds } }),
+        Product.find({ location: { $in: allLocationIds } }),
+        Post.find({ location: { $in: allLocationIds } })
+      ]);
+      
+      const exportData = {
+        location: location.toObject(),
+        children: allChildren,
+        stats: {
+          totalUsers: users.length,
+          totalShops: shops.length,
+          totalProducts: products.length,
+          totalPosts: posts.length
+        },
+        data: {
+          users,
+          shops,
+          products,
+          posts
+        },
+        exportDate: new Date(),
+        format
+      };
+      
+      return exportData;
+    } catch (error) {
+      console.error('Błąd eksportu danych:', error);
+      throw error;
+    }
+  }
+
+  async getUserLocationRating(locationId, userId) {
+    try {
+      return await LocationRating.findOne({ location: locationId, user: userId });
+    } catch (error) {
+      console.error('Błąd pobierania oceny użytkownika:', error);
+      return null;
+    }
+  }
+
+  async updateLocationAverageRating(locationId) {
+    try {
+      const ratings = await LocationRating.find({ location: locationId });
+      
+      if (ratings.length === 0) return;
+      
+      const totalRating = ratings.reduce((sum, rating) => sum + rating.rating, 0);
+      const averageRating = totalRating / ratings.length;
+      
+      await Location.findByIdAndUpdate(locationId, {
+        'stats.averageRating': averageRating,
+        'stats.totalRatings': ratings.length
+      });
+    } catch (error) {
+      console.error('Błąd aktualizacji średniej oceny:', error);
     }
   }
 

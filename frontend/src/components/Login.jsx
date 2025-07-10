@@ -7,6 +7,15 @@ const Container = styled.div`
   max-width: 400px;
   margin: 0 auto;
   padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+    max-width: 100%;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+  }
 `;
 
 const Title = styled.h1`
@@ -18,6 +27,16 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const Form = styled.form`
@@ -25,10 +44,24 @@ const Form = styled.form`
   border-radius: 20px;
   padding: 2rem;
   box-shadow: ${props => props.theme.shadow};
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+  }
 `;
 
 const FormGroup = styled.div`
   margin-bottom: 1.5rem;
+  
+  @media (max-width: 480px) {
+    margin-bottom: 1rem;
+  }
 `;
 
 const Label = styled.label`
@@ -36,6 +69,10 @@ const Label = styled.label`
   font-weight: 600;
   color: ${props => props.theme.text};
   margin-bottom: 0.5rem;
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const Input = styled.input`
@@ -56,6 +93,17 @@ const Input = styled.input`
   
   &::placeholder {
     color: ${props => props.theme.textSecondary};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
   }
 `;
 
@@ -83,6 +131,17 @@ const Button = styled.button`
     cursor: not-allowed;
     transform: none;
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.75rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
 `;
 
 const Divider = styled.div`
@@ -105,6 +164,14 @@ const Divider = styled.div`
     padding: 0 1rem;
     color: ${props => props.theme.textSecondary};
     font-size: 0.875rem;
+  }
+  
+  @media (max-width: 480px) {
+    margin: 1rem 0;
+    
+    span {
+      font-size: 0.8rem;
+    }
   }
 `;
 
@@ -129,6 +196,17 @@ const SocialButton = styled.button`
     background: ${props => props.theme.primary}10;
     border-color: ${props => props.theme.primary};
   }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem 1.75rem;
+    font-size: 0.95rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
 `;
 
 const RegisterLink = styled.div`
@@ -145,6 +223,11 @@ const RegisterLink = styled.div`
       text-decoration: underline;
     }
   }
+  
+  @media (max-width: 480px) {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
 `;
 
 const ErrorMessage = styled.div`
@@ -152,6 +235,10 @@ const ErrorMessage = styled.div`
   font-size: 0.875rem;
   margin-top: 0.5rem;
   text-align: center;
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const SuccessMessage = styled.div`
@@ -159,6 +246,10 @@ const SuccessMessage = styled.div`
   font-size: 0.875rem;
   margin-top: 0.5rem;
   text-align: center;
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const TestCredentials = styled.div`
@@ -168,6 +259,17 @@ const TestCredentials = styled.div`
   padding: 1rem;
   margin-bottom: 1.5rem;
   font-size: 0.875rem;
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    font-size: 0.8rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.75rem;
+    border-radius: 8px;
+  }
 `;
 
 const TestTitle = styled.div`
@@ -179,6 +281,10 @@ const TestTitle = styled.div`
 const TestInfo = styled.div`
   color: ${props => props.theme.textSecondary};
   margin-bottom: 0.25rem;
+  
+  @media (max-width: 480px) {
+    word-break: break-all;
+  }
 `;
 
 const CopyButton = styled.button`
@@ -193,6 +299,12 @@ const CopyButton = styled.button`
   
   &:hover {
     background: ${props => props.theme.primary}dd;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+    margin-left: 0.25rem;
   }
 `;
 
