@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -403,77 +404,60 @@ const EmptyState = styled.div`
 `;
 
 export default function ShopList() {
+  const { user } = useAuth();
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('all');
   const [status, setStatus] = useState('all');
 
-  // Symulowane dane sklepów
-  const mockShops = [
-    {
-      id: 1,
-      name: 'TechStore Pro',
-      description: 'Sklep z elektroniką i akcesoriami komputerowymi',
-      category: 'electronics',
-      status: 'open',
-      location: 'Warszawa, Śródmieście',
-      rating: 4.8,
-      products: 156,
-      orders: 1247,
-      image: '💻'
-    },
-    {
-      id: 2,
-      name: 'Fashion Boutique',
-      description: 'Ekskluzywna odzież damska i męska',
-      category: 'clothing',
-      status: 'open',
-      location: 'Kraków, Stare Miasto',
-      rating: 4.6,
-      products: 89,
-      orders: 892,
-      image: '👗'
-    },
-    {
-      id: 3,
-      name: 'BookWorld',
-      description: 'Księgarnia z szerokim wyborem książek',
-      category: 'books',
-      status: 'closed',
-      location: 'Wrocław, Rynek',
-      rating: 4.9,
-      products: 234,
-      orders: 567,
-      image: '📚'
-    },
-    {
-      id: 4,
-      name: 'SportZone',
-      description: 'Sprzęt sportowy i odzież treningowa',
-      category: 'sports',
-      status: 'open',
-      location: 'Poznań, Centrum',
-      rating: 4.7,
-      products: 178,
-      orders: 1034,
-      image: '⚽'
-    }
-  ];
-
   useEffect(() => {
-    // Symulacja ładowania danych
-    setTimeout(() => {
-      setShops(mockShops);
-      setLoading(false);
-    }, 1000);
+    fetchShops();
   }, []);
+
+  // Dodaj odświeżanie przy powrocie na stronę
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchShops();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
+  const fetchShops = async () => {
+    try {
+      setLoading(true);
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/shops`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Nie udało się pobrać sklepów');
+      }
+
+      const data = await response.json();
+      setShops(data);
+    } catch (err) {
+      console.error('Błąd podczas pobierania sklepów:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredShops = shops.filter(shop => {
     const matchesSearch = shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          shop.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = category === 'all' || shop.category === category;
-    const matchesStatus = status === 'all' || shop.status === status;
+    const matchesCategory = category === 'all' || shop.categories?.includes(category);
+    const matchesStatus = status === 'all' || (shop.isActive ? 'open' : 'closed') === status;
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -483,6 +467,21 @@ export default function ShopList() {
         <div style={{ textAlign: 'center', padding: '4rem' }}>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
           <p>Ładowanie sklepów...</p>
+        </div>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <div style={{ textAlign: 'center', padding: '4rem' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>❌</div>
+          <h3>Błąd podczas ładowania sklepów</h3>
+          <p>{error}</p>
+          <button onClick={fetchShops} style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>
+            Spróbuj ponownie
+          </button>
         </div>
       </Container>
     );
@@ -506,10 +505,16 @@ export default function ShopList() {
         />
         <Select value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="all">Wszystkie kategorie</option>
-          <option value="electronics">Elektronika</option>
-          <option value="clothing">Ubrania</option>
-          <option value="books">Książki</option>
-          <option value="sports">Sport</option>
+          <option value="Elektronika">Elektronika</option>
+          <option value="Odzież i moda">Odzież i moda</option>
+          <option value="Książki i multimedia">Książki i multimedia</option>
+          <option value="Sport i rekreacja">Sport i rekreacja</option>
+          <option value="Dom i ogród">Dom i ogród</option>
+          <option value="Motoryzacja">Motoryzacja</option>
+          <option value="Zdrowie i uroda">Zdrowie i uroda</option>
+          <option value="Zabawki i gry">Zabawki i gry</option>
+          <option value="Spożywcze">Spożywcze</option>
+          <option value="Inne">Inne</option>
         </Select>
         <Select value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="all">Wszystkie statusy</option>
@@ -522,17 +527,20 @@ export default function ShopList() {
         <EmptyState>
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🏪</div>
           <h3>Nie znaleziono sklepów</h3>
-          <p>Spróbuj zmienić kryteria wyszukiwania</p>
+          <p>Spróbuj zmienić kryteria wyszukiwania lub dodaj pierwszy sklep</p>
+          <AddButton to="/shop-create" style={{ display: 'inline-block', marginTop: '1rem' }}>
+            🏪 Dodaj pierwszy sklep
+          </AddButton>
         </EmptyState>
       ) : (
         <Grid>
           {filteredShops.map(shop => (
-            <ShopCard key={shop.id}>
+            <ShopCard key={shop._id}>
               <ShopHeader>
-                <ShopStatus status={shop.status}>
-                  {shop.status === 'open' ? 'Otwarte' : 'Zamknięte'}
+                <ShopStatus status={shop.isActive ? 'open' : 'closed'}>
+                  {shop.isActive ? 'Otwarte' : 'Zamknięte'}
                 </ShopStatus>
-                {shop.image}
+                <div style={{ fontSize: '2rem' }}>🏪</div>
               </ShopHeader>
               <ShopInfo>
                 <ShopName>{shop.name}</ShopName>
@@ -540,29 +548,29 @@ export default function ShopList() {
                 
                 <ShopDetails>
                   <ShopLocation>
-                    📍 {shop.location}
+                    📍 {shop.location || shop.address?.city || 'Brak lokalizacji'}
                   </ShopLocation>
                   <ShopRating>
-                    ⭐ {shop.rating}
+                    ⭐ {shop.rating || 'Brak ocen'}
                   </ShopRating>
                 </ShopDetails>
                 
                 <ShopStats>
                   <Stat>
-                    <StatValue>{shop.products}</StatValue>
+                    <StatValue>{shop.stats?.totalProducts || 0}</StatValue>
                     <StatLabel>Produktów</StatLabel>
                   </Stat>
                   <Stat>
-                    <StatValue>{shop.orders}</StatValue>
+                    <StatValue>{shop.stats?.totalOrders || 0}</StatValue>
                     <StatLabel>Zamówień</StatLabel>
                   </Stat>
                 </ShopStats>
                 
                 <ShopActions>
-                  <ActionButton className="primary" as={Link} to={`/shop/${shop.id}`}>
+                  <ActionButton className="primary" as={Link} to={`/shop/${shop._id}`}>
                     🛒 Przejdź do sklepu
                   </ActionButton>
-                  <ActionButton className="secondary" as={Link} to={`/shop/${shop.id}`}>
+                  <ActionButton className="secondary" as={Link} to={`/shop/${shop._id}`}>
                     👁️ Szczegóły
                   </ActionButton>
                 </ShopActions>

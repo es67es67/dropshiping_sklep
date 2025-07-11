@@ -70,6 +70,11 @@ exports.createShop = async (req, res) => {
     
     await shop.save();
     
+    // Aktualizuj dane użytkownika, aby zawierał nowy sklep
+    await User.findByIdAndUpdate(owner, {
+      $addToSet: { shops: shop._id }
+    });
+    
     const populatedShop = await Shop.findById(shop._id)
       .populate('owner', 'username firstName lastName avatar')
       .populate('location', 'name');

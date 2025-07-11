@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import MapSelector from './MapSelector';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
   max-width: 800px;
@@ -252,6 +254,9 @@ const SuccessMessage = styled.div`
 `;
 
 export default function ShopCreate({ theme }) {
+  const { user, updateUser } = useAuth();
+  const navigate = useNavigate();
+  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -436,6 +441,33 @@ export default function ShopCreate({ theme }) {
       const result = await response.json();
       console.log('Sklep utworzony:', result);
       
+      // Pobierz zaktualizowane dane użytkownika
+      try {
+        const userResponse = await fetch(`${apiUrl}/api/users/profile`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (userResponse.ok) {
+          const updatedUserData = await userResponse.json();
+          if (updateUser) {
+            updateUser(updatedUserData);
+          }
+        }
+      } catch (userError) {
+        console.error('Błąd podczas aktualizacji danych użytkownika:', userError);
+        // Fallback - aktualizuj lokalnie
+        if (updateUser && result._id) {
+          const updatedUser = {
+            ...user,
+            shops: [...(user.shops || []), result._id]
+          };
+          updateUser(updatedUser);
+        }
+      }
+      
       setIsSubmitting(false);
       alert('✅ Sklep został dodany pomyślnie!');
       
@@ -458,7 +490,7 @@ export default function ShopCreate({ theme }) {
       setCoordinates(null);
       
       // Przekieruj do zarządzania sklepami
-      window.location.href = '/shop-management';
+      navigate('/shop-management');
       
     } catch (error) {
       console.error('Błąd podczas tworzenia sklepu:', error);
