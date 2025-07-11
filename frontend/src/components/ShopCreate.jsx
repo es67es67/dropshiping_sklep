@@ -251,7 +251,7 @@ const SuccessMessage = styled.div`
   margin-top: 0.5rem;
 `;
 
-export default function ShopCreate() {
+export default function ShopCreate({ theme }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',

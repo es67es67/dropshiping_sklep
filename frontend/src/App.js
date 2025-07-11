@@ -108,7 +108,7 @@ function App() {
                 <Route path="/gamification" element={<GamificationPanel />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/product-create" element={<ProductCreate />} />
-                <Route path="/shop-create" element={<ShopCreate />} />
+                <Route path="/shop-create" element={<ShopCreate theme={currentTheme} />} />
                 <Route path="/shop-management" element={<ShopManagement />} />
                 <Route path="/product-management" element={<ProductManagement />} />
                 <Route path="/layout-customization" element={<LayoutCustomization />} />
@@ -151,7 +151,7 @@ function App() {
                 <Route path="/gamification" element={<GamificationPanel />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/product-create" element={<ProductCreate />} />
-                <Route path="/shop-create" element={<ShopCreate />} />
+                <Route path="/shop-create" element={<ShopCreate theme={currentTheme} />} />
                 <Route path="/shop-management" element={<ShopManagement />} />
                 <Route path="/product-management" element={<ProductManagement />} />
                 <Route path="/layout-customization" element={<LayoutCustomization />} />
@@ -194,7 +194,7 @@ function App() {
                 <Route path="/gamification" element={<GamificationPanel />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/product-create" element={<ProductCreate />} />
-                <Route path="/shop-create" element={<ShopCreate />} />
+                <Route path="/shop-create" element={<ShopCreate theme={currentTheme} />} />
                 <Route path="/shop-management" element={<ShopManagement />} />
                 <Route path="/product-management" element={<ProductManagement />} />
                 <Route path="/layout-customization" element={<LayoutCustomization />} />
