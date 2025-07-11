@@ -286,7 +286,7 @@ const SuccessMessage = styled.div`
   border: 1px solid ${props => props.theme.success}40;
 `;
 
-export default function LayoutCustomization({ theme }) {
+export default function LayoutCustomization({ theme, onSettingsSaved }) {
   console.log('LayoutCustomization component rendered'); // Dodaj log renderowania
   console.log('Theme prop:', theme); // Dodaj log theme
   
@@ -410,7 +410,6 @@ export default function LayoutCustomization({ theme }) {
 
   const handleSaveSettings = async () => {
     console.log('handleSaveSettings called!'); // Dodaj ten log na początku
-    alert('Przycisk działa!'); // Dodaj alert do testu
     
     try {
       const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
@@ -458,6 +457,7 @@ export default function LayoutCustomization({ theme }) {
         console.log('Response data:', result);
         setMessage('Ustawienia zostały zapisane pomyślnie!');
         setTimeout(() => setMessage(''), 3000);
+        if (onSettingsSaved) onSettingsSaved();
       } else {
         const errorData = await response.json();
         console.error('Error response:', errorData);
@@ -607,29 +607,6 @@ export default function LayoutCustomization({ theme }) {
         </Button>
       </ButtonGroup>
       
-      {/* Dodaj prosty test */}
-      <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-        <button 
-          onClick={() => {
-            console.log('Test button clicked');
-            console.log('handleSaveSettings function:', handleSaveSettings);
-            console.log('handleSaveSettings type:', typeof handleSaveSettings);
-          }}
-          style={{ padding: '1rem', background: 'red', color: 'white', border: 'none', borderRadius: '8px' }}
-        >
-          TEST PRZYCISK
-        </button>
-      </div>
-      
-      {/* Dodaj prosty test */}
-      <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-        <button 
-          onClick={() => console.log('Test button clicked')}
-          style={{ padding: '1rem', background: 'red', color: 'white', border: 'none', borderRadius: '8px' }}
-        >
-          TEST PRZYCISK
-        </button>
-              </div>
-      </Container>
+    </Container>
   );
 } 

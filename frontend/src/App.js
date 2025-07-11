@@ -75,6 +75,10 @@ function App() {
 
   const currentTheme = theme === 'light' ? lightTheme : darkTheme;
 
+  const handleSettingsSaved = () => {
+    fetchUserLayoutSettings();
+  };
+
   // Funkcja do renderowania layoutu
   const renderLayout = () => {
     switch (userLayout) {
@@ -111,7 +115,7 @@ function App() {
                 <Route path="/shop-create" element={<ShopCreate theme={currentTheme} />} />
                 <Route path="/shop-management" element={<ShopManagement />} />
                 <Route path="/product-management" element={<ProductManagement />} />
-                <Route path="/layout-customization" element={<LayoutCustomization theme={currentTheme} />} />
+                <Route path="/layout-customization" element={<LayoutCustomization theme={currentTheme} onSettingsSaved={handleSettingsSaved} />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/settings" element={<Settings />} />
@@ -154,7 +158,7 @@ function App() {
                 <Route path="/shop-create" element={<ShopCreate theme={currentTheme} />} />
                 <Route path="/shop-management" element={<ShopManagement />} />
                 <Route path="/product-management" element={<ProductManagement />} />
-                <Route path="/layout-customization" element={<LayoutCustomization theme={currentTheme} />} />
+                <Route path="/layout-customization" element={<LayoutCustomization theme={currentTheme} onSettingsSaved={handleSettingsSaved} />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/settings" element={<Settings />} />
@@ -197,7 +201,7 @@ function App() {
                 <Route path="/shop-create" element={<ShopCreate theme={currentTheme} />} />
                 <Route path="/shop-management" element={<ShopManagement />} />
                 <Route path="/product-management" element={<ProductManagement />} />
-                <Route path="/layout-customization" element={<LayoutCustomization theme={currentTheme} />} />
+                <Route path="/layout-customization" element={<LayoutCustomization theme={currentTheme} onSettingsSaved={handleSettingsSaved} />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/search" element={<Search />} />
                 <Route path="/settings" element={<Settings />} />
