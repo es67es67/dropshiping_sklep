@@ -57,7 +57,7 @@ const LocationIcon = styled.div`
   font-size: 3rem;
 `;
 
-const LocationDetails = styled.div`
+const LocationInfoDetails = styled.div`
   flex: 1;
 `;
 
@@ -303,10 +303,10 @@ export default function LocationDetails({ location, onClose, theme }) {
       <LocationInfo>
         <LocationHeader>
           <LocationIcon>{getLocationIcon(location.type)}</LocationIcon>
-          <LocationDetails>
+          <LocationInfoDetails>
             <LocationName>{location.name}</LocationName>
             <LocationType>{location.type}</LocationType>
-          </LocationDetails>
+          </LocationInfoDetails>
         </LocationHeader>
         
         <LocationStats>
