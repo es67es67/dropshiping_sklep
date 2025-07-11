@@ -232,7 +232,7 @@ export default function LocationDetails({ location, onClose, theme }) {
 
   const fetchLocationData = async () => {
     if (!location) return;
-    
+
     setLoading(true);
     setError(null);
     
@@ -342,7 +342,7 @@ export default function LocationDetails({ location, onClose, theme }) {
             <div>
               <StatValue>{data.shops.length}</StatValue>
               <StatLabel>Dostępnych sklepów</StatLabel>
-            </div>
+        </div>
           </CardStats>
           <ActionButton to={`/shops?location=${location.id}`}>
             🏪 Zobacz sklepy
@@ -406,7 +406,7 @@ export default function LocationDetails({ location, onClose, theme }) {
           </ActionButton>
         </Card>
       </ContentGrid>
-    </div>
+              </div>
   );
 
   const renderShops = () => (
@@ -486,7 +486,7 @@ export default function LocationDetails({ location, onClose, theme }) {
           </EmptyState>
         )}
       </ContentGrid>
-    </div>
+                  </div>
   );
 
   const renderPosts = () => (
@@ -504,11 +504,11 @@ export default function LocationDetails({ location, onClose, theme }) {
                 <div>
                   <StatValue>{post.likes?.length || 0}</StatValue>
                   <StatLabel>Polubień</StatLabel>
-                </div>
+              </div>
                 <div>
                   <StatValue>{post.comments?.length || 0}</StatValue>
                   <StatLabel>Komentarzy</StatLabel>
-                </div>
+            </div>
               </CardStats>
               <ActionButton to={`/post/${post._id}`}>
                 💬 Zobacz post

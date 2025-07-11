@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
   max-width: 800px;
@@ -213,9 +214,12 @@ const NotificationItem = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background: ${props => props.theme.background};
-  border-radius: 8px;
+  padding: 1rem 0;
+  border-bottom: 1px solid ${props => props.theme.border};
+  
+  &:last-child {
+    border-bottom: none;
+  }
 `;
 
 const NotificationInfo = styled.div`
@@ -233,28 +237,73 @@ const NotificationDesc = styled.div`
   color: ${props => props.theme.textSecondary};
 `;
 
+const SaveButton = styled.button`
+  padding: 1rem 2rem;
+  background: ${props => props.theme.gradient};
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+  
+  &:hover {
+    background: ${props => props.theme.gradientHover};
+    transform: translateY(-2px);
+    box-shadow: ${props => props.theme.shadowHover};
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const Message = styled.div`
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  
+  &.success {
+    background: ${props => props.theme.success}20;
+    color: ${props => props.theme.success};
+    border: 1px solid ${props => props.theme.success};
+  }
+  
+  &.error {
+    background: ${props => props.theme.error}20;
+    color: ${props => props.theme.error};
+    border: 1px solid ${props => props.theme.error};
+  }
+`;
+
+const LoadingSpinner = styled.div`
+  text-align: center;
+  padding: 2rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
 const DangerZone = styled.div`
-  background: #FEF2F2;
-  border: 2px solid #FECACA;
+  border: 2px solid ${props => props.theme.error};
   border-radius: 12px;
   padding: 1.5rem;
-  margin-top: 1rem;
+  margin-top: 2rem;
 `;
 
 const DangerTitle = styled.h3`
-  color: #DC2626;
-  font-size: 1.125rem;
-  font-weight: 600;
+  color: ${props => props.theme.error};
   margin-bottom: 1rem;
-`;
-
-const DangerText = styled.p`
-  color: #7F1D1D;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 export default function Settings() {
+  const { user, logout } = useAuth();
   const [settings, setSettings] = useState({
     theme: 'light',
     language: 'pl',
@@ -265,34 +314,121 @@ export default function Settings() {
       marketing: false,
       orderUpdates: true,
       promotions: true,
-      security: true
+      security: true,
+      messages: true,
+      reviews: true
     },
     privacy: {
       profileVisibility: 'public',
       showEmail: false,
       showPhone: false,
-      allowMessages: true
+      allowMessages: true,
+      showLocation: true,
+      showStats: true
     },
     security: {
       twoFactorAuth: false,
       loginNotifications: true,
-      sessionTimeout: '24h'
+      sessionTimeout: '24h',
+      passwordChangeRequired: false
+    },
+    preferences: {
+      autoSave: true,
+      darkMode: false,
+      compactView: false,
+      showTutorials: true
     }
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
   const themes = [
     { id: 'light', name: 'Jasny', color: '#F3F4F6' },
     { id: 'dark', name: 'Ciemny', color: '#1F2937' },
     { id: 'blue', name: 'Niebieski', color: '#3B82F6' },
-    { id: 'green', name: 'Zielony', color: '#10B981' }
+    { id: 'green', name: 'Zielony', color: '#10B981' },
+    { id: 'purple', name: 'Fioletowy', color: '#8B5CF6' },
+    { id: 'orange', name: 'Pomarańczowy', color: '#F59E0B' }
   ];
 
   const languages = [
     { code: 'pl', name: 'Polski' },
     { code: 'en', name: 'English' },
     { code: 'de', name: 'Deutsch' },
-    { code: 'fr', name: 'Français' }
+    { code: 'fr', name: 'Français' },
+    { code: 'es', name: 'Español' },
+    { code: 'it', name: 'Italiano' }
   ];
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      setLoading(true);
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/users/settings`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSettings(data);
+      } else {
+        console.error('Błąd podczas ładowania ustawień');
+        // Użyj domyślnych ustawień
+      }
+    } catch (error) {
+      console.error('Błąd:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveSettings = async () => {
+    try {
+      setSaving(true);
+      setMessage(null);
+      
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/users/settings`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(settings)
+      });
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Ustawienia zostały zapisane' });
+        setHasChanges(false);
+        
+        // Zastosuj zmiany motywu
+        if (settings.theme) {
+          document.documentElement.setAttribute('data-theme', settings.theme);
+        }
+      } else {
+        const error = await response.json();
+        setMessage({ type: 'error', text: error.message || 'Błąd podczas zapisywania ustawień' });
+      }
+    } catch (error) {
+      console.error('Błąd:', error);
+      setMessage({ type: 'error', text: 'Błąd połączenia z serwerem' });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleToggle = (category, setting) => {
     setSettings(prev => ({
@@ -302,6 +438,7 @@ export default function Settings() {
         [setting]: !prev[category][setting]
       }
     }));
+    setHasChanges(true);
   };
 
   const handleSelect = (category, setting, value) => {
@@ -312,6 +449,7 @@ export default function Settings() {
         [setting]: value
       }
     }));
+    setHasChanges(true);
   };
 
   const handleThemeChange = (themeId) => {
@@ -319,21 +457,97 @@ export default function Settings() {
       ...prev,
       theme: themeId
     }));
+    setHasChanges(true);
   };
 
-  const handleDeleteAccount = () => {
-    if (window.confirm('Czy na pewno chcesz usunąć konto? Ta operacja jest nieodwracalna.')) {
-      alert('Konto zostało usunięte (symulacja)');
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Czy na pewno chcesz usunąć konto? Ta operacja jest nieodwracalna i usunie wszystkie Twoje dane.')) {
+      return;
+    }
+
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/users/account`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        alert('Konto zostało usunięte');
+        logout();
+      } else {
+        const error = await response.json();
+        alert(error.message || 'Błąd podczas usuwania konta');
+      }
+    } catch (error) {
+      console.error('Błąd:', error);
+      alert('Błąd połączenia z serwerem');
     }
   };
 
-  const handleExportData = () => {
-    alert('Dane zostały wyeksportowane (symulacja)');
+  const handleExportData = async () => {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/users/export-data`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `user_data_${user?.username || 'user'}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        setMessage({ type: 'success', text: 'Dane zostały wyeksportowane' });
+      } else {
+        const error = await response.json();
+        setMessage({ type: 'error', text: error.message || 'Błąd podczas eksportu danych' });
+      }
+    } catch (error) {
+      console.error('Błąd:', error);
+      setMessage({ type: 'error', text: 'Błąd połączenia z serwerem' });
+    }
   };
+
+  const handleChangePassword = () => {
+    // Przekieruj do strony zmiany hasła
+    window.location.href = '/change-password';
+  };
+
+  if (loading) {
+    return (
+      <Container>
+        <Title>Ustawienia</Title>
+        <LoadingSpinner>Ładowanie ustawień...</LoadingSpinner>
+      </Container>
+    );
+  }
 
   return (
     <Container>
-      <Title>Ustawienia</Title>
+      <Title>⚙️ Ustawienia</Title>
+      
+      {message && (
+        <Message className={message.type}>
+          {message.text}
+        </Message>
+      )}
       
       <SettingsCard>
         <SectionTitle>🎨 Wygląd</SectionTitle>
@@ -371,6 +585,36 @@ export default function Settings() {
               </option>
             ))}
           </Select>
+        </SettingItem>
+
+        <SettingItem>
+          <SettingInfo>
+            <SettingLabel>Tryb ciemny</SettingLabel>
+            <SettingDescription>Automatyczne przełączanie na ciemny motyw</SettingDescription>
+          </SettingInfo>
+          <ToggleSwitch>
+            <ToggleInput
+              type="checkbox"
+              checked={settings.preferences.darkMode}
+              onChange={() => handleToggle('preferences', 'darkMode')}
+            />
+            <ToggleSlider />
+          </ToggleSwitch>
+        </SettingItem>
+
+        <SettingItem>
+          <SettingInfo>
+            <SettingLabel>Kompaktowy widok</SettingLabel>
+            <SettingDescription>Zmniejsz odstępy w interfejsie</SettingDescription>
+          </SettingInfo>
+          <ToggleSwitch>
+            <ToggleInput
+              type="checkbox"
+              checked={settings.preferences.compactView}
+              onChange={() => handleToggle('preferences', 'compactView')}
+            />
+            <ToggleSlider />
+          </ToggleSwitch>
         </SettingItem>
       </SettingsCard>
 
@@ -451,6 +695,36 @@ export default function Settings() {
               <ToggleSlider />
             </ToggleSwitch>
           </NotificationItem>
+
+          <NotificationItem>
+            <NotificationInfo>
+              <NotificationLabel>Wiadomości</NotificationLabel>
+              <NotificationDesc>Powiadomienia o nowych wiadomościach</NotificationDesc>
+            </NotificationInfo>
+            <ToggleSwitch>
+              <ToggleInput
+                type="checkbox"
+                checked={settings.notifications.messages}
+                onChange={() => handleToggle('notifications', 'messages')}
+              />
+              <ToggleSlider />
+            </ToggleSwitch>
+          </NotificationItem>
+
+          <NotificationItem>
+            <NotificationInfo>
+              <NotificationLabel>Recenzje</NotificationLabel>
+              <NotificationDesc>Powiadomienia o nowych recenzjach</NotificationDesc>
+            </NotificationInfo>
+            <ToggleSwitch>
+              <ToggleInput
+                type="checkbox"
+                checked={settings.notifications.reviews}
+                onChange={() => handleToggle('notifications', 'reviews')}
+              />
+              <ToggleSlider />
+            </ToggleSwitch>
+          </NotificationItem>
         </NotificationSettings>
       </SettingsCard>
 
@@ -515,6 +789,36 @@ export default function Settings() {
             <ToggleSlider />
           </ToggleSwitch>
         </SettingItem>
+
+        <SettingItem>
+          <SettingInfo>
+            <SettingLabel>Pokaż lokalizację</SettingLabel>
+            <SettingDescription>Pokaż swoją lokalizację w profilu</SettingDescription>
+          </SettingInfo>
+          <ToggleSwitch>
+            <ToggleInput
+              type="checkbox"
+              checked={settings.privacy.showLocation}
+              onChange={() => handleToggle('privacy', 'showLocation')}
+            />
+            <ToggleSlider />
+          </ToggleSwitch>
+        </SettingItem>
+
+        <SettingItem>
+          <SettingInfo>
+            <SettingLabel>Pokaż statystyki</SettingLabel>
+            <SettingDescription>Pokaż swoje statystyki publicznie</SettingDescription>
+          </SettingInfo>
+          <ToggleSwitch>
+            <ToggleInput
+              type="checkbox"
+              checked={settings.privacy.showStats}
+              onChange={() => handleToggle('privacy', 'showStats')}
+            />
+            <ToggleSlider />
+          </ToggleSwitch>
+        </SettingItem>
       </SettingsCard>
 
       <SettingsCard>
@@ -551,48 +855,50 @@ export default function Settings() {
         
         <SettingItem>
           <SettingInfo>
-            <SettingLabel>Timeout sesji</SettingLabel>
-            <SettingDescription>Po jakim czasie sesja wygasa</SettingDescription>
+            <SettingLabel>Czas sesji</SettingLabel>
+            <SettingDescription>Jak długo sesja pozostaje aktywna</SettingDescription>
           </SettingInfo>
           <Select
             value={settings.security.sessionTimeout}
             onChange={(e) => handleSelect('security', 'sessionTimeout', e.target.value)}
           >
             <option value="1h">1 godzina</option>
-            <option value="8h">8 godzin</option>
+            <option value="6h">6 godzin</option>
             <option value="24h">24 godziny</option>
             <option value="7d">7 dni</option>
           </Select>
         </SettingItem>
+
+        <ButtonGroup>
+          <Button onClick={handleChangePassword}>
+            🔑 Zmień hasło
+          </Button>
+          <Button className="secondary" onClick={handleExportData}>
+            📥 Eksportuj dane
+          </Button>
+        </ButtonGroup>
       </SettingsCard>
 
-      <SettingsCard>
-        <SectionTitle>📊 Dane</SectionTitle>
-        <SettingItem>
-          <SettingInfo>
-            <SettingLabel>Eksport danych</SettingLabel>
-            <SettingDescription>Pobierz kopię swoich danych</SettingDescription>
-          </SettingInfo>
-          <Button onClick={handleExportData}>
-            Eksportuj
+      <DangerZone>
+        <DangerTitle>⚠️ Strefa niebezpieczna</DangerTitle>
+        <p style={{ marginBottom: '1rem', color: '#666' }}>
+          Te operacje są nieodwracalne. Użyj ich ostrożnie.
+        </p>
+        <ButtonGroup>
+          <Button className="danger" onClick={handleDeleteAccount}>
+            🗑️ Usuń konto
           </Button>
-        </SettingItem>
-        
-        <DangerZone>
-          <DangerTitle>🗑️ Strefa niebezpieczna</DangerTitle>
-          <DangerText>
-            Usunięcie konta jest nieodwracalne. Wszystkie dane zostaną trwale usunięte.
-          </DangerText>
-          <ButtonGroup>
-            <Button className="danger" onClick={handleDeleteAccount}>
-              Usuń konto
-            </Button>
-            <Button className="secondary">
-              Anuluj
-            </Button>
-          </ButtonGroup>
-        </DangerZone>
-      </SettingsCard>
+        </ButtonGroup>
+      </DangerZone>
+
+      {hasChanges && (
+        <SaveButton 
+          onClick={saveSettings} 
+          disabled={saving}
+        >
+          {saving ? 'Zapisywanie...' : '💾 Zapisz ustawienia'}
+        </SaveButton>
+      )}
     </Container>
   );
 } 
