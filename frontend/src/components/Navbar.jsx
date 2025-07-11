@@ -331,8 +331,8 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
         </NavLink>
         
         {/* Admin Panel */}
-        {user?.role === 'admin' && (
-          <NavLink to="/admin" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+        {user?.roles && user.roles.includes('admin') && (
+          <NavLink to="/admin-panel" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
             ⚙️ Panel Admina
           </NavLink>
         )}

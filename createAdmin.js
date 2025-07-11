@@ -47,7 +47,6 @@ async function createAdmin() {
       username: 'admin',
       email: 'admin@portal.local',
       password: hash,
-      isAdmin: true,
       firstName: 'Administrator',
       lastName: 'Portalu',
       roles: ['admin'],

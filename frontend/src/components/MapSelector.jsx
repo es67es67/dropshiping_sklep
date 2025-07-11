@@ -144,6 +144,17 @@ export default function MapSelector({
     // Inicjalizacja mapy przy pierwszym renderowaniu
     if (window.google && window.google.maps && !mapInstance.current) {
       initMap();
+    } else if (!window.google) {
+      // Fallback - załaduj Google Maps API dynamicznie
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg'}&libraries=places`;
+      script.async = true;
+      script.onload = () => {
+        if (window.google && window.google.maps && !mapInstance.current) {
+          initMap();
+        }
+      };
+      document.head.appendChild(script);
     }
   }, []);
 

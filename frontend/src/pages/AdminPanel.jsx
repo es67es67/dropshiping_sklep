@@ -110,7 +110,7 @@ const AdminPanel = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  if (!user || !user.isAdmin) {
+  if (!user || !user.roles || !user.roles.includes('admin')) {
     return (
       <AccessDenied>
         <AccessDeniedIcon>🚫</AccessDeniedIcon>
