@@ -409,19 +409,28 @@ export default function LayoutCustomization({ theme, onSettingsSaved }) {
   ];
 
   const handleSaveSettings = async () => {
-    console.log('handleSaveSettings called!'); // Dodaj ten log na początku
+    console.log('=== handleSaveSettings START ===');
+    console.log('handleSaveSettings called!');
+    console.log('Current state:', { selectedLayout, selectedTheme, selectedColors, activeTab });
+    console.log('User from context:', user);
+    console.log('User ID:', user?._id);
     
     try {
       const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
+      console.log('API URL:', apiUrl);
+      console.log('Token available:', !!token);
+      
       if (!token) {
+        console.error('Brak tokenu!');
         setMessage('Błąd: Nie jesteś zalogowany. Zaloguj się ponownie.');
         setTimeout(() => setMessage(''), 5000);
         return;
       }
       
       if (!user || !user._id) {
+        console.error('Brak użytkownika lub ID!');
         setMessage('Błąd: Brak ID użytkownika. Zaloguj się ponownie.');
         setTimeout(() => setMessage(''), 5000);
         return;
@@ -435,10 +444,6 @@ export default function LayoutCustomization({ theme, onSettingsSaved }) {
       };
 
       console.log('Wysyłanie ustawień:', settings);
-      console.log('API URL:', apiUrl);
-      console.log('Token:', token ? 'Dostępny' : 'Brak');
-      console.log('User from context:', user);
-      console.log('User ID from context:', user?._id);
 
       const response = await fetch(`${apiUrl}/api/users/layout-settings`, {
         method: 'POST',
@@ -455,9 +460,16 @@ export default function LayoutCustomization({ theme, onSettingsSaved }) {
       if (response.ok) {
         const result = await response.json();
         console.log('Response data:', result);
-        setMessage('Ustawienia zostały zapisane pomyślnie!');
+        setMessage('✅ Ustawienia zostały zapisane pomyślnie!');
         setTimeout(() => setMessage(''), 3000);
-        if (onSettingsSaved) onSettingsSaved();
+        
+        console.log('Wywołuję onSettingsSaved callback...');
+        if (onSettingsSaved) {
+          onSettingsSaved();
+          console.log('onSettingsSaved callback wywołany');
+        } else {
+          console.warn('onSettingsSaved callback nie jest dostępny!');
+        }
       } else {
         const errorData = await response.json();
         console.error('Error response:', errorData);
@@ -465,9 +477,11 @@ export default function LayoutCustomization({ theme, onSettingsSaved }) {
       }
     } catch (err) {
       console.error('Save settings error:', err);
-      setMessage('Błąd podczas zapisywania ustawień: ' + err.message);
+      setMessage('❌ Błąd podczas zapisywania ustawień: ' + err.message);
       setTimeout(() => setMessage(''), 5000);
     }
+    
+    console.log('=== handleSaveSettings END ===');
   };
 
   const handleResetSettings = () => {
@@ -604,6 +618,34 @@ export default function LayoutCustomization({ theme, onSettingsSaved }) {
         </Button>
         <Button onClick={handleResetSettings} style={{ background: '#6B7280' }}>
           🔄 Resetuj
+        </Button>
+        
+        {/* Przyciski testowe */}
+        <Button 
+          onClick={() => {
+            console.log('Test button clicked!');
+            alert('Test button działa!');
+            setMessage('Test: Przycisk działa poprawnie!');
+          }}
+          style={{ background: '#F59E0B' }}
+        >
+          🧪 Test przycisku
+        </Button>
+        
+        <Button 
+          onClick={() => {
+            console.log('Current state:', {
+              selectedLayout,
+              selectedTheme,
+              selectedColors,
+              activeTab,
+              user: user?._id
+            });
+            alert(`Layout: ${selectedLayout}\nTheme: ${selectedTheme}\nUser: ${user?._id}`);
+          }}
+          style={{ background: '#8B5CF6' }}
+        >
+          🔍 Debug state
         </Button>
       </ButtonGroup>
       

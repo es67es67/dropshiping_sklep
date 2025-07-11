@@ -59,6 +59,7 @@ function App() {
 
       if (response.ok) {
         const settings = await response.json();
+        console.log('Pobrane ustawienia:', settings);
         setUserLayout(settings.layout || 'modern');
         setUserTheme(settings.theme || 'default');
       }
@@ -73,9 +74,60 @@ function App() {
     localStorage.setItem('theme', newTheme);
   };
 
-  const currentTheme = theme === 'light' ? lightTheme : darkTheme;
+  // Funkcja do tworzenia motywu na podstawie userTheme
+  const createCustomTheme = (baseTheme, userThemeName) => {
+    const themeVariants = {
+      default: {
+        primary: '#00D4AA',
+        secondary: '#8B5CF6',
+        gradient: 'linear-gradient(135deg, #00D4AA 0%, #8B5CF6 100%)',
+        gradientHover: 'linear-gradient(135deg, #00B894 0%, #7C3AED 100%)'
+      },
+      ocean: {
+        primary: '#0EA5E9',
+        secondary: '#06B6D4',
+        gradient: 'linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%)',
+        gradientHover: 'linear-gradient(135deg, #0284C7 0%, #0891B2 100%)'
+      },
+      sunset: {
+        primary: '#F59E0B',
+        secondary: '#EC4899',
+        gradient: 'linear-gradient(135deg, #F59E0B 0%, #EC4899 100%)',
+        gradientHover: 'linear-gradient(135deg, #D97706 0%, #DB2777 100%)'
+      },
+      forest: {
+        primary: '#10B981',
+        secondary: '#8B5A2B',
+        gradient: 'linear-gradient(135deg, #10B981 0%, #8B5A2B 100%)',
+        gradientHover: 'linear-gradient(135deg, #059669 0%, #A16207 100%)'
+      },
+      midnight: {
+        primary: '#1E40AF',
+        secondary: '#7C3AED',
+        gradient: 'linear-gradient(135deg, #1E40AF 0%, #7C3AED 100%)',
+        gradientHover: 'linear-gradient(135deg, #1D4ED8 0%, #6D28D9 100%)'
+      },
+      coral: {
+        primary: '#F97316',
+        secondary: '#E11D48',
+        gradient: 'linear-gradient(135deg, #F97316 0%, #E11D48 100%)',
+        gradientHover: 'linear-gradient(135deg, #EA580C 0%, #BE185D 100%)'
+      }
+    };
+
+    const variant = themeVariants[userThemeName] || themeVariants.default;
+    
+    return {
+      ...baseTheme,
+      ...variant
+    };
+  };
+
+  const baseTheme = theme === 'light' ? lightTheme : darkTheme;
+  const currentTheme = createCustomTheme(baseTheme, userTheme);
 
   const handleSettingsSaved = () => {
+    console.log('handleSettingsSaved called - odświeżam ustawienia');
     fetchUserLayoutSettings();
   };
 
