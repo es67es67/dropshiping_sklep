@@ -43,10 +43,36 @@ app.use(cors({
     'http://localhost:3000',
     'https://portal-frontend.onrender.com',
     'https://portal-frontend-igf9.onrender.com',
-    'https://portal-frontend-ysqz.onrender.com'
+    'https://portal-frontend-ysqz.onrender.com',
+    'https://portal-frontend-*.onrender.com', // Wildcard dla wszystkich subdomen
+    '*' // Tymczasowo pozwól wszystkim (do usunięcia w produkcji)
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 }));
+
+// Middleware do logowania żądań
+app.use((req, res, next) => {
+  console.log(`🌐 ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
+  console.log('Headers:', req.headers);
+  
+  // Dodaj nagłówki CORS dla wszystkich żądań
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // Obsłuż preflight requests
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+    return;
+  }
+  
+  next();
+});
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
