@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
@@ -202,12 +202,76 @@ const UserMenu = styled.div`
   align-items: center;
   gap: 1rem;
   margin-left: auto;
+  position: relative;
   
   @media (max-width: 768px) {
     margin-left: 0;
     flex-direction: column;
     width: 100%;
     gap: 0.5rem;
+  }
+`;
+
+const UserDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: ${props => props.theme.surface};
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  min-width: 220px;
+  z-index: 1000;
+  overflow: hidden;
+  opacity: ${props => props.isOpen ? '1' : '0'};
+  visibility: ${props => props.isOpen ? 'visible' : 'hidden'};
+  transform: ${props => props.isOpen ? 'translateY(0)' : 'translateY(-10px)'};
+  transition: all 0.2s ease;
+  
+  @media (max-width: 768px) {
+    position: static;
+    width: 100%;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+  }
+`;
+
+const DropdownItem = styled.div`
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: ${props => props.theme.text};
+  transition: all 0.2s ease;
+  border-bottom: 1px solid ${props => props.theme.border};
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:hover {
+    background: ${props => props.theme.primary}10;
+    color: ${props => props.theme.primary};
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem 0;
+    border-bottom: none;
+  }
+`;
+
+const DropdownDivider = styled.div`
+  height: 1px;
+  background: ${props => props.theme.border};
+  margin: 0.5rem 0;
+  
+  @media (max-width: 768px) {
+    display: none;
   }
 `;
 
@@ -237,6 +301,17 @@ const UserDetails = styled.div`
   
   @media (max-width: 768px) {
     align-items: center;
+  }
+`;
+
+const DropdownArrow = styled.div`
+  font-size: 0.75rem;
+  color: ${props => props.theme.textSecondary};
+  transition: transform 0.2s ease;
+  transform: ${props => props.isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
+  
+  @media (max-width: 768px) {
+    display: none;
   }
 `;
 
@@ -272,10 +347,50 @@ const LogoutButton = styled.button`
 export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
   const { user, isAuthenticated, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const userMenuRef = useRef(null);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const toggleUserDropdown = () => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
+  };
+
+  const closeUserDropdown = () => {
+    setIsUserDropdownOpen(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    closeUserDropdown();
+  };
+
+  // Zamykanie dropdown menu po kliknięciu poza nim i klawiszu Escape
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserDropdownOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setIsUserDropdownOpen(false);
+      }
+    };
+
+    if (isUserDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isUserDropdownOpen]);
 
   return (
     <Nav theme={theme} layout={layout}>
@@ -352,23 +467,72 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
           </RegisterButton>
         </AuthSection>
       ) : (
-        <UserMenu>
-          <UserInfo theme={theme}>
+        <UserMenu ref={userMenuRef}>
+          <UserInfo theme={theme} onClick={toggleUserDropdown} style={{ cursor: 'pointer' }}>
             <UserAvatar>👤</UserAvatar>
             <UserDetails>
               <UserName>{user?.username}</UserName>
               <UserLevel theme={theme}>Poziom {user?.level || 1}</UserLevel>
             </UserDetails>
+            <DropdownArrow theme={theme} isOpen={isUserDropdownOpen}>▼</DropdownArrow>
           </UserInfo>
-          <NavLink to="/profile" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
-            👤 Mój profil
-          </NavLink>
-          <NavLink to="/layout-customization" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
-            🎨 Dostosuj wygląd
-          </NavLink>
-          <LogoutButton onClick={logout} theme={theme}>
-            🚪 Wyloguj
-          </LogoutButton>
+          
+          <UserDropdown theme={theme} isOpen={isUserDropdownOpen}>
+            <DropdownItem onClick={() => { 
+              window.location.href = '/profile'; 
+              closeUserDropdown(); 
+              setIsMenuOpen(false);
+            }}>
+              👤 Mój profil
+            </DropdownItem>
+            
+            {user?.shops && user.shops.length > 0 && (
+              <DropdownItem onClick={() => { 
+                window.location.href = '/shop-management'; 
+                closeUserDropdown(); 
+                setIsMenuOpen(false);
+              }}>
+                🏪 Moje sklepy
+              </DropdownItem>
+            )}
+            
+            <DropdownItem onClick={() => { 
+              window.location.href = '/settings'; 
+              closeUserDropdown(); 
+              setIsMenuOpen(false);
+            }}>
+              ⚙️ Ustawienia
+            </DropdownItem>
+            
+            <DropdownItem onClick={() => { 
+              window.location.href = '/layout-customization'; 
+              closeUserDropdown(); 
+              setIsMenuOpen(false);
+            }}>
+              🎨 Dostosuj wygląd
+            </DropdownItem>
+            
+            {user?.roles && user.roles.includes('admin') && (
+              <>
+                <DropdownDivider theme={theme} />
+                <DropdownItem onClick={() => { 
+                  window.location.href = '/admin-panel'; 
+                  closeUserDropdown(); 
+                  setIsMenuOpen(false);
+                }}>
+                  🔧 Panel administracyjny
+                </DropdownItem>
+              </>
+            )}
+            
+            <DropdownDivider theme={theme} />
+            <DropdownItem onClick={() => { 
+              handleLogout(); 
+              setIsMenuOpen(false);
+            }} style={{ color: '#ef4444' }}>
+              🚪 Wyloguj
+            </DropdownItem>
+          </UserDropdown>
         </UserMenu>
       )}
     </Nav>
