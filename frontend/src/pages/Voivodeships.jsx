@@ -191,11 +191,14 @@ export default function Voivodeships() {
   const fetchVoivodeships = async () => {
     try {
       setLoading(true);
+      setError(null);
       const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
       const response = await fetch(`${apiUrl}/api/locations/voivodeships`);
+      
       if (!response.ok) {
         throw new Error('Błąd podczas pobierania województw');
       }
+      
       const data = await response.json();
       setVoivodeships(data);
       
@@ -206,8 +209,10 @@ export default function Voivodeships() {
         counties: data.reduce((sum, v) => sum + (v.countiesCount || 0), 0)
       });
     } catch (err) {
+      console.error('Błąd pobierania województw:', err);
       setError(err.message);
-      // Fallback do danych mockowych
+      
+      // Fallback do danych mockowych tylko w przypadku błędu
       const mockData = [
         { id: 1, name: 'Dolnośląskie', code: '02', countiesCount: 26, active: true },
         { id: 2, name: 'Kujawsko-pomorskie', code: '04', countiesCount: 23, active: true },

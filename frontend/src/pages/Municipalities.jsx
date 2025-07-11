@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
+import LocationSearch from '../components/LocationSearch';
+import LocationDetails from '../components/LocationDetails';
+import LocationAnalytics from '../components/LocationAnalytics';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -103,6 +106,44 @@ const StatLabel = styled.div`
   font-size: 0.875rem;
 `;
 
+const TabContainer = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid ${props => props.theme.border};
+`;
+
+const Tab = styled.button`
+  padding: 1rem 2rem;
+  background: ${props => props.active ? props.theme.primary : 'transparent'};
+  color: ${props => props.active ? 'white' : props.theme.text};
+  border: none;
+  border-radius: 12px 12px 0 0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.active ? props.theme.primary : props.theme.border};
+  }
+`;
+
+const ActionButton = styled.button`
+  background: ${props => props.theme.gradient};
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.theme.gradientHover};
+    transform: translateY(-1px);
+  }
+`;
+
 const MunicipalitiesGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -115,6 +156,7 @@ const MunicipalityCard = styled.div`
   border-radius: 12px;
   box-shadow: ${props => props.theme.shadow};
   transition: all 0.3s ease;
+  cursor: pointer;
   
   &:hover {
     transform: translateY(-4px);
@@ -159,28 +201,6 @@ const MunicipalityType = styled.div`
   margin-top: 0.5rem;
 `;
 
-const MunicipalityDetails = styled.div`
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid ${props => props.theme.border};
-`;
-
-const DetailRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
-`;
-
-const DetailLabel = styled.span`
-  color: ${props => props.theme.textSecondary};
-`;
-
-const DetailValue = styled.span`
-  font-weight: 500;
-  color: ${props => props.theme.text};
-`;
-
 const MunicipalityStats = styled.div`
   display: flex;
   justify-content: space-between;
@@ -218,41 +238,47 @@ const ErrorMessage = styled.div`
   margin-bottom: 1rem;
 `;
 
-/**
- * Strona zarządzania gminami dla wybranego powiatu
- * Wyświetla listę gmin z możliwością wyszukiwania i filtrowania
- * oraz szczegółowe informacje o każdej gminie
- */
+const EmptyState = styled.div`
+  text-align: center;
+  padding: 4rem 2rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
 export default function Municipalities() {
   const { countyCode } = useParams();
   const [municipalities, setMunicipalities] = useState([]);
   const [filteredMunicipalities, setFilteredMunicipalities] = useState([]);
+  const [county, setCounty] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [county, setCounty] = useState(null);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
-    cities: 0,
-    villages: 0
+    population: 0
   });
+  
+  // Modal states
+  const [showSearch, setShowSearch] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [activeTab, setActiveTab] = useState('list');
 
   useEffect(() => {
-    fetchMunicipalities();
+    if (countyCode) {
+      fetchMunicipalities();
+    }
   }, [countyCode]);
 
   useEffect(() => {
-    let filtered = municipalities.filter(municipality =>
-      municipality.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      municipality.code.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(municipality => municipality.type === typeFilter);
-    }
-
+    const filtered = municipalities.filter(municipality => {
+      const matchesSearch = municipality.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           municipality.code.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesType = typeFilter === 'all' || municipality.type === typeFilter;
+      return matchesSearch && matchesType;
+    });
     setFilteredMunicipalities(filtered);
   }, [searchTerm, typeFilter, municipalities]);
 
@@ -262,45 +288,46 @@ export default function Municipalities() {
   const fetchMunicipalities = async () => {
     try {
       setLoading(true);
+      setError(null);
       const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
       const response = await fetch(`${apiUrl}/api/locations/counties/${countyCode}/municipalities`);
+      
       if (!response.ok) {
         throw new Error('Błąd podczas pobierania gmin');
       }
+      
       const data = await response.json();
       setMunicipalities(data.municipalities || []);
       setCounty(data.county);
       
       // Oblicz statystyki
-      const municipalitiesData = data.municipalities || [];
       setStats({
-        total: municipalitiesData.length,
-        active: municipalitiesData.filter(m => m.active).length,
-        cities: municipalitiesData.filter(m => m.type === 'gmina miejska').length,
-        villages: municipalitiesData.filter(m => m.type === 'gmina wiejska').length
+        total: data.municipalities?.length || 0,
+        active: data.municipalities?.filter(m => m.active).length || 0,
+        population: data.municipalities?.reduce((sum, m) => sum + (m.population || 0), 0) || 0
       });
     } catch (err) {
+      console.error('Błąd pobierania gmin:', err);
       setError(err.message);
-      // Fallback do danych mockowych dla Wrocławia
+      
+      // Fallback do danych mockowych tylko w przypadku błędu
       const mockMunicipalities = [
-        { 
-          id: 1, 
-          name: 'Wrocław', 
-          code: '0261011', 
-          type: 'gmina miejska', 
-          active: true,
-          population: 674079,
-          area: 292.82,
-          coordinates: { lat: 51.1079, lng: 17.0385 }
-        }
+        { id: 1, name: 'Wrocław', code: '0261011', type: 'gmina miejska', population: 641607, active: true },
+        { id: 2, name: 'Oława', code: '0215011', type: 'gmina miejsko-wiejska', population: 15400, active: true },
+        { id: 3, name: 'Brzeg Dolny', code: '0216011', type: 'gmina miejsko-wiejska', population: 12300, active: true },
+        { id: 4, name: 'Jelcz-Laskowice', code: '0216012', type: 'gmina miejsko-wiejska', population: 15800, active: true },
+        { id: 5, name: 'Miękinia', code: '0216013', type: 'gmina wiejska', population: 8900, active: true },
+        { id: 6, name: 'Oława', code: '0215012', type: 'gmina wiejska', population: 7600, active: true },
+        { id: 7, name: 'Siechnice', code: '0216014', type: 'gmina miejsko-wiejska', population: 11200, active: true },
+        { id: 8, name: 'Żórawina', code: '0216015', type: 'gmina wiejska', population: 6800, active: true },
+        { id: 9, name: 'Domaniów', code: '0216016', type: 'gmina wiejska', population: 4200, active: true }
       ];
       setMunicipalities(mockMunicipalities);
-      setCounty({ name: 'Wrocław', code: countyCode, type: 'miasto na prawach powiatu' });
+      setCounty({ name: 'wrocławski', code: countyCode, type: 'powiat' });
       setStats({
         total: mockMunicipalities.length,
         active: mockMunicipalities.filter(m => m.active).length,
-        cities: mockMunicipalities.filter(m => m.type === 'gmina miejska').length,
-        villages: mockMunicipalities.filter(m => m.type === 'gmina wiejska').length
+        population: mockMunicipalities.reduce((sum, m) => sum + (m.population || 0), 0)
       });
     } finally {
       setLoading(false);
@@ -321,95 +348,173 @@ export default function Municipalities() {
         <BreadcrumbLink to="/voivodeships">🏛️ Województwa</BreadcrumbLink>
         <span>→</span>
         <BreadcrumbLink to={`/counties/${county?.code?.substring(0, 2)}`}>
-          {county?.name || 'Powiat'}
+          🏘️ Powiaty
         </BreadcrumbLink>
         <span>→</span>
-        <span>{county?.name || 'Gmina'}</span>
+        <span>{county?.name || 'Powiat'}</span>
       </Breadcrumb>
 
       <Header>
-        <Title>🏘️ Gminy - {county?.name}</Title>
+        <Title>🏙️ Gminy - {county?.name}</Title>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <ActionButton onClick={() => setShowSearch(true)}>
+            🔍 Zaawansowane wyszukiwanie
+          </ActionButton>
+          <ActionButton onClick={() => setShowAnalytics(true)}>
+            📊 Analityka
+          </ActionButton>
+        </div>
       </Header>
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
-      <StatsGrid>
-        <StatCard>
-          <StatNumber>{stats.total}</StatNumber>
-          <StatLabel>Wszystkie gminy</StatLabel>
-        </StatCard>
-        <StatCard>
-          <StatNumber>{stats.active}</StatNumber>
-          <StatLabel>Aktywne gminy</StatLabel>
-        </StatCard>
-        <StatCard>
-          <StatNumber>{stats.cities}</StatNumber>
-          <StatLabel>Gminy miejskie</StatLabel>
-        </StatCard>
-        <StatCard>
-          <StatNumber>{stats.villages}</StatNumber>
-          <StatLabel>Gminy wiejskie</StatLabel>
-        </StatCard>
-      </StatsGrid>
-
-      <SearchContainer>
-        <SearchInput
-          type="text"
-          placeholder="Wyszukaj gminę..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <FilterSelect
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
+      <TabContainer>
+        <Tab 
+          active={activeTab === 'list'} 
+          onClick={() => setActiveTab('list')}
         >
-          <option value="all">Wszystkie typy</option>
-          <option value="gmina miejska">Gmina miejska</option>
-          <option value="gmina wiejska">Gmina wiejska</option>
-          <option value="gmina miejsko-wiejska">Gmina miejsko-wiejska</option>
-        </FilterSelect>
-      </SearchContainer>
+          📋 Lista gmin
+        </Tab>
+        <Tab 
+          active={activeTab === 'search'} 
+          onClick={() => setActiveTab('search')}
+        >
+          🔍 Wyszukiwanie
+        </Tab>
+        <Tab 
+          active={activeTab === 'analytics'} 
+          onClick={() => setActiveTab('analytics')}
+        >
+          📊 Analityka
+        </Tab>
+      </TabContainer>
 
-      <MunicipalitiesGrid>
-        {filteredMunicipalities.map(municipality => (
-          <MunicipalityCard key={municipality.id}>
-            <MunicipalityHeader>
-              <MunicipalityIcon>🏘️</MunicipalityIcon>
-              <MunicipalityInfo>
-                <MunicipalityName>{municipality.name}</MunicipalityName>
-                <MunicipalityCode>Kod: {municipality.code}</MunicipalityCode>
-                <MunicipalityType>{municipality.type}</MunicipalityType>
-              </MunicipalityInfo>
-            </MunicipalityHeader>
-            
-            <MunicipalityDetails>
-              <DetailRow>
-                <DetailLabel>Ludność:</DetailLabel>
-                <DetailValue>{municipality.population?.toLocaleString() || 'Brak danych'}</DetailValue>
-              </DetailRow>
-              <DetailRow>
-                <DetailLabel>Powierzchnia:</DetailLabel>
-                <DetailValue>{municipality.area ? `${municipality.area} km²` : 'Brak danych'}</DetailValue>
-              </DetailRow>
-              <DetailRow>
-                <DetailLabel>Status:</DetailLabel>
-                <DetailValue>{municipality.active ? '✅ Aktywna' : '❌ Nieaktywna'}</DetailValue>
-              </DetailRow>
-            </MunicipalityDetails>
-            
-            <MunicipalityStats>
-              <Stat>
-                <StatValue>{municipality.population || 0}</StatValue>
-                <StatText>Mieszkańców</StatText>
-              </Stat>
-              <Stat>
-                <StatValue>{municipality.area || 0}</StatValue>
-                <StatText>km²</StatText>
-              </Stat>
-            </MunicipalityStats>
-          </MunicipalityCard>
-        ))}
-      </MunicipalitiesGrid>
+      {activeTab === 'list' && (
+        <>
+          <StatsGrid>
+            <StatCard>
+              <StatNumber>{stats.total}</StatNumber>
+              <StatLabel>Wszystkie gminy</StatLabel>
+            </StatCard>
+            <StatCard>
+              <StatNumber>{stats.active}</StatNumber>
+              <StatLabel>Aktywne gminy</StatLabel>
+            </StatCard>
+            <StatCard>
+              <StatNumber>{stats.population.toLocaleString()}</StatNumber>
+              <StatLabel>Łączna populacja</StatLabel>
+            </StatCard>
+          </StatsGrid>
+
+          <SearchContainer>
+            <SearchInput
+              type="text"
+              placeholder="Wyszukaj gminę..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FilterSelect
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              <option value="all">Wszystkie typy</option>
+              <option value="gmina miejska">Gmina miejska</option>
+              <option value="gmina wiejska">Gmina wiejska</option>
+              <option value="gmina miejsko-wiejska">Gmina miejsko-wiejska</option>
+            </FilterSelect>
+          </SearchContainer>
+
+          {filteredMunicipalities.length === 0 ? (
+            <EmptyState>
+              <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🏙️</div>
+              <h3>Nie znaleziono gmin</h3>
+              <p>Spróbuj zmienić kryteria wyszukiwania</p>
+            </EmptyState>
+          ) : (
+            <MunicipalitiesGrid>
+              {filteredMunicipalities.map(municipality => (
+                <MunicipalityCard 
+                  key={municipality.id}
+                  onClick={() => {
+                    setSelectedLocation(municipality);
+                    setShowDetails(true);
+                  }}
+                >
+                  <MunicipalityHeader>
+                    <MunicipalityIcon>🏙️</MunicipalityIcon>
+                    <MunicipalityInfo>
+                      <MunicipalityName>{municipality.name}</MunicipalityName>
+                      <MunicipalityCode>Kod: {municipality.code}</MunicipalityCode>
+                      <MunicipalityType>{municipality.type}</MunicipalityType>
+                    </MunicipalityInfo>
+                  </MunicipalityHeader>
+                  
+                  <MunicipalityStats>
+                    <Stat>
+                      <StatValue>{municipality.population?.toLocaleString() || 'N/A'}</StatValue>
+                      <StatText>Populacja</StatText>
+                    </Stat>
+                    <Stat>
+                      <StatValue>{municipality.active ? '✅' : '❌'}</StatValue>
+                      <StatText>Status</StatText>
+                    </Stat>
+                  </MunicipalityStats>
+                </MunicipalityCard>
+              ))}
+            </MunicipalitiesGrid>
+          )}
+        </>
+      )}
+
+      {activeTab === 'search' && (
+        <LocationSearch 
+          onLocationSelect={(location) => {
+            setSelectedLocation(location);
+            setShowDetails(true);
+            setActiveTab('list');
+          }}
+          onClose={() => setActiveTab('list')}
+        />
+      )}
+
+      {activeTab === 'analytics' && (
+        <LocationAnalytics 
+          locationType="county"
+          locationId={countyCode}
+          onClose={() => setShowAnalytics(false)}
+        />
+      )}
+
+      {/* Modals */}
+      {showDetails && selectedLocation && (
+        <LocationDetails 
+          location={selectedLocation}
+          onClose={() => {
+            setShowDetails(false);
+            setSelectedLocation(null);
+          }}
+          theme="light"
+        />
+      )}
+
+      {showSearch && (
+        <LocationSearch 
+          onLocationSelect={(location) => {
+            setSelectedLocation(location);
+            setShowDetails(true);
+            setShowSearch(false);
+          }}
+          onClose={() => setShowSearch(false)}
+        />
+      )}
+
+      {showAnalytics && (
+        <LocationAnalytics 
+          locationType="county"
+          locationId={countyCode}
+          onClose={() => setShowAnalytics(false)}
+        />
+      )}
     </Container>
   );
 } 

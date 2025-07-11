@@ -1,345 +1,582 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import './LocationDetails.css';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
 
-const LocationDetails = ({ locationId, onClose }) => {
-  const { user } = useAuth();
-  const [location, setLocation] = useState(null);
-  const [recommendations, setRecommendations] = useState([]);
-  const [ratings, setRatings] = useState([]);
-  const [userRating, setUserRating] = useState(null);
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [ratingForm, setRatingForm] = useState({
-    rating: 5,
-    comment: ''
+const Container = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+`;
+
+const Title = styled.h1`
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: ${props => props.theme.gradient};
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const CloseButton = styled.button`
+  background: ${props => props.theme.error};
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+const LocationInfo = styled.div`
+  background: ${props => props.theme.surface};
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: ${props => props.theme.shadow};
+  margin-bottom: 2rem;
+`;
+
+const LocationHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+`;
+
+const LocationIcon = styled.div`
+  font-size: 3rem;
+`;
+
+const LocationDetails = styled.div`
+  flex: 1;
+`;
+
+const LocationName = styled.h2`
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+`;
+
+const LocationType = styled.div`
+  background: ${props => props.theme.primary}20;
+  color: ${props => props.theme.primary};
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: inline-block;
+`;
+
+const LocationStats = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+`;
+
+const StatCard = styled.div`
+  text-align: center;
+  padding: 1rem;
+  background: ${props => props.theme.background};
+  border-radius: 8px;
+`;
+
+const StatValue = styled.div`
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: ${props => props.theme.primary};
+  margin-bottom: 0.25rem;
+`;
+
+const StatLabel = styled.div`
+  font-size: 0.875rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
+const TabsContainer = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid ${props => props.theme.border};
+`;
+
+const Tab = styled.button`
+  padding: 1rem 2rem;
+  background: ${props => props.active ? props.theme.primary : 'transparent'};
+  color: ${props => props.active ? 'white' : props.theme.text};
+  border: none;
+  border-radius: 12px 12px 0 0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.active ? props.theme.primary : props.theme.border};
+  }
+`;
+
+const ContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+`;
+
+const Card = styled.div`
+  background: ${props => props.theme.surface};
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: ${props => props.theme.shadow};
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${props => props.theme.shadowHover};
+  }
+`;
+
+const CardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+`;
+
+const CardIcon = styled.div`
+  font-size: 2rem;
+`;
+
+const CardTitle = styled.h3`
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+`;
+
+const CardDescription = styled.p`
+  color: ${props => props.theme.textSecondary};
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+`;
+
+const CardStats = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid ${props => props.theme.border};
+`;
+
+const ActionButton = styled(Link)`
+  background: ${props => props.theme.gradient};
+  color: white;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 1rem;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.theme.gradientHover};
+    transform: translateY(-1px);
+  }
+`;
+
+const LoadingSpinner = styled.div`
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.2rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
+const ErrorMessage = styled.div`
+  background: ${props => props.theme.error}20;
+  color: ${props => props.theme.error};
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+`;
+
+const EmptyState = styled.div`
+  text-align: center;
+  padding: 4rem 2rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
+export default function LocationDetails({ location, onClose, theme }) {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [data, setData] = useState({
+    shops: [],
+    products: [],
+    posts: [],
+    users: []
   });
-  const [showRatingForm, setShowRatingForm] = useState(false);
 
   useEffect(() => {
-    if (locationId) {
-      loadLocationDetails();
+    if (location) {
+      fetchLocationData();
     }
-  }, [locationId]);
+  }, [location]);
 
-  const loadLocationDetails = async () => {
+  const fetchLocationData = async () => {
+    if (!location) return;
+    
     setLoading(true);
+    setError(null);
+    
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/locations/${locationId}`);
-      const data = await response.json();
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
       
-      if (response.ok) {
-        setLocation(data);
-        setRecommendations(data.recommendations || []);
-        
-        // Sprawdź subskrypcję użytkownika
-        if (user && user.subscribedLocations) {
-          setIsSubscribed(user.subscribedLocations.includes(locationId));
-        }
-        
-        // Pobierz oceny
-        loadRatings();
-        
-        // Sprawdź ocenę użytkownika
-        if (user) {
-          loadUserRating();
-        }
+      // Pobierz dane lokalizacji
+      const [shopsRes, productsRes, postsRes, usersRes] = await Promise.allSettled([
+        fetch(`${apiUrl}/api/locations/${location.id}/shops`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${apiUrl}/api/locations/${location.id}/products`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${apiUrl}/api/locations/${location.id}/feed?type=posts`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${apiUrl}/api/locations/${location.id}/users`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      ]);
+
+      const newData = { ...data };
+      
+      if (shopsRes.status === 'fulfilled' && shopsRes.value.ok) {
+        const shopsData = await shopsRes.value.json();
+        newData.shops = shopsData.shops || [];
       }
-    } catch (error) {
-      console.error('Błąd ładowania szczegółów lokalizacji:', error);
+      
+      if (productsRes.status === 'fulfilled' && productsRes.value.ok) {
+        const productsData = await productsRes.value.json();
+        newData.products = productsData.products || [];
+      }
+      
+      if (postsRes.status === 'fulfilled' && postsRes.value.ok) {
+        const postsData = await postsRes.value.json();
+        newData.posts = postsData.feed || [];
+      }
+      
+      if (usersRes.status === 'fulfilled' && usersRes.value.ok) {
+        const usersData = await usersRes.value.json();
+        newData.users = usersData.users || [];
+      }
+      
+      setData(newData);
+    } catch (err) {
+      console.error('Błąd pobierania danych lokalizacji:', err);
+      setError('Nie udało się pobrać danych lokalizacji');
     } finally {
       setLoading(false);
     }
   };
 
-  const loadRatings = async () => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/locations/${locationId}/ratings`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        setRatings(data.ratings);
-      }
-    } catch (error) {
-      console.error('Błąd ładowania ocen:', error);
+  const getLocationIcon = (type) => {
+    switch (type) {
+      case 'województwo': return '🏛️';
+      case 'powiat': return '🏘️';
+      case 'gmina': return '🏙️';
+      case 'miasto': return '🏙️';
+      case 'miejscowość': return '🏘️';
+      default: return '📍';
     }
   };
 
-  const loadUserRating = async () => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/locations/${locationId}/ratings?userId=${user._id}`);
-      const data = await response.json();
-      
-      if (response.ok && data.ratings.length > 0) {
-        const userRatingData = data.ratings.find(r => r.user._id === user._id);
-        if (userRatingData) {
-          setUserRating(userRatingData);
-          setRatingForm({
-            rating: userRatingData.rating,
-            comment: userRatingData.comment || ''
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Błąd ładowania oceny użytkownika:', error);
-    }
-  };
+  const renderOverview = () => (
+    <div>
+      <LocationInfo>
+        <LocationHeader>
+          <LocationIcon>{getLocationIcon(location.type)}</LocationIcon>
+          <LocationDetails>
+            <LocationName>{location.name}</LocationName>
+            <LocationType>{location.type}</LocationType>
+          </LocationDetails>
+        </LocationHeader>
+        
+        <LocationStats>
+          <StatCard>
+            <StatValue>{data.shops.length}</StatValue>
+            <StatLabel>Sklepów</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatValue>{data.products.length}</StatValue>
+            <StatLabel>Produktów</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatValue>{data.users.length}</StatValue>
+            <StatLabel>Użytkowników</StatLabel>
+          </StatCard>
+          <StatCard>
+            <StatValue>{data.posts.length}</StatValue>
+            <StatLabel>Postów</StatLabel>
+          </StatCard>
+        </LocationStats>
+      </LocationInfo>
 
-  const handleRatingSubmit = async (e) => {
-    e.preventDefault();
-    
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/locations/${locationId}/rate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user._id,
-          rating: ratingForm.rating,
-          comment: ratingForm.comment
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        setShowRatingForm(false);
-        loadRatings();
-        loadLocationDetails(); // Odśwież dane lokalizacji
-        alert('Ocena została zapisana!');
-      } else {
-        alert('Błąd zapisywania oceny: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Błąd zapisywania oceny:', error);
-      alert('Błąd zapisywania oceny');
-    }
-  };
-
-  const handleSubscribe = async () => {
-    try {
-      const method = isSubscribed ? 'DELETE' : 'POST';
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/locations/${locationId}/subscribe`, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user._id
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        setIsSubscribed(!isSubscribed);
-        alert(isSubscribed ? 'Subskrypcja została usunięta' : 'Subskrypcja została dodana');
-      } else {
-        alert('Błąd: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Błąd subskrypcji:', error);
-      alert('Błąd subskrypcji');
-    }
-  };
-
-  const renderStars = (rating) => {
-    return [...Array(5)].map((_, index) => (
-      <span key={index} className={`star ${index < rating ? 'filled' : ''}`}>
-        ★
-      </span>
-    ));
-  };
-
-  if (loading) {
-    return (
-      <div className="location-details-overlay">
-        <div className="location-details">
-          <div className="loading">Ładowanie...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!location) {
-    return (
-      <div className="location-details-overlay">
-        <div className="location-details">
-          <div className="error">Lokalizacja nie została znaleziona</div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="location-details-overlay">
-      <div className="location-details">
-        <div className="details-header">
-          <h2>{location.name}</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
-        </div>
-
-        <div className="details-content">
-          {/* Podstawowe informacje */}
-          <div className="basic-info">
-            <div className="info-row">
-              <span className="label">Typ:</span>
-              <span className="value">{location.type}</span>
+      <ContentGrid>
+        <Card>
+          <CardHeader>
+            <CardIcon>🏪</CardIcon>
+            <CardTitle>Sklepy lokalne</CardTitle>
+          </CardHeader>
+          <CardDescription>
+            Odkryj sklepy w tej lokalizacji i znajdź lokalne produkty
+          </CardDescription>
+          <CardStats>
+            <div>
+              <StatValue>{data.shops.length}</StatValue>
+              <StatLabel>Dostępnych sklepów</StatLabel>
             </div>
-            {location.population && (
-              <div className="info-row">
-                <span className="label">Populacja:</span>
-                <span className="value">{location.population.toLocaleString()}</span>
-              </div>
-            )}
-            {location.area && (
-              <div className="info-row">
-                <span className="label">Powierzchnia:</span>
-                <span className="value">{location.area} km²</span>
-              </div>
-            )}
-            {location.description && (
-              <div className="description">
-                <h4>Opis</h4>
-                <p>{location.description}</p>
-              </div>
-            )}
-          </div>
+          </CardStats>
+          <ActionButton to={`/shops?location=${location.id}`}>
+            🏪 Zobacz sklepy
+          </ActionButton>
+        </Card>
 
-          {/* Statystyki */}
-          <div className="stats-section">
-            <h4>Statystyki</h4>
-            <div className="stats-grid">
-              <div className="stat-item">
-                <span className="stat-number">{location.stats?.totalUsers || 0}</span>
-                <span className="stat-label">Użytkownicy</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{location.stats?.totalShops || 0}</span>
-                <span className="stat-label">Sklepy</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{location.stats?.totalProducts || 0}</span>
-                <span className="stat-label">Produkty</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{location.stats?.totalPosts || 0}</span>
-                <span className="stat-label">Posty</span>
-              </div>
+        <Card>
+          <CardHeader>
+            <CardIcon>📦</CardIcon>
+            <CardTitle>Produkty lokalne</CardTitle>
+          </CardHeader>
+          <CardDescription>
+            Produkty wytwarzane i sprzedawane lokalnie
+          </CardDescription>
+          <CardStats>
+            <div>
+              <StatValue>{data.products.length}</StatValue>
+              <StatLabel>Dostępnych produktów</StatLabel>
             </div>
-          </div>
+          </CardStats>
+          <ActionButton to={`/products?location=${location.id}`}>
+            📦 Zobacz produkty
+          </ActionButton>
+        </Card>
 
-          {/* Oceny */}
-          <div className="ratings-section">
-            <div className="ratings-header">
-              <h4>Oceny</h4>
-              {user && (
-                <button 
-                  className="rate-btn"
-                  onClick={() => setShowRatingForm(!showRatingForm)}
-                >
-                  {userRating ? 'Edytuj ocenę' : 'Dodaj ocenę'}
-                </button>
-              )}
+        <Card>
+          <CardHeader>
+            <CardIcon>💬</CardIcon>
+            <CardTitle>Wiadomości lokalne</CardTitle>
+          </CardHeader>
+          <CardDescription>
+            Najnowsze posty i wiadomości z tej lokalizacji
+          </CardDescription>
+          <CardStats>
+            <div>
+              <StatValue>{data.posts.length}</StatValue>
+              <StatLabel>Nowych postów</StatLabel>
             </div>
+          </CardStats>
+          <ActionButton to={`/messages?location=${location.id}`}>
+            💬 Zobacz wiadomości
+          </ActionButton>
+        </Card>
 
-            {location.stats?.averageRating > 0 && (
-              <div className="average-rating">
-                <div className="stars">{renderStars(Math.round(location.stats.averageRating))}</div>
-                <span className="rating-text">
-                  {location.stats.averageRating.toFixed(1)} ({location.stats.totalRatings} ocen)
-                </span>
-              </div>
-            )}
-
-            {showRatingForm && (
-              <form className="rating-form" onSubmit={handleRatingSubmit}>
-                <div className="rating-input">
-                  <label>Twoja ocena:</label>
-                  <div className="star-rating">
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <button
-                        key={star}
-                        type="button"
-                        className={`star-btn ${star <= ratingForm.rating ? 'active' : ''}`}
-                        onClick={() => setRatingForm(prev => ({ ...prev, rating: star }))}
-                      >
-                        ★
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="comment-input">
-                  <label>Komentarz (opcjonalnie):</label>
-                  <textarea
-                    value={ratingForm.comment}
-                    onChange={(e) => setRatingForm(prev => ({ ...prev, comment: e.target.value }))}
-                    placeholder="Podziel się swoją opinią..."
-                    maxLength={1000}
-                  />
-                </div>
-                <div className="form-actions">
-                  <button type="submit" className="submit-btn">Zapisz ocenę</button>
-                  <button type="button" className="cancel-btn" onClick={() => setShowRatingForm(false)}>
-                    Anuluj
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Lista ocen */}
-            <div className="ratings-list">
-              {ratings.map(rating => (
-                <div key={rating._id} className="rating-item">
-                  <div className="rating-header">
-                    <span className="user-name">{rating.user.username}</span>
-                    <div className="stars">{renderStars(rating.rating)}</div>
-                  </div>
-                  {rating.comment && (
-                    <p className="rating-comment">{rating.comment}</p>
-                  )}
-                  <span className="rating-date">
-                    {new Date(rating.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              ))}
+        <Card>
+          <CardHeader>
+            <CardIcon>👥</CardIcon>
+            <CardTitle>Społeczność lokalna</CardTitle>
+          </CardHeader>
+          <CardDescription>
+            Użytkownicy z tej lokalizacji
+          </CardDescription>
+          <CardStats>
+            <div>
+              <StatValue>{data.users.length}</StatValue>
+              <StatLabel>Aktywnych użytkowników</StatLabel>
             </div>
-          </div>
-
-          {/* Rekomendacje */}
-          {recommendations.length > 0 && (
-            <div className="recommendations-section">
-              <h4>Polecane lokalizacje</h4>
-              <div className="recommendations-grid">
-                {recommendations.map(rec => (
-                  <div key={rec._id} className="recommendation-item">
-                    <h5>{rec.name}</h5>
-                    <p className="rec-type">{rec.type}</p>
-                    {rec.description && (
-                      <p className="rec-description">{rec.description}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Akcje */}
-          {user && (
-            <div className="actions-section">
-              <button 
-                className={`subscribe-btn ${isSubscribed ? 'subscribed' : ''}`}
-                onClick={handleSubscribe}
-              >
-                {isSubscribed ? 'Anuluj subskrypcję' : 'Subskrybuj'}
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+          </CardStats>
+          <ActionButton to={`/users?location=${location.id}`}>
+            👥 Zobacz użytkowników
+          </ActionButton>
+        </Card>
+      </ContentGrid>
     </div>
   );
-};
 
-export default LocationDetails; 
+  const renderShops = () => (
+    <div>
+      <ContentGrid>
+        {data.shops.length > 0 ? (
+          data.shops.map(shop => (
+            <Card key={shop._id}>
+              <CardHeader>
+                <CardIcon>🏪</CardIcon>
+                <CardTitle>{shop.name}</CardTitle>
+              </CardHeader>
+              <CardDescription>{shop.description}</CardDescription>
+              <CardStats>
+                <div>
+                  <StatValue>{shop.stats?.totalProducts || 0}</StatValue>
+                  <StatLabel>Produktów</StatLabel>
+                </div>
+                <div>
+                  <StatValue>⭐ {shop.rating || 'Brak'}</StatValue>
+                  <StatLabel>Ocena</StatLabel>
+                </div>
+              </CardStats>
+              <ActionButton to={`/shop/${shop._id}`}>
+                🛒 Przejdź do sklepu
+              </ActionButton>
+            </Card>
+          ))
+        ) : (
+          <EmptyState>
+            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🏪</div>
+            <h3>Brak sklepów w tej lokalizacji</h3>
+            <p>Bądź pierwszym, który otworzy sklep w tej lokalizacji!</p>
+            <ActionButton to="/shop-create">
+              🏪 Dodaj sklep
+            </ActionButton>
+          </EmptyState>
+        )}
+      </ContentGrid>
+    </div>
+  );
+
+  const renderProducts = () => (
+    <div>
+      <ContentGrid>
+        {data.products.length > 0 ? (
+          data.products.map(product => (
+            <Card key={product._id}>
+              <CardHeader>
+                <CardIcon>📦</CardIcon>
+                <CardTitle>{product.name}</CardTitle>
+              </CardHeader>
+              <CardDescription>{product.description}</CardDescription>
+              <CardStats>
+                <div>
+                  <StatValue>{product.price} zł</StatValue>
+                  <StatLabel>Cena</StatLabel>
+                </div>
+                <div>
+                  <StatValue>{product.shop?.name || 'Nieznany sklep'}</StatValue>
+                  <StatLabel>Sklep</StatLabel>
+                </div>
+              </CardStats>
+              <ActionButton to={`/product/${product._id}`}>
+                📦 Zobacz produkt
+              </ActionButton>
+            </Card>
+          ))
+        ) : (
+          <EmptyState>
+            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📦</div>
+            <h3>Brak produktów w tej lokalizacji</h3>
+            <p>Dodaj pierwszy lokalny produkt!</p>
+            <ActionButton to="/product-create">
+              📦 Dodaj produkt
+            </ActionButton>
+          </EmptyState>
+        )}
+      </ContentGrid>
+    </div>
+  );
+
+  const renderPosts = () => (
+    <div>
+      <ContentGrid>
+        {data.posts.length > 0 ? (
+          data.posts.map(post => (
+            <Card key={post._id}>
+              <CardHeader>
+                <CardIcon>💬</CardIcon>
+                <CardTitle>{post.author?.username || 'Anonim'}</CardTitle>
+              </CardHeader>
+              <CardDescription>{post.content}</CardDescription>
+              <CardStats>
+                <div>
+                  <StatValue>{post.likes?.length || 0}</StatValue>
+                  <StatLabel>Polubień</StatLabel>
+                </div>
+                <div>
+                  <StatValue>{post.comments?.length || 0}</StatValue>
+                  <StatLabel>Komentarzy</StatLabel>
+                </div>
+              </CardStats>
+              <ActionButton to={`/post/${post._id}`}>
+                💬 Zobacz post
+              </ActionButton>
+            </Card>
+          ))
+        ) : (
+          <EmptyState>
+            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>💬</div>
+            <h3>Brak postów w tej lokalizacji</h3>
+            <p>Bądź pierwszym, który napisze post!</p>
+            <ActionButton to="/post/create">
+              💬 Napisz post
+            </ActionButton>
+          </EmptyState>
+        )}
+      </ContentGrid>
+    </div>
+  );
+
+  if (!location) return null;
+
+  return (
+    <Container>
+      <Header>
+        <Title>📍 {location.name}</Title>
+        <CloseButton onClick={onClose}>✕ Zamknij</CloseButton>
+      </Header>
+
+      {error && <ErrorMessage>{error}</ErrorMessage>}
+
+      <TabsContainer>
+        <Tab 
+          active={activeTab === 'overview'} 
+          onClick={() => setActiveTab('overview')}
+        >
+          📊 Przegląd
+        </Tab>
+        <Tab 
+          active={activeTab === 'shops'} 
+          onClick={() => setActiveTab('shops')}
+        >
+          🏪 Sklepy ({data.shops.length})
+        </Tab>
+        <Tab 
+          active={activeTab === 'products'} 
+          onClick={() => setActiveTab('products')}
+        >
+          📦 Produkty ({data.products.length})
+        </Tab>
+        <Tab 
+          active={activeTab === 'posts'} 
+          onClick={() => setActiveTab('posts')}
+        >
+          💬 Wiadomości ({data.posts.length})
+        </Tab>
+      </TabsContainer>
+
+      {loading ? (
+        <LoadingSpinner>Ładowanie danych lokalizacji...</LoadingSpinner>
+      ) : (
+        <>
+          {activeTab === 'overview' && renderOverview()}
+          {activeTab === 'shops' && renderShops()}
+          {activeTab === 'products' && renderProducts()}
+          {activeTab === 'posts' && renderPosts()}
+        </>
+      )}
+    </Container>
+  );
+} 

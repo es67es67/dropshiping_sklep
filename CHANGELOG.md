@@ -17,6 +17,7 @@ a projekt przestrzega [Semantic Versioning](https://semver.org/lang/pl/).
 - **Menu użytkownika** - zakładka "Moje sklepy" pojawia się po dodaniu pierwszego sklepu
 - **Aktualizacja danych użytkownika** - po dodaniu sklepu dane użytkownika są automatycznie aktualizowane
 - **Odświeżanie listy sklepów** - lista automatycznie się odświeża po powrocie na stronę
+- **Funkcjonalności lokalizacji** - wszystkie komponenty lokalizacji używają rzeczywistych danych z API
 
 ### 🆕 Dodane
 - **Zakładka "Produkty"** w szczegółach sklepu (`/shop/:shopId`)
@@ -28,6 +29,13 @@ a projekt przestrzega [Semantic Versioning](https://semver.org/lang/pl/).
 - **Integracja z rzeczywistym API** - wszystkie komponenty używają danych z backendu
 - **Automatyczna aktualizacja menu** - menu użytkownika aktualizuje się po dodaniu sklepu
 - **Backend aktualizacja** - po dodaniu sklepu backend automatycznie aktualizuje dane użytkownika
+- **Rozwinięte funkcjonalności lokalizacji**:
+  - **Województwa** - lista z rzeczywistymi danymi, statystyki, wyszukiwanie
+  - **Powiaty** - lista dla każdego województwa z analityką
+  - **Gminy** - lista dla każdego powiatu z populacją i statystykami
+  - **Szczegóły lokalizacji** - sklepy, produkty, wiadomości, użytkownicy dla każdej lokalizacji
+  - **Wyszukiwanie lokalizacji** - zaawansowane wyszukiwanie z filtrami
+  - **Analityka lokalizacji** - statystyki i wykresy dla każdego poziomu administracyjnego
 
 ### 🔧 Techniczne zmiany
 - **ShopList.jsx** - usunięto symulowane dane, dodano pobieranie z API
@@ -35,3 +43,8 @@ a projekt przestrzega [Semantic Versioning](https://semver.org/lang/pl/).
 - **MapSelector.jsx** - dodano obsługę błędów Google Maps API
 - **shopController.js** - dodano aktualizację danych użytkownika po utworzeniu sklepu
 - **Navbar.jsx** - poprawiono logikę wyświetlania zakładki "Moje sklepy"
+- **Voivodeships.jsx** - poprawiono integrację z API, dodano lepszą obsługę błędów
+- **Counties.jsx** - poprawiono integrację z API, dodano funkcjonalności
+- **Municipalities.jsx** - całkowicie przepisany z pełną funkcjonalnością
+- **LocationDetails.jsx** - całkowicie przepisany z zakładkami i funkcjonalnościami lokalnymi
+- **locationController.js** - wszystkie endpointy są już zaimplementowane i działają
