@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -46,7 +47,7 @@ const Title = styled.h1`
   }
 `;
 
-const AddButton = styled.button`
+const AddButton = styled(Link)`
   background: ${props => props.theme.gradient};
   color: white;
   border: none;
@@ -58,6 +59,7 @@ const AddButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  text-decoration: none;
   
   &:hover {
     background: ${props => props.theme.gradientHover};
@@ -390,7 +392,7 @@ export default function ProductList() {
     <Container>
       <Header>
         <Title>Produkty</Title>
-        <AddButton>
+        <AddButton to="/product-create">
           ➕ Dodaj produkt
         </AddButton>
       </Header>

@@ -159,7 +159,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/products" element={<ProductList />} />
                 <Route path="/shops" element={<ShopList />} />
-                <Route path="/shop/:shopId" element={<ShopDetails />} />
+                <Route path="/shop/:shopId" element={<ShopDetails theme={currentTheme} />} />
                 <Route path="/messages" element={<MessagingSystem />} />
                 <Route path="/payment" element={<PaymentSystem />} />
                 <Route path="/location" element={<LocationSelector />} />
@@ -204,7 +204,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/products" element={<ProductList />} />
                 <Route path="/shops" element={<ShopList />} />
-                <Route path="/shop/:shopId" element={<ShopDetails />} />
+                <Route path="/shop/:shopId" element={<ShopDetails theme={currentTheme} />} />
                 <Route path="/messages" element={<MessagingSystem />} />
                 <Route path="/payment" element={<PaymentSystem />} />
                 <Route path="/location" element={<LocationSelector />} />
@@ -249,7 +249,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/products" element={<ProductList />} />
                 <Route path="/shops" element={<ShopList />} />
-                <Route path="/shop/:shopId" element={<ShopDetails />} />
+                <Route path="/shop/:shopId" element={<ShopDetails theme={currentTheme} />} />
                 <Route path="/messages" element={<MessagingSystem />} />
                 <Route path="/payment" element={<PaymentSystem />} />
                 <Route path="/location" element={<LocationSelector />} />

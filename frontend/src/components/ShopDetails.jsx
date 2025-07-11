@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
+import ShopProducts from './ShopProducts';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -347,10 +348,45 @@ const StatusBadge = styled.div`
   }
 `;
 
-export default function ShopDetails() {
+const TabsContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid ${props => props.theme.border};
+`;
+
+const Tab = styled.button`
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: ${props => props.theme.textSecondary};
+  background: ${props => props.theme.surface};
+  
+  &:hover {
+    color: ${props => props.theme.primary};
+  }
+  
+  ${props => props.active && `
+    border-bottom-color: ${props.theme.primary};
+    color: ${props.theme.primary};
+    background: ${props.theme.background};
+  `}
+  
+  @media (max-width: 480px) {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.9rem;
+  }
+`;
+
+export default function ShopDetails({ theme }) {
   const { shopId } = useParams();
   const [shop, setShop] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('details');
 
   // Symulowane dane sklepu
   const mockShop = {
@@ -465,77 +501,98 @@ export default function ShopDetails() {
         </ActionButtons>
       </ShopHero>
 
-      <ShopDetailsContainer>
-        <DetailSection>
-          <SectionTitle>📞 Informacje kontaktowe</SectionTitle>
-          <DetailItem>
-            <DetailLabel>Adres:</DetailLabel>
-            <DetailValue>{shop.address}</DetailValue>
-          </DetailItem>
-          <DetailItem>
-            <DetailLabel>Telefon:</DetailLabel>
-            <DetailValue>{shop.phone}</DetailValue>
-          </DetailItem>
-          <DetailItem>
-            <DetailLabel>Email:</DetailLabel>
-            <DetailValue>{shop.email}</DetailValue>
-          </DetailItem>
-          <DetailItem>
-            <DetailLabel>Strona WWW:</DetailLabel>
-            <DetailValue>{shop.website}</DetailValue>
-          </DetailItem>
-        </DetailSection>
+      <TabsContainer>
+        <Tab 
+          active={activeTab === 'details'} 
+          onClick={() => setActiveTab('details')}
+        >
+          📋 Szczegóły
+        </Tab>
+        <Tab 
+          active={activeTab === 'products'} 
+          onClick={() => setActiveTab('products')}
+        >
+          📦 Produkty
+        </Tab>
+      </TabsContainer>
 
-        <DetailSection>
-          <SectionTitle>🏢 Informacje o firmie</SectionTitle>
-          <DetailItem>
-            <DetailLabel>Kategoria:</DetailLabel>
-            <DetailValue>{shop.category}</DetailValue>
-          </DetailItem>
-          <DetailItem>
-            <DetailLabel>Założony:</DetailLabel>
-            <DetailValue>{shop.founded}</DetailValue>
-          </DetailItem>
-          <DetailItem>
-            <DetailLabel>Pracowników:</DetailLabel>
-            <DetailValue>{shop.employees}</DetailValue>
-          </DetailItem>
-          <DetailItem>
-            <DetailLabel>Przychód:</DetailLabel>
-            <DetailValue>{shop.revenue}</DetailValue>
-          </DetailItem>
-        </DetailSection>
-
-        <DetailSection>
-          <SectionTitle>🚚 Dostawa</SectionTitle>
-          {shop.delivery.map((method, index) => (
-            <DetailItem key={index}>
-              <DetailLabel>Metoda {index + 1}:</DetailLabel>
-              <DetailValue>{method}</DetailValue>
+      {activeTab === 'details' && (
+        <ShopDetailsContainer>
+          <DetailSection>
+            <SectionTitle>📞 Informacje kontaktowe</SectionTitle>
+            <DetailItem>
+              <DetailLabel>Adres:</DetailLabel>
+              <DetailValue>{shop.address}</DetailValue>
             </DetailItem>
-          ))}
-        </DetailSection>
-
-        <DetailSection>
-          <SectionTitle>💳 Płatności</SectionTitle>
-          {shop.payment.map((method, index) => (
-            <DetailItem key={index}>
-              <DetailLabel>Metoda {index + 1}:</DetailLabel>
-              <DetailValue>{method}</DetailValue>
+            <DetailItem>
+              <DetailLabel>Telefon:</DetailLabel>
+              <DetailValue>{shop.phone}</DetailValue>
             </DetailItem>
-          ))}
-        </DetailSection>
-
-        <DetailSection>
-          <SectionTitle>🕒 Godziny otwarcia</SectionTitle>
-          {Object.entries(shop.hours).map(([day, hours]) => (
-            <DetailItem key={day}>
-              <DetailLabel>{day.charAt(0).toUpperCase() + day.slice(1)}:</DetailLabel>
-              <DetailValue>{hours}</DetailValue>
+            <DetailItem>
+              <DetailLabel>Email:</DetailLabel>
+              <DetailValue>{shop.email}</DetailValue>
             </DetailItem>
-          ))}
-        </DetailSection>
-      </ShopDetailsContainer>
+            <DetailItem>
+              <DetailLabel>Strona WWW:</DetailLabel>
+              <DetailValue>{shop.website}</DetailValue>
+            </DetailItem>
+          </DetailSection>
+
+          <DetailSection>
+            <SectionTitle>🏢 Informacje o firmie</SectionTitle>
+            <DetailItem>
+              <DetailLabel>Kategoria:</DetailLabel>
+              <DetailValue>{shop.category}</DetailValue>
+            </DetailItem>
+            <DetailItem>
+              <DetailLabel>Założony:</DetailLabel>
+              <DetailValue>{shop.founded}</DetailValue>
+            </DetailItem>
+            <DetailItem>
+              <DetailLabel>Pracowników:</DetailLabel>
+              <DetailValue>{shop.employees}</DetailValue>
+            </DetailItem>
+            <DetailItem>
+              <DetailLabel>Przychód:</DetailLabel>
+              <DetailValue>{shop.revenue}</DetailValue>
+            </DetailItem>
+          </DetailSection>
+
+          <DetailSection>
+            <SectionTitle>🚚 Dostawa</SectionTitle>
+            {shop.delivery.map((method, index) => (
+              <DetailItem key={index}>
+                <DetailLabel>Metoda {index + 1}:</DetailLabel>
+                <DetailValue>{method}</DetailValue>
+              </DetailItem>
+            ))}
+          </DetailSection>
+
+          <DetailSection>
+            <SectionTitle>💳 Płatności</SectionTitle>
+            {shop.payment.map((method, index) => (
+              <DetailItem key={index}>
+                <DetailLabel>Metoda {index + 1}:</DetailLabel>
+                <DetailValue>{method}</DetailValue>
+              </DetailItem>
+            ))}
+          </DetailSection>
+
+          <DetailSection>
+            <SectionTitle>🕒 Godziny otwarcia</SectionTitle>
+            {Object.entries(shop.hours).map(([day, hours]) => (
+              <DetailItem key={day}>
+                <DetailLabel>{day.charAt(0).toUpperCase() + day.slice(1)}:</DetailLabel>
+                <DetailValue>{hours}</DetailValue>
+              </DetailItem>
+            ))}
+          </DetailSection>
+        </ShopDetailsContainer>
+      )}
+
+      {activeTab === 'products' && (
+        <ShopProducts shopId={shopId} theme={theme} />
+      )}
     </Container>
   );
 } 

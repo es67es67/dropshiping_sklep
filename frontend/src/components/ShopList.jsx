@@ -47,7 +47,7 @@ const Title = styled.h1`
   }
 `;
 
-const AddButton = styled.button`
+const AddButton = styled(Link)`
   background: ${props => props.theme.gradient};
   color: white;
   border: none;
@@ -59,6 +59,7 @@ const AddButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  text-decoration: none;
   
   &:hover {
     background: ${props => props.theme.gradientHover};
@@ -491,7 +492,7 @@ export default function ShopList() {
     <Container>
       <Header>
         <Title>Sklepy</Title>
-        <AddButton>
+        <AddButton to="/shop-create">
           🏪 Dodaj sklep
         </AddButton>
       </Header>

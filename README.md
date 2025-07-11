@@ -17,6 +17,9 @@ Nowoczesna platforma społecznościowa z modułową architekturą, panelami admi
 - System zamówień i płatności
 - Recenzje i oceny
 - System powiadomień
+- **Zarządzanie sklepami** - Dodawanie, edycja, usuwanie sklepów
+- **Zarządzanie produktami** - Dodawanie produktów do sklepów, edycja, usuwanie
+- **Panel zarządzania** - Dedykowany panel dla właścicieli sklepów
 
 ### 📍 **Lokalizacje**
 - Baza danych lokalizacji (województwa, powiaty, gminy)
@@ -36,6 +39,33 @@ Nowoczesna platforma społecznościowa z modułową architekturą, panelami admi
 - Eksport danych (JSON, CSV, XML, Excel)
 - Statystyki systemu
 - Zarządzanie duplikatami
+
+## 📝 Najnowsze zmiany (v1.2.0)
+
+### ✅ Naprawione problemy
+- **Przycisk "Dodaj sklep"** - Teraz poprawnie przekierowuje do formularza dodawania sklepu
+- **Przycisk "Dodaj produkt"** - Poprawne przekierowanie do formularza dodawania produktu
+- **Zarządzanie produktami w sklepach** - Dodana zakładka "Produkty" w szczegółach sklepu
+- **Przekazywanie motywu** - Poprawione przekazywanie motywu do komponentów
+
+### 🆕 Nowe funkcjonalności
+- **Zakładka "Produkty"** w szczegółach sklepu z możliwością:
+  - Przeglądania produktów sklepu
+  - Dodawania nowych produktów
+  - Edycji istniejących produktów
+  - Usuwania produktów
+- **Modal dodawania/edycji produktów** z formularzem zawierającym:
+  - Nazwę produktu
+  - Opis
+  - Cenę
+  - Kategorię
+  - Markę
+  - Stan magazynowy
+
+### 🔧 Zmiany techniczne
+- Zaktualizowane komponenty: `ShopList`, `ProductList`, `ShopDetails`, `ShopProducts`
+- Poprawione routing w `App.js` z przekazywaniem motywu
+- Dodane styled components dla zakładek w `ShopDetails`
 
 ## 🛠️ Technologie
 
