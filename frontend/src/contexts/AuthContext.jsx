@@ -24,6 +24,8 @@ export const AuthProvider = ({ children }) => {
         
         if (isLoggedIn === 'true' && userData) {
           const parsedUser = JSON.parse(userData);
+          console.log('Restored user from localStorage:', parsedUser);
+          console.log('User ID from localStorage:', parsedUser._id);
           setUser(parsedUser);
           setIsAuthenticated(true);
         }
@@ -60,6 +62,9 @@ export const AuthProvider = ({ children }) => {
         isLoggedIn: true,
         loginTime: new Date().toISOString(),
       };
+      
+      console.log('Login successful, user data:', userData);
+      console.log('User ID:', userData._id);
       
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('isLoggedIn', 'true');
@@ -111,6 +116,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('token');
     setUser(null);
     setIsAuthenticated(false);
   };

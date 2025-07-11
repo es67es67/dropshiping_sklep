@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { ThemeProvider } from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
@@ -285,9 +286,32 @@ const SuccessMessage = styled.div`
   border: 1px solid ${props => props.theme.success}40;
 `;
 
-export default function LayoutCustomization() {
+export default function LayoutCustomization({ theme }) {
+  console.log('LayoutCustomization component rendered'); // Dodaj log renderowania
+  console.log('Theme prop:', theme); // Dodaj log theme
+  
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('portal');
+  
+    // Sprawdź czy użytkownik jest zalogowany
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    console.log('Current user from context:', user);
+    console.log('User from localStorage:', userData ? JSON.parse(userData) : null);
+    console.log('Token available:', !!token);
+    console.log('Theme prop:', theme);
+    
+    if (!user || !token) {
+      setMessage('Błąd: Nie jesteś zalogowany. Zaloguj się ponownie.');
+    } else if (!user._id) {
+      setMessage('Błąd: Brak ID użytkownika. Zaloguj się ponownie.');
+    }
+    
+    if (!theme) {
+      console.error('Theme prop is missing!');
+    }
+  }, [user, theme]);
   const [selectedLayout, setSelectedLayout] = useState('modern');
   const [selectedTheme, setSelectedTheme] = useState('default');
   const [selectedColors, setSelectedColors] = useState({
@@ -385,9 +409,24 @@ export default function LayoutCustomization() {
   ];
 
   const handleSaveSettings = async () => {
+    console.log('handleSaveSettings called!'); // Dodaj ten log na początku
+    alert('Przycisk działa!'); // Dodaj alert do testu
+    
     try {
       const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setMessage('Błąd: Nie jesteś zalogowany. Zaloguj się ponownie.');
+        setTimeout(() => setMessage(''), 5000);
+        return;
+      }
+      
+      if (!user || !user._id) {
+        setMessage('Błąd: Brak ID użytkownika. Zaloguj się ponownie.');
+        setTimeout(() => setMessage(''), 5000);
+        return;
+      }
       
       const settings = {
         layout: selectedLayout,
@@ -395,6 +434,12 @@ export default function LayoutCustomization() {
         colors: selectedColors,
         type: activeTab // 'portal' lub 'shop'
       };
+
+      console.log('Wysyłanie ustawień:', settings);
+      console.log('API URL:', apiUrl);
+      console.log('Token:', token ? 'Dostępny' : 'Brak');
+      console.log('User from context:', user);
+      console.log('User ID from context:', user?._id);
 
       const response = await fetch(`${apiUrl}/api/users/layout-settings`, {
         method: 'POST',
@@ -405,13 +450,21 @@ export default function LayoutCustomization() {
         body: JSON.stringify(settings)
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
       if (response.ok) {
+        const result = await response.json();
+        console.log('Response data:', result);
         setMessage('Ustawienia zostały zapisane pomyślnie!');
         setTimeout(() => setMessage(''), 3000);
       } else {
-        throw new Error('Nie udało się zapisać ustawień');
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(errorData.error || 'Nie udało się zapisać ustawień');
       }
     } catch (err) {
+      console.error('Save settings error:', err);
       setMessage('Błąd podczas zapisywania ustawień: ' + err.message);
       setTimeout(() => setMessage(''), 5000);
     }
@@ -468,8 +521,9 @@ export default function LayoutCustomization() {
   };
 
   return (
-    <Container>
-      <Title>Dostosowywanie wyglądu</Title>
+    <ThemeProvider theme={theme || {}}>
+      <Container>
+        <Title>Dostosowywanie wyglądu</Title>
 
       {message && <SuccessMessage>{message}</SuccessMessage>}
 
@@ -553,6 +607,31 @@ export default function LayoutCustomization() {
           🔄 Resetuj
         </Button>
       </ButtonGroup>
-    </Container>
+      
+      {/* Dodaj prosty test */}
+      <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+        <button 
+          onClick={() => {
+            console.log('Test button clicked');
+            console.log('handleSaveSettings function:', handleSaveSettings);
+            console.log('handleSaveSettings type:', typeof handleSaveSettings);
+          }}
+          style={{ padding: '1rem', background: 'red', color: 'white', border: 'none', borderRadius: '8px' }}
+        >
+          TEST PRZYCISK
+        </button>
+      </div>
+      
+      {/* Dodaj prosty test */}
+      <div style={{ marginTop: '2rem', textAlign: 'center' }}>
+        <button 
+          onClick={() => console.log('Test button clicked')}
+          style={{ padding: '1rem', background: 'red', color: 'white', border: 'none', borderRadius: '8px' }}
+        >
+          TEST PRZYCISK
+        </button>
+              </div>
+      </Container>
+    </ThemeProvider>
   );
 } 

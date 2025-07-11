@@ -278,12 +278,24 @@ exports.list = async (req, res) => {
 // Zapisywanie ustawień layoutu
 exports.saveLayoutSettings = async (req, res) => {
   try {
+    console.log('saveLayoutSettings called');
+    console.log('Request body:', req.body);
+    console.log('User ID:', req.userId);
+    
     const { layout, theme, colors, type } = req.body;
+    
+    if (!layout || !theme || !colors || !type) {
+      console.log('Missing required fields:', { layout, theme, colors, type });
+      return res.status(400).json({ error: 'Brakuje wymaganych pól' });
+    }
     
     const user = await User.findById(req.userId);
     if (!user) {
+      console.log('User not found for ID:', req.userId);
       return res.status(404).json({ error: 'Użytkownik nie został znaleziony' });
     }
+    
+    console.log('User found:', user.username);
     
     // Inicjalizuj ustawienia jeśli nie istnieją
     if (!user.settings) {
@@ -302,7 +314,11 @@ exports.saveLayoutSettings = async (req, res) => {
       updatedAt: new Date()
     };
     
+    console.log('Settings to save:', user.settings.layouts[type]);
+    
     await user.save();
+    
+    console.log('Settings saved successfully');
     
     res.json({ 
       success: true, 
@@ -310,6 +326,7 @@ exports.saveLayoutSettings = async (req, res) => {
       settings: user.settings.layouts[type]
     });
   } catch (err) {
+    console.error('Error in saveLayoutSettings:', err);
     res.status(500).json({ error: err.message });
   }
 };
