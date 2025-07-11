@@ -5,6 +5,40 @@ Wszystkie istotne zmiany w projekcie będą dokumentowane w tym pliku.
 Format jest oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 a projekt przestrzega [Semantic Versioning](https://semver.org/lang/pl/).
 
+## [2025-01-11] - Rozwój eksportu lokalizacji
+
+### 📤 Eksport lokalizacji (LocationExport.jsx)
+- **Dodano integrację z API** - pobieranie województw i historii eksportów z backendu
+- **Dodano zakładki** - nowy eksport i historia eksportów
+- **Dodano dynamiczne województwa** - pobieranie z API zamiast statycznych opcji
+- **Dodano historię eksportów** - lista wszystkich eksportów użytkownika
+- **Dodano zaawansowane filtry** - liczba mieszkańców, status, typ lokalizacji
+- **Dodano nowe opcje eksportu** - statystyki, relacje między lokalizacjami
+- **Dodano statusy eksportów** - zakończony, w trakcie, nieudany
+- **Dodano obsługę błędów** - fallback do mock danych
+- **Dodano responsywność** - pełna obsługa urządzeń mobilnych
+
+### 🔧 Ulepszenia techniczne
+- **Dodano obsługę błędów API** - graceful fallback do mock danych
+- **Dodano loading states** - wskaźniki ładowania dla lepszego UX
+- **Dodano error handling** - komunikaty błędów dla użytkownika
+- **Dodano responsywność** - pełna obsługa urządzeń mobilnych
+- **Dodano integrację z AuthContext** - sprawdzanie autoryzacji
+- **Dodano dokumentację** - komentarze i opis funkcjonalności
+
+### 📱 Responsywność
+- **Dodano breakpointy** - obsługa tabletów i telefonów
+- **Dostosowano layout** - kolumny, padding, font-size
+- **Dodano touch-friendly** - większe przyciski na mobile
+- **Dostosowano nawigację** - menu mobilne i gesty
+
+### 🎨 UX/UI
+- **Dodano animacje** - hover effects, transitions
+- **Dodano ikony** - emoji i ikony dla lepszej identyfikacji
+- **Dodano kolory** - różne kolory dla różnych statusów
+- **Dodano loading states** - spinnery i placeholdery
+- **Dodano empty states** - komunikaty gdy brak danych
+
 ## [2025-01-11] - Rozwój panelu administracyjnego
 
 ### ⚙️ Panel administracyjny (AdminPanel.jsx)
