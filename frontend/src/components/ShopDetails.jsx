@@ -195,7 +195,7 @@ const StatLabel = styled.div`
   }
 `;
 
-const ShopDetails = styled.div`
+const ShopDetailsContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
@@ -465,7 +465,7 @@ export default function ShopDetails() {
         </ActionButtons>
       </ShopHero>
 
-      <ShopDetails>
+      <ShopDetailsContainer>
         <DetailSection>
           <SectionTitle>📞 Informacje kontaktowe</SectionTitle>
           <DetailItem>
@@ -535,7 +535,7 @@ export default function ShopDetails() {
             </DetailItem>
           ))}
         </DetailSection>
-      </ShopDetails>
+      </ShopDetailsContainer>
     </Container>
   );
 } 
