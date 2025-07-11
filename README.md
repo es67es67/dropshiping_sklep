@@ -147,7 +147,26 @@ PORT=5000
 
 # Environment
 NODE_ENV=development
+
+# Google Maps API (opcjonalne)
+REACT_APP_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
 ```
+
+### Google Maps API (Opcjonalne)
+Aplikacja używa Google Maps API do wyboru lokalizacji sklepów. Jeśli API nie jest skonfigurowane:
+
+1. **Funkcjonalność nadal działa** - użytkownicy mogą ręcznie wprowadzać adresy
+2. **Brak mapy** - wyświetli się komunikat o niedostępności Google Maps
+3. **Nie wpływa na dodawanie sklepów** - wszystkie inne funkcje działają normalnie
+
+#### Aby włączyć Google Maps:
+1. Utwórz projekt w [Google Cloud Console](https://console.cloud.google.com/)
+2. Włącz Maps JavaScript API i Geocoding API
+3. Utwórz klucz API
+4. Dodaj domeny do autoryzacji:
+   - `localhost` (dla rozwoju)
+   - `https://portal-frontend-ysqz.onrender.com` (dla produkcji)
+5. Dodaj klucz do zmiennej `REACT_APP_GOOGLE_MAPS_API_KEY`
 
 ### MongoDB Atlas
 1. Utwórz darmowe konto na [MongoDB Atlas](https://www.mongodb.com/atlas)

@@ -155,6 +155,10 @@ export default function MapSelector({
           initMap();
         }
       };
+      script.onerror = () => {
+        console.warn('Google Maps API nie jest dostępne. Używam trybu fallback.');
+        setError('Google Maps nie jest dostępne. Możesz ręcznie wprowadzić adres.');
+      };
       document.head.appendChild(script);
     }
   }, []);
@@ -162,49 +166,54 @@ export default function MapSelector({
   const initMap = () => {
     if (!mapRef.current) return;
 
-    const mapOptions = {
-      center: coordinates,
-      zoom: 13,
-      mapTypeId: window.google.maps.MapTypeId.ROADMAP,
-      styles: [
-        {
-          featureType: 'poi',
-          elementType: 'labels',
-          stylers: [{ visibility: 'off' }]
-        }
-      ]
-    };
+    try {
+      const mapOptions = {
+        center: coordinates,
+        zoom: 13,
+        mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      };
 
-    mapInstance.current = new window.google.maps.Map(mapRef.current, mapOptions);
+      mapInstance.current = new window.google.maps.Map(mapRef.current, mapOptions);
 
-    // Dodaj marker
-    markerRef.current = new window.google.maps.Marker({
-      position: coordinates,
-      map: mapInstance.current,
-      draggable: true,
-      title: 'Lokalizacja sklepu'
-    });
-
-    // Obsługa kliknięcia na mapę
-    mapInstance.current.addListener('click', (event) => {
-      const newPosition = event.latLng;
-      setCoordinates({
-        lat: newPosition.lat(),
-        lng: newPosition.lng()
+      // Dodaj marker
+      markerRef.current = new window.google.maps.Marker({
+        position: coordinates,
+        map: mapInstance.current,
+        draggable: true,
+        title: 'Lokalizacja sklepu'
       });
-      markerRef.current.setPosition(newPosition);
-      reverseGeocode(newPosition.lat(), newPosition.lng());
-    });
 
-    // Obsługa przeciągania markera
-    markerRef.current.addListener('dragend', (event) => {
-      const newPosition = event.latLng;
-      setCoordinates({
-        lat: newPosition.lat(),
-        lng: newPosition.lng()
+      // Obsługa kliknięcia na mapę
+      mapInstance.current.addListener('click', (event) => {
+        const newPosition = event.latLng;
+        setCoordinates({
+          lat: newPosition.lat(),
+          lng: newPosition.lng()
+        });
+        markerRef.current.setPosition(newPosition);
+        reverseGeocode(newPosition.lat(), newPosition.lng());
       });
-      reverseGeocode(newPosition.lat(), newPosition.lng());
-    });
+
+      // Obsługa przeciągania markera
+      markerRef.current.addListener('dragend', (event) => {
+        const newPosition = event.latLng;
+        setCoordinates({
+          lat: newPosition.lat(),
+          lng: newPosition.lng()
+        });
+        reverseGeocode(newPosition.lat(), newPosition.lng());
+      });
+    } catch (error) {
+      console.error('Błąd podczas inicjalizacji mapy:', error);
+      setError('Nie udało się załadować mapy. Możesz ręcznie wprowadzić adres.');
+    }
   };
 
   const geocodeAddress = async () => {
@@ -218,6 +227,10 @@ export default function MapSelector({
     setSuccess('');
 
     try {
+      if (!window.google || !window.google.maps) {
+        throw new Error('Google Maps API nie jest dostępne');
+      }
+
       const geocoder = new window.google.maps.Geocoder();
       
       geocoder.geocode({ address: address }, (results, status) => {
@@ -241,17 +254,22 @@ export default function MapSelector({
           setSuccess('Lokalizacja została znaleziona!');
           onLocationSelect(newCoordinates, results[0].formatted_address);
         } else {
-          setError('Nie udało się znaleźć podanego adresu');
+          setError('Nie udało się znaleźć podanego adresu. Możesz ręcznie wprowadzić koordynaty.');
         }
       });
     } catch (err) {
       setIsLoading(false);
-      setError('Błąd podczas geokodowania adresu');
+      setError('Google Maps nie jest dostępne. Możesz ręcznie wprowadzić adres i koordynaty.');
+      console.warn('Błąd geokodowania:', err);
     }
   };
 
   const reverseGeocode = async (lat, lng) => {
     try {
+      if (!window.google || !window.google.maps) {
+        return; // Cichy fallback
+      }
+
       const geocoder = new window.google.maps.Geocoder();
       
       geocoder.geocode({ location: { lat, lng } }, (results, status) => {
@@ -262,7 +280,8 @@ export default function MapSelector({
         }
       });
     } catch (err) {
-      console.error('Błąd podczas reverse geokodowania:', err);
+      console.warn('Błąd podczas reverse geokodowania:', err);
+      // Cichy fallback - nie pokazujemy błędu użytkownikowi
     }
   };
 
@@ -311,6 +330,25 @@ export default function MapSelector({
 
   return (
     <div>
+      {error && (
+        <div style={{ 
+          background: '#fef2f2', 
+          border: '1px solid #fecaca', 
+          color: '#dc2626', 
+          padding: '1rem', 
+          borderRadius: '8px', 
+          marginBottom: '1rem',
+          fontSize: '0.875rem'
+        }}>
+          <strong>⚠️ Uwaga:</strong> {error}
+          <br />
+          <small>
+            Jeśli Google Maps nie działa, możesz ręcznie wprowadzić adres w polach poniżej.
+            To nie wpłynie na funkcjonalność dodawania sklepu.
+          </small>
+        </div>
+      )}
+
       <form onSubmit={handleAddressSubmit}>
         <AddressInput
           type="text"
