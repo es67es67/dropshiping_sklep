@@ -403,6 +403,33 @@ exports.getAllShops = async (req, res) => {
   }
 };
 
+// Pobieranie wszystkich sklepów (włącznie z nieaktywnymi)
+exports.getAllShopsIncludingInactive = async (req, res) => {
+  try {
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+    
+    const shops = await Shop.find({})
+      .populate('owner', 'username firstName lastName avatar')
+      .populate('location', 'name')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Shop.countDocuments({});
+    
+    res.json({
+      shops,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      totalShops: total
+    });
+  } catch (err) {
+    console.error('Błąd podczas pobierania wszystkich sklepów (włącznie z nieaktywnymi):', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // Wyszukiwanie sklepów
 exports.searchShops = async (req, res) => {
   try {

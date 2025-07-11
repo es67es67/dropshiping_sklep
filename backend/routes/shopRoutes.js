@@ -11,6 +11,8 @@ router.get('/user', authMiddleware, shopController.getUserShops);
 router.get('/search', shopController.searchShops);
 // Route dla pobierania wszystkich sklepów (musi być przed /:id)
 router.get('/', shopController.getAllShops);
+// Route dla pobierania wszystkich sklepów (włącznie z nieaktywnymi)
+router.get('/all', shopController.getAllShopsIncludingInactive);
 router.get('/:id', shopController.getShop);
 router.put('/:id', authMiddleware, shopController.updateShop);
 router.delete('/:id', authMiddleware, shopController.deleteShop);

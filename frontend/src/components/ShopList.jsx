@@ -411,10 +411,11 @@ export default function ShopList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('all');
   const [status, setStatus] = useState('all');
+  const [showAllShops, setShowAllShops] = useState(false);
 
   useEffect(() => {
     fetchShops();
-  }, []);
+  }, [showAllShops]);
 
   // Dodaj odświeżanie przy powrocie na stronę
   useEffect(() => {
@@ -432,7 +433,10 @@ export default function ShopList() {
       const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`${apiUrl}/api/shops`, {
+      // Wybierz endpoint w zależności od filtra
+      const endpoint = showAllShops ? '/api/shops/all' : '/api/shops';
+      
+      const response = await fetch(`${apiUrl}${endpoint}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -523,6 +527,20 @@ export default function ShopList() {
           <option value="open">Otwarte</option>
           <option value="closed">Zamknięte</option>
         </Select>
+        <button 
+          onClick={() => setShowAllShops(!showAllShops)}
+          style={{
+            padding: '0.5rem 1rem',
+            background: showAllShops ? '#4CAF50' : '#2196F3',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontWeight: '600'
+          }}
+        >
+          {showAllShops ? '🔒 Tylko aktywne' : '🔓 Wszystkie sklepy'}
+        </button>
       </Filters>
 
       {filteredShops.length === 0 ? (
