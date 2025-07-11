@@ -110,6 +110,25 @@ exports.getProfile = async (req, res) => {
   }
 };
 
+// Pobieranie profilu zalogowanego użytkownika
+exports.getMyProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId)
+      .select('-password')
+      .populate('friends', 'username firstName lastName avatar isOnline')
+      .populate('followers', 'username firstName lastName avatar')
+      .populate('following', 'username firstName lastName avatar');
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Użytkownik nie został znaleziony' });
+    }
+    
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.updateProfile = async (req, res) => {
   try {
     const { 
@@ -253,5 +272,70 @@ exports.list = async (req, res) => {
     res.json(users);
   } catch (err) {
     res.status(500).json({ error: err.message || 'Wystąpił błąd podczas pobierania użytkowników' });
+  }
+};
+
+// Zapisywanie ustawień layoutu
+exports.saveLayoutSettings = async (req, res) => {
+  try {
+    const { layout, theme, colors, type } = req.body;
+    
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Użytkownik nie został znaleziony' });
+    }
+    
+    // Inicjalizuj ustawienia jeśli nie istnieją
+    if (!user.settings) {
+      user.settings = {};
+    }
+    
+    if (!user.settings.layouts) {
+      user.settings.layouts = {};
+    }
+    
+    // Zapisz ustawienia dla określonego typu (portal/shop)
+    user.settings.layouts[type] = {
+      layout,
+      theme,
+      colors,
+      updatedAt: new Date()
+    };
+    
+    await user.save();
+    
+    res.json({ 
+      success: true, 
+      message: 'Ustawienia zostały zapisane',
+      settings: user.settings.layouts[type]
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobieranie ustawień layoutu
+exports.getLayoutSettings = async (req, res) => {
+  try {
+    const { type } = req.params;
+    
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Użytkownik nie został znaleziony' });
+    }
+    
+    const settings = user.settings?.layouts?.[type] || {
+      layout: 'modern',
+      theme: 'default',
+      colors: {
+        primary: '#00D4AA',
+        secondary: '#8B5CF6',
+        accent: '#F59E0B'
+      }
+    };
+    
+    res.json(settings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

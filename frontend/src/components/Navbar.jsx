@@ -4,21 +4,33 @@ import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
 const Nav = styled.nav`
-  background: ${props => props.theme === 'dark' ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
-  backdrop-filter: blur(20px);
-  padding: 1rem 2rem;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  position: sticky;
+  background: ${props => {
+    if (props.layout === 'classic') {
+      return props.theme.surface;
+    }
+    return props.theme === 'dark' ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+  }};
+  backdrop-filter: ${props => props.layout === 'classic' ? 'none' : 'blur(20px)'};
+  padding: ${props => props.layout === 'compact' ? '0.5rem 1rem' : '1rem 2rem'};
+  display: ${props => props.layout === 'classic' ? 'flex' : 'flex'};
+  flex-direction: ${props => props.layout === 'classic' ? 'column' : 'row'};
+  align-items: ${props => props.layout === 'classic' ? 'stretch' : 'center'};
+  gap: ${props => props.layout === 'compact' ? '0.5rem' : '1.5rem'};
+  box-shadow: ${props => props.layout === 'classic' ? 'none' : '0 4px 20px rgba(0, 0, 0, 0.1)'};
+  position: ${props => props.layout === 'classic' ? 'static' : 'sticky'};
   top: 0;
   z-index: 1000;
-  border-bottom: 1px solid ${props => props.theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
+  border-bottom: ${props => props.layout === 'classic' ? 'none' : `1px solid ${props.theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`};
+  height: ${props => props.layout === 'classic' ? '100vh' : 'auto'};
+  width: ${props => props.layout === 'classic' ? '250px' : 'auto'};
   
   @media (max-width: 768px) {
     padding: 1rem;
     gap: 1rem;
+    flex-direction: row;
+    height: auto;
+    width: auto;
+    position: sticky;
   }
 `;
 
@@ -41,9 +53,11 @@ const Logo = styled(Link)`
 
 const NavLinks = styled.div`
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-left: 2rem;
+  align-items: ${props => props.layout === 'classic' ? 'stretch' : 'center'};
+  flex-direction: ${props => props.layout === 'classic' ? 'column' : 'row'};
+  gap: ${props => props.layout === 'compact' ? '0.5rem' : '1rem'};
+  margin-left: ${props => props.layout === 'classic' ? '0' : '2rem'};
+  flex: ${props => props.layout === 'classic' ? '1' : 'none'};
   
   @media (max-width: 768px) {
     display: ${props => props.isOpen ? 'flex' : 'none'};
@@ -58,6 +72,8 @@ const NavLinks = styled.div`
     gap: 0.5rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid ${props => props.theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
+    margin-left: 0;
+    flex: none;
   }
 `;
 
@@ -65,12 +81,14 @@ const NavLink = styled(Link)`
   color: ${props => props.theme.text};
   text-decoration: none;
   font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  padding: ${props => props.layout === 'compact' ? '0.25rem 0.5rem' : '0.5rem 1rem'};
+  border-radius: ${props => props.layout === 'compact' ? '4px' : '8px'};
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  width: ${props => props.layout === 'classic' ? '100%' : 'auto'};
+  justify-content: ${props => props.layout === 'classic' ? 'flex-start' : 'center'};
   
   &:hover {
     background: ${props => props.theme.primary}20;
@@ -251,7 +269,7 @@ const LogoutButton = styled.button`
   }
 `;
 
-export default function Navbar({ theme, toggleTheme }) {
+export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
   const { user, isAuthenticated, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -260,7 +278,7 @@ export default function Navbar({ theme, toggleTheme }) {
   };
 
   return (
-    <Nav theme={theme}>
+    <Nav theme={theme} layout={layout}>
       <Logo to="/" theme={theme}>
         🏪 Portal
       </Logo>
@@ -269,40 +287,52 @@ export default function Navbar({ theme, toggleTheme }) {
         {isMenuOpen ? '✕' : '☰'}
       </HamburgerButton>
       
-      <NavLinks isOpen={isMenuOpen} theme={theme}>
-        <NavLink to="/" theme={theme} onClick={() => setIsMenuOpen(false)}>
+              <NavLinks isOpen={isMenuOpen} theme={theme} layout={layout}>
+        <NavLink to="/" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🏠 Strona główna
         </NavLink>
-        <NavLink to="/products" theme={theme} onClick={() => setIsMenuOpen(false)}>
+        <NavLink to="/products" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           📦 Produkty
         </NavLink>
-        <NavLink to="/shops" theme={theme} onClick={() => setIsMenuOpen(false)}>
+        <NavLink to="/shops" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🏪 Sklepy
         </NavLink>
-        <NavLink to="/messages" theme={theme} onClick={() => setIsMenuOpen(false)}>
+        <NavLink to="/messages" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           💬 Wiadomości
         </NavLink>
-        <NavLink to="/gamification" theme={theme} onClick={() => setIsMenuOpen(false)}>
+        <NavLink to="/gamification" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🏆 Gamifikacja
         </NavLink>
-        <NavLink to="/notifications" theme={theme} onClick={() => setIsMenuOpen(false)}>
+        <NavLink to="/notifications" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🔔 Powiadomienia
         </NavLink>
         
+        {/* Zarządzanie sklepami - tylko dla właścicieli */}
+        {user?.shops && user.shops.length > 0 && (
+          <>
+            <NavLink to="/shop-management" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+              🏪 Zarządzaj sklepami
+            </NavLink>
+            <NavLink to="/product-management" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+              📦 Zarządzaj produktami
+            </NavLink>
+          </>
+        )}
+        
         {/* Lokalizacje */}
-        <NavLink to="/voivodeships" theme={theme} onClick={() => setIsMenuOpen(false)}>
+        <NavLink to="/voivodeships" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🏛️ Województwa
         </NavLink>
-        <NavLink to="/counties" theme={theme} onClick={() => setIsMenuOpen(false)}>
+        <NavLink to="/counties" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🏘️ Powiaty
         </NavLink>
-        <NavLink to="/municipalities" theme={theme} onClick={() => setIsMenuOpen(false)}>
+        <NavLink to="/municipalities" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🏙️ Gminy
         </NavLink>
         
         {/* Admin Panel */}
         {user?.role === 'admin' && (
-          <NavLink to="/admin" theme={theme} onClick={() => setIsMenuOpen(false)}>
+          <NavLink to="/admin" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
             ⚙️ Panel Admina
           </NavLink>
         )}
@@ -330,6 +360,12 @@ export default function Navbar({ theme, toggleTheme }) {
               <UserLevel theme={theme}>Poziom {user?.level || 1}</UserLevel>
             </UserDetails>
           </UserInfo>
+          <NavLink to="/profile" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+            👤 Mój profil
+          </NavLink>
+          <NavLink to="/layout-customization" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+            🎨 Dostosuj wygląd
+          </NavLink>
           <LogoutButton onClick={logout} theme={theme}>
             🚪 Wyloguj
           </LogoutButton>

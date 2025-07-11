@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
   max-width: 1000px;
@@ -310,6 +311,43 @@ const Input = styled.input`
   }
 `;
 
+const TextArea = styled.textarea`
+  padding: 1rem;
+  border: 2px solid ${props => props.theme.border};
+  border-radius: 12px;
+  font-size: 1rem;
+  background: ${props => props.theme.background};
+  color: ${props => props.theme.text};
+  transition: all 0.2s ease;
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+  
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.primary};
+    box-shadow: 0 0 0 3px ${props => props.theme.primary}20;
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+    min-height: 100px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    min-height: 80px;
+  }
+`;
+
 const Button = styled.button`
   padding: 1rem 2rem;
   background: ${props => props.theme.gradient};
@@ -461,21 +499,23 @@ const SecurityValue = styled.div`
 `;
 
 export default function Profile() {
+  const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState('personal');
   const [userData, setUserData] = useState({
-    firstName: 'Jan',
-    lastName: 'Kowalski',
-    email: 'jan.kowalski@example.com',
-    phone: '+48 123 456 789',
-    address: 'ul. Przykładowa 123',
-    city: 'Warszawa',
-    postalCode: '00-001',
-    dateOfBirth: '1990-01-01'
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    bio: '',
+    location: '',
+    interests: []
   });
   
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   // Symulowane dane zamówień
   const mockOrders = [
@@ -503,12 +543,46 @@ export default function Profile() {
   ];
 
   useEffect(() => {
-    // Symulacja ładowania danych
-    setTimeout(() => {
-      setOrders(mockOrders);
+    if (isAuthenticated && user) {
+      fetchUserProfile();
+    }
+  }, [isAuthenticated, user]);
+
+  const fetchUserProfile = async () => {
+    try {
+      setLoading(true);
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/users/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Nie udało się pobrać profilu użytkownika');
+      }
+
+      const profileData = await response.json();
+      
+      setUserData({
+        firstName: profileData.firstName || '',
+        lastName: profileData.lastName || '',
+        email: profileData.email || '',
+        phone: profileData.phone || '',
+        bio: profileData.bio || '',
+        location: profileData.location || '',
+        interests: profileData.interests || []
+      });
+      
       setLoading(false);
-    }, 1000);
-  }, []);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -518,24 +592,37 @@ export default function Profile() {
     });
   };
 
-  const handleSave = () => {
-    setIsEditing(false);
-    alert('Dane zostały zaktualizowane!');
+  const handleSave = async () => {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/users/profile`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Nie udało się zaktualizować profilu');
+      }
+
+      setIsEditing(false);
+      setSuccess('Profil został zaktualizowany pomyślnie!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.message);
+      setTimeout(() => setError(''), 5000);
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    // Reset to original data
-    setUserData({
-      firstName: 'Jan',
-      lastName: 'Kowalski',
-      email: 'jan.kowalski@example.com',
-      phone: '+48 123 456 789',
-      address: 'ul. Przykładowa 123',
-      city: 'Warszawa',
-      postalCode: '00-001',
-      dateOfBirth: '1990-01-01'
-    });
+    fetchUserProfile(); // Pobierz oryginalne dane
   };
 
   const renderPersonalInfo = () => (
@@ -549,6 +636,7 @@ export default function Profile() {
             value={userData.firstName}
             onChange={handleInputChange}
             disabled={!isEditing}
+            placeholder="Wprowadź imię"
           />
         </FormRow>
         
@@ -560,6 +648,7 @@ export default function Profile() {
             value={userData.lastName}
             onChange={handleInputChange}
             disabled={!isEditing}
+            placeholder="Wprowadź nazwisko"
           />
         </FormRow>
         
@@ -571,6 +660,7 @@ export default function Profile() {
             value={userData.email}
             onChange={handleInputChange}
             disabled={!isEditing}
+            placeholder="Wprowadź email"
           />
         </FormRow>
         
@@ -582,55 +672,33 @@ export default function Profile() {
             value={userData.phone}
             onChange={handleInputChange}
             disabled={!isEditing}
-          />
-        </FormRow>
-        
-        <FormRow>
-          <Label>Data urodzenia</Label>
-          <Input
-            type="date"
-            name="dateOfBirth"
-            value={userData.dateOfBirth}
-            onChange={handleInputChange}
-            disabled={!isEditing}
+            placeholder="Wprowadź telefon"
           />
         </FormRow>
       </FormGrid>
       
       <FormRow>
-        <Label>Adres</Label>
-        <Input
-          type="text"
-          name="address"
-          value={userData.address}
+        <Label>O mnie</Label>
+        <TextArea
+          name="bio"
+          value={userData.bio}
           onChange={handleInputChange}
           disabled={!isEditing}
+          placeholder="Napisz coś o sobie..."
         />
       </FormRow>
       
-      <FormGrid>
-        <FormRow>
-          <Label>Miasto</Label>
-          <Input
-            type="text"
-            name="city"
-            value={userData.city}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-          />
-        </FormRow>
-        
-        <FormRow>
-          <Label>Kod pocztowy</Label>
-          <Input
-            type="text"
-            name="postalCode"
-            value={userData.postalCode}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-          />
-        </FormRow>
-      </FormGrid>
+      <FormRow>
+        <Label>Lokalizacja</Label>
+        <Input
+          type="text"
+          name="location"
+          value={userData.location}
+          onChange={handleInputChange}
+          disabled={!isEditing}
+          placeholder="Wprowadź lokalizację"
+        />
+      </FormRow>
       
       {isEditing ? (
         <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
@@ -709,9 +777,58 @@ export default function Profile() {
     );
   }
 
+  if (!isAuthenticated) {
+    return (
+      <Container>
+        <div style={{ textAlign: 'center', padding: '4rem' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔒</div>
+          <h2>Zaloguj się</h2>
+          <p>Aby zobaczyć swój profil, musisz się zalogować.</p>
+        </div>
+      </Container>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Container>
+        <div style={{ textAlign: 'center', padding: '4rem' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
+          <p>Ładowanie profilu...</p>
+        </div>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <Title>Profil użytkownika</Title>
+      
+      {error && (
+        <div style={{ 
+          background: '#FEF2F2', 
+          color: '#DC2626', 
+          padding: '1rem', 
+          borderRadius: '8px', 
+          marginBottom: '1rem',
+          border: '1px solid #FECACA'
+        }}>
+          {error}
+        </div>
+      )}
+      
+      {success && (
+        <div style={{ 
+          background: '#F0FDF4', 
+          color: '#16A34A', 
+          padding: '1rem', 
+          borderRadius: '8px', 
+          marginBottom: '1rem',
+          border: '1px solid #BBF7D0'
+        }}>
+          {success}
+        </div>
+      )}
       
       <ProfileGrid>
         <Sidebar>

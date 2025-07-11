@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import MapSelector from './MapSelector';
 
 const Container = styled.div`
   max-width: 800px;
@@ -265,6 +266,7 @@ export default function ShopCreate() {
     deliveryOptions: [],
     paymentMethods: []
   });
+  const [coordinates, setCoordinates] = useState(null);
   
   const [logo, setLogo] = useState(null);
   const [errors, setErrors] = useState({});
@@ -312,6 +314,17 @@ export default function ShopCreate() {
         ...errors,
         [name]: ''
       });
+    }
+  };
+
+  const handleLocationSelect = (coords, address) => {
+    setCoordinates(coords);
+    // Automatycznie wypełnij adres z mapy
+    if (address) {
+      setFormData(prev => ({
+        ...prev,
+        address: address
+      }));
     }
   };
 
@@ -368,10 +381,52 @@ export default function ShopCreate() {
     
     setIsSubmitting(true);
     
-    // Symulacja wysyłania danych
-    setTimeout(() => {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      // Przygotuj dane do wysłania
+      const shopData = {
+        name: formData.name,
+        description: formData.description,
+        categories: [formData.category],
+        address: {
+          street: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode
+        },
+        location: formData.city, // Użyj miasta jako lokalizacji
+        coordinates: coordinates, // Dodaj koordynaty z mapy
+        phone: formData.phone,
+        email: formData.email,
+        website: formData.website,
+        openingHours: formData.openingHours,
+        deliveryOptions: formData.deliveryOptions.map(option => ({
+          type: option,
+          description: `Dostawa ${option}`
+        })),
+        paymentMethods: formData.paymentMethods
+      };
+
+      const response = await fetch(`${apiUrl}/api/shops`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(shopData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Nie udało się utworzyć sklepu');
+      }
+
+      const result = await response.json();
+      
       setIsSubmitting(false);
       alert('Sklep został dodany pomyślnie!');
+      
       // Reset form
       setFormData({
         name: '',
@@ -388,7 +443,14 @@ export default function ShopCreate() {
         paymentMethods: []
       });
       setLogo(null);
-    }, 2000);
+      
+      // Przekieruj do zarządzania sklepami
+      window.location.href = '/shop-management';
+      
+    } catch (error) {
+      setIsSubmitting(false);
+      alert('Błąd podczas tworzenia sklepu: ' + error.message);
+    }
   };
 
   const handleReset = () => {
@@ -461,7 +523,17 @@ export default function ShopCreate() {
         </FormSection>
 
         <FormSection>
-          <SectionTitle>📍 Dane kontaktowe</SectionTitle>
+          <SectionTitle>📍 Lokalizacja i dane kontaktowe</SectionTitle>
+          
+          <FormRow>
+            <Label>Wybierz lokalizację na mapie *</Label>
+            <MapSelector 
+              onLocationSelect={handleLocationSelect}
+              initialAddress={formData.address}
+              theme={theme}
+            />
+          </FormRow>
+          
           <FormGrid>
             <FormRow>
               <Label>Adres *</Label>

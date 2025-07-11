@@ -90,6 +90,32 @@ const userSchema = new mongoose.Schema({
     shopsCount: { type: Number, default: 0 },
     totalLikes: { type: Number, default: 0 },
     totalViews: { type: Number, default: 0 }
+  },
+  
+  // Ustawienia layoutu i motywów
+  settings: {
+    layouts: {
+      portal: {
+        layout: { type: String, default: 'modern' },
+        theme: { type: String, default: 'default' },
+        colors: {
+          primary: { type: String, default: '#00D4AA' },
+          secondary: { type: String, default: '#8B5CF6' },
+          accent: { type: String, default: '#F59E0B' }
+        },
+        updatedAt: { type: Date, default: Date.now }
+      },
+      shop: {
+        layout: { type: String, default: 'modern' },
+        theme: { type: String, default: 'default' },
+        colors: {
+          primary: { type: String, default: '#00D4AA' },
+          secondary: { type: String, default: '#8B5CF6' },
+          accent: { type: String, default: '#F59E0B' }
+        },
+        updatedAt: { type: Date, default: Date.now }
+      }
+    }
   }
 }, { timestamps: true });
 
