@@ -385,6 +385,10 @@ export default function ShopCreate({ theme }) {
       const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
+      console.log('Tworzenie sklepu...');
+      console.log('API URL:', apiUrl);
+      console.log('Token available:', !!token);
+      
       // Przygotuj dane do wysłania
       const shopData = {
         name: formData.name,
@@ -403,10 +407,13 @@ export default function ShopCreate({ theme }) {
         openingHours: formData.openingHours,
         deliveryOptions: formData.deliveryOptions.map(option => ({
           type: option,
-          description: `Dostawa ${option}`
+          description: `Dostawa ${option}`,
+          cost: 0
         })),
         paymentMethods: formData.paymentMethods
       };
+
+      console.log('Dane sklepu:', shopData);
 
       const response = await fetch(`${apiUrl}/api/shops`, {
         method: 'POST',
@@ -417,15 +424,20 @@ export default function ShopCreate({ theme }) {
         body: JSON.stringify(shopData)
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Error response:', errorData);
         throw new Error(errorData.error || 'Nie udało się utworzyć sklepu');
       }
 
       const result = await response.json();
+      console.log('Sklep utworzony:', result);
       
       setIsSubmitting(false);
-      alert('Sklep został dodany pomyślnie!');
+      alert('✅ Sklep został dodany pomyślnie!');
       
       // Reset form
       setFormData({
@@ -443,13 +455,15 @@ export default function ShopCreate({ theme }) {
         paymentMethods: []
       });
       setLogo(null);
+      setCoordinates(null);
       
       // Przekieruj do zarządzania sklepami
       window.location.href = '/shop-management';
       
     } catch (error) {
+      console.error('Błąd podczas tworzenia sklepu:', error);
       setIsSubmitting(false);
-      alert('Błąd podczas tworzenia sklepu: ' + error.message);
+      alert('❌ Błąd podczas tworzenia sklepu: ' + error.message);
     }
   };
 

@@ -33,6 +33,32 @@ Bug Report → Reproduce → Fix → Test → Deploy → Verify
 Critical Bug → Hotfix Branch → Emergency Deploy → Post-mortem
 ```
 
+### **4. Automatyczne commitowanie i push**
+```
+Code Changes → Auto Commit → Auto Push → CI/CD Pipeline → Deploy
+```
+
+**Automatyczne commitowanie:**
+- Każda zmiana kodu jest automatycznie commitowana
+- Commit message zawiera opis zmian i timestamp
+- Automatyczny push na GitHub po każdym commicie
+- Integracja z CI/CD pipeline
+
+**Commit message format:**
+```
+feat: dodano nową funkcjonalność sklepów
+fix: naprawiono błąd dodawania produktów
+docs: zaktualizowano dokumentację
+test: dodano testy Cypress dla sklepów
+```
+
+**Automatyczne akcje:**
+- ✅ Commit po każdej zmianie
+- ✅ Push na GitHub
+- ✅ Uruchomienie testów CI/CD
+- ✅ Deploy na staging/production
+- ✅ Powiadomienia zespołu
+
 ---
 
 ## 🧪 **System testów**
@@ -65,6 +91,23 @@ Critical Bug → Hotfix Branch → Emergency Deploy → Post-mortem
 - Build i deploy na Render
 - Code quality checks
 - Security scanning
+```
+
+### **Automatyczne Git workflow:**
+```bash
+# Automatyczne commitowanie po każdej zmianie
+git add .
+git commit -m "feat: $DESCRIPTION - $(date)"
+git push origin main
+
+# Automatyczne tworzenie branchy dla feature
+git checkout -b feature/$FEATURE_NAME
+git push -u origin feature/$FEATURE_NAME
+
+# Automatyczne merge po testach
+git checkout main
+git merge feature/$FEATURE_NAME
+git push origin main
 ```
 
 ### **Automatyczne raporty:**
@@ -126,6 +169,8 @@ Critical Bug → Hotfix Branch → Emergency Deploy → Post-mortem
 - [ ] Dokumentacja zaktualizowana
 - [ ] Backup bazy danych
 - [ ] Monitoring skonfigurowany
+- [ ] Automatyczny commit i push wykonany
+- [ ] GitHub Actions workflow uruchomiony
 
 ### **Po deployem:**
 - [ ] Health checks OK

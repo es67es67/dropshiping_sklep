@@ -487,14 +487,31 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
             </DropdownItem>
             
             {user?.shops && user.shops.length > 0 && (
-              <DropdownItem onClick={() => { 
-                window.location.href = '/shop-management'; 
-                closeUserDropdown(); 
-                setIsMenuOpen(false);
-              }}>
-                🏪 Moje sklepy
-              </DropdownItem>
+              <>
+                <DropdownItem onClick={() => { 
+                  window.location.href = '/shop-management'; 
+                  closeUserDropdown(); 
+                  setIsMenuOpen(false);
+                }}>
+                  🏪 Moje sklepy ({user.shops.length})
+                </DropdownItem>
+                <DropdownItem onClick={() => { 
+                  window.location.href = '/my-products'; 
+                  closeUserDropdown(); 
+                  setIsMenuOpen(false);
+                }}>
+                  📦 Moje produkty
+                </DropdownItem>
+              </>
             )}
+            
+            <DropdownItem onClick={() => { 
+              window.location.href = '/local-products'; 
+              closeUserDropdown(); 
+              setIsMenuOpen(false);
+            }}>
+              🏘️ Produkty lokalne
+            </DropdownItem>
             
             <DropdownItem onClick={() => { 
               window.location.href = '/settings'; 

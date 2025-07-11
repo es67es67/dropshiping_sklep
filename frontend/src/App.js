@@ -30,6 +30,8 @@ import LocationAnalytics from './pages/LocationAnalytics';
 import LocationImport from './pages/LocationImport';
 import LocationExport from './pages/LocationExport';
 import AdminPanel from './pages/AdminPanel';
+import LocalProducts from './pages/LocalProducts';
+import MyProducts from './pages/MyProducts';
 
 function App() {
   const [theme, setTheme] = useState('light');
@@ -180,6 +182,8 @@ function App() {
                 <Route path="/location-import" element={<LocationImport />} />
                 <Route path="/location-export" element={<LocationExport />} />
                 <Route path="/admin-panel" element={<AdminPanel />} />
+                <Route path="/local-products" element={<LocalProducts />} />
+                <Route path="/my-products" element={<MyProducts />} />
               </Routes>
             </div>
           </div>
@@ -223,6 +227,8 @@ function App() {
                 <Route path="/location-import" element={<LocationImport />} />
                 <Route path="/location-export" element={<LocationExport />} />
                 <Route path="/admin-panel" element={<AdminPanel />} />
+                <Route path="/local-products" element={<LocalProducts />} />
+                <Route path="/my-products" element={<MyProducts />} />
               </Routes>
             </div>
           </div>
@@ -266,6 +272,8 @@ function App() {
                 <Route path="/location-import" element={<LocationImport />} />
                 <Route path="/location-export" element={<LocationExport />} />
                 <Route path="/admin-panel" element={<AdminPanel />} />
+                <Route path="/local-products" element={<LocalProducts />} />
+                <Route path="/my-products" element={<MyProducts />} />
               </Routes>
             </div>
           </div>
