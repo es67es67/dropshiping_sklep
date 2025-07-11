@@ -521,9 +521,8 @@ export default function LayoutCustomization({ theme }) {
   };
 
   return (
-    <ThemeProvider theme={theme || {}}>
-      <Container>
-        <Title>Dostosowywanie wyglądu</Title>
+    <Container>
+      <Title>Dostosowywanie wyglądu</Title>
 
       {message && <SuccessMessage>{message}</SuccessMessage>}
 
@@ -632,6 +631,5 @@ export default function LayoutCustomization({ theme }) {
         </button>
               </div>
       </Container>
-    </ThemeProvider>
   );
 } 
