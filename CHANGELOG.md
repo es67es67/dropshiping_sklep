@@ -5,46 +5,138 @@ Wszystkie istotne zmiany w projekcie będą dokumentowane w tym pliku.
 Format jest oparty na [Keep a Changelog](https://keepachangelog.com/pl/1.0.0/),
 a projekt przestrzega [Semantic Versioning](https://semver.org/lang/pl/).
 
-## [1.2.0] - 2025-01-11
+## [2025-01-11] - Rozwój głównych stron aplikacji
 
-### ✅ Naprawione
-- **Przycisk "Dodaj sklep"** na liście sklepów - teraz poprawnie przekierowuje do `/shop-create`
-- **Przycisk "Dodaj produkt"** na liście produktów - poprawnie przekierowuje do `/product-create`
-- **Przekazywanie motywu** do komponentów `ShopDetails` i `ShopProducts`
-- **Routing** w `App.js` - dodane przekazywanie `theme` prop do `ShopDetails`
-- **Google Maps API** - dodana obsługa błędów i fallback gdy API nie jest dostępne
-- **Wyświetlanie sklepów** - ShopList teraz pobiera rzeczywiste dane z API zamiast symulowanych
-- **Menu użytkownika** - zakładka "Moje sklepy" pojawia się po dodaniu pierwszego sklepu
-- **Aktualizacja danych użytkownika** - po dodaniu sklepu dane użytkownika są automatycznie aktualizowane
-- **Odświeżanie listy sklepów** - lista automatycznie się odświeża po powrocie na stronę
-- **Funkcjonalności lokalizacji** - wszystkie komponenty lokalizacji używają rzeczywistych danych z API
+### 🏠 Strona główna (Home.jsx)
+- **Dodano dashboard z rzeczywistymi danymi** - integracja z API dla statystyk
+- **Dodano sekcję powitalną** - personalizowane powitanie użytkownika z jego statystykami
+- **Dodano karty funkcjonalności** - szybki dostęp do głównych modułów aplikacji
+- **Dodano statystyki użytkownika** - poziom, doświadczenie, liczba sklepów, aktywność
+- **Dodano obsługę błędów** - graceful fallback gdy API nie odpowiada
+- **Dodano responsywność** - pełna obsługa urządzeń mobilnych
 
-### 🆕 Dodane
-- **Zakładka "Produkty"** w szczegółach sklepu (`/shop/:shopId`)
-- **Modal dodawania/edycji produktów** z pełnym formularzem
-- **Zarządzanie produktami w sklepach** - możliwość dodawania, edycji i usuwania produktów
-- **Styled components** dla zakładek w `ShopDetails`
-- **Obsługa błędów Google Maps** - aplikacja działa nawet gdy Google Maps API nie jest dostępne
-- **Fallback dla map** - użytkownicy mogą ręcznie wprowadzać adresy
-- **Integracja z rzeczywistym API** - wszystkie komponenty używają danych z backendu
-- **Automatyczna aktualizacja menu** - menu użytkownika aktualizuje się po dodaniu sklepu
-- **Backend aktualizacja** - po dodaniu sklepu backend automatycznie aktualizuje dane użytkownika
-- **Rozwinięte funkcjonalności lokalizacji**:
-  - **Województwa** - lista z rzeczywistymi danymi, statystyki, wyszukiwanie
-  - **Powiaty** - lista dla każdego województwa z analityką
-  - **Gminy** - lista dla każdego powiatu z populacją i statystykami
-  - **Szczegóły lokalizacji** - sklepy, produkty, wiadomości, użytkownicy dla każdej lokalizacji
-  - **Wyszukiwanie lokalizacji** - zaawansowane wyszukiwanie z filtrami
-  - **Analityka lokalizacji** - statystyki i wykresy dla każdego poziomu administracyjnego
+### 📦 Lista produktów (ProductList.jsx)
+- **Dodano integrację z API** - pobieranie rzeczywistych produktów z backendu
+- **Dodano statystyki** - liczba produktów, sklepów, średnia cena
+- **Dodano zaawansowane filtrowanie** - kategorie, sortowanie, wyszukiwanie
+- **Dodano paginację** - obsługa dużych list produktów
+- **Dodano informacje o sklepach** - wyświetlanie właściciela produktu
+- **Dodano obsługę błędów** - fallback do mock danych
+- **Dodano responsywność** - pełna obsługa urządzeń mobilnych
 
-### 🔧 Techniczne zmiany
-- **ShopList.jsx** - usunięto symulowane dane, dodano pobieranie z API
-- **ShopCreate.jsx** - dodano aktualizację danych użytkownika po dodaniu sklepu
-- **MapSelector.jsx** - dodano obsługę błędów Google Maps API
-- **shopController.js** - dodano aktualizację danych użytkownika po utworzeniu sklepu
-- **Navbar.jsx** - poprawiono logikę wyświetlania zakładki "Moje sklepy"
-- **Voivodeships.jsx** - poprawiono integrację z API, dodano lepszą obsługę błędów
-- **Counties.jsx** - poprawiono integrację z API, dodano funkcjonalności
-- **Municipalities.jsx** - całkowicie przepisany z pełną funkcjonalnością
-- **LocationDetails.jsx** - całkowicie przepisany z zakładkami i funkcjonalnościami lokalnymi
-- **locationController.js** - wszystkie endpointy są już zaimplementowane i działają
+### 💬 System wiadomości (MessagingSystem.jsx)
+- **Dodano integrację z API** - pobieranie kontaktów i wiadomości z backendu
+- **Dodano obsługę grup** - zakładki dla czatów i grup
+- **Dodano wskaźniki online** - status aktywności użytkowników
+- **Dodano liczniki nieprzeczytanych** - badge z liczbą nowych wiadomości
+- **Dodano wyszukiwanie kontaktów** - filtrowanie listy kontaktów
+- **Dodano typy kontaktów** - rozróżnienie użytkowników i grup
+- **Dodano obsługę błędów** - fallback do mock danych
+- **Dodano responsywność** - pełna obsługa urządzeń mobilnych
+
+### 🔔 System powiadomień (Notifications.jsx)
+- **Dodano integrację z API** - pobieranie powiadomień z backendu
+- **Dodano statystyki** - liczba wszystkich, nieprzeczytanych, dzisiejszych
+- **Dodano nowe typy powiadomień** - zamówienia, płatności, osiągnięcia, system
+- **Dodano formatowanie czasu** - inteligentne wyświetlanie czasu względnego
+- **Dodano akcje powiadomień** - linki do szczegółów, oznaczanie jako przeczytane
+- **Dodano obsługę błędów** - fallback do mock danych
+- **Dodano responsywność** - pełna obsługa urządzeń mobilnych
+
+### 🔧 Ulepszenia techniczne
+- **Dodano obsługę błędów API** - graceful fallback do mock danych
+- **Dodano loading states** - wskaźniki ładowania dla lepszego UX
+- **Dodano error handling** - komunikaty błędów dla użytkownika
+- **Dodano responsywność** - pełna obsługa urządzeń mobilnych
+- **Dodano integrację z AuthContext** - sprawdzanie autoryzacji
+- **Dodano dokumentację** - komentarze i opis funkcjonalności
+
+### 📱 Responsywność
+- **Dodano breakpointy** - obsługa tabletów i telefonów
+- **Dostosowano layout** - kolumny, padding, font-size
+- **Dodano touch-friendly** - większe przyciski na mobile
+- **Dostosowano nawigację** - menu mobilne i gesty
+
+### 🎨 UX/UI
+- **Dodano animacje** - hover effects, transitions
+- **Dodano ikony** - emoji i ikony dla lepszej identyfikacji
+- **Dodano kolory** - różne kolory dla różnych typów
+- **Dodano loading states** - spinnery i placeholdery
+- **Dodano empty states** - komunikaty gdy brak danych
+
+## [2025-01-10] - Rozwój lokalizacji
+
+### 🏛️ Województwa (Voivodeships.jsx)
+- **Dodano integrację z API** - pobieranie rzeczywistych danych z backendu
+- **Dodano statystyki** - liczba powiatów, gmin, sklepów, produktów
+- **Dodano wyszukiwanie** - filtrowanie województw po nazwie
+- **Dodano sortowanie** - po nazwie, liczbie powiatów, liczbie sklepów
+- **Dodano karty województw** - informacje o każdym województwie
+- **Dodano nawigację** - linki do powiatów w każdym województwie
+- **Dodano obsługę błędów** - fallback do mock danych
+- **Dodano responsywność** - pełna obsługa urządzeń mobilnych
+
+### 🏘️ Powiaty (Counties.jsx)
+- **Dodano integrację z API** - pobieranie powiatów dla wybranego województwa
+- **Dodano statystyki** - liczba gmin, sklepów, produktów w powiecie
+- **Dodano wyszukiwanie** - filtrowanie powiatów po nazwie
+- **Dodano sortowanie** - po nazwie, liczbie gmin, liczbie sklepów
+- **Dodano karty powiatów** - informacje o każdym powiecie
+- **Dodano nawigację** - linki do gmin w każdym powiecie
+- **Dodano breadcrumb** - nawigacja do województwa
+- **Dodano obsługę błędów** - fallback do mock danych
+- **Dodano responsywność** - pełna obsługa urządzeń mobilnych
+
+### 🏘️ Gminy (Municipalities.jsx)
+- **Dodano integrację z API** - pobieranie gmin dla wybranego powiatu
+- **Dodano statystyki** - liczba sklepów, produktów, użytkowników w gminie
+- **Dodano wyszukiwanie** - filtrowanie gmin po nazwie
+- **Dodano sortowanie** - po nazwie, liczbie sklepów, liczbie produktów
+- **Dodano karty gmin** - informacje o każdej gminie
+- **Dodano modal szczegółów** - szczegółowe informacje o gminie
+- **Dodano breadcrumb** - nawigacja do powiatu i województwa
+- **Dodano obsługę błędów** - fallback do mock danych
+- **Dodano responsywność** - pełna obsługa urządzeń mobilnych
+
+### 📊 Komponent LocationDetails
+- **Dodano szczegółowe informacje** - dane o lokalizacji
+- **Dodano zakładki** - sklepy, produkty, posty, użytkownicy
+- **Dodano listy** - wyświetlanie powiązanych danych
+- **Dodano nawigację** - linki do szczegółów
+- **Dodano statystyki** - liczba elementów w każdej kategorii
+- **Dodano obsługę błędów** - komunikaty gdy brak danych
+- **Dodano responsywność** - pełna obsługa urządzeń mobilnych
+
+## [2025-01-09] - Naprawa sklepów
+
+### 🏪 Sklepy
+- **Naprawiono ShopList** - teraz pobiera rzeczywiste dane z API zamiast mock danych
+- **Naprawiono ShopCreate** - dodano aktualizację listy sklepów użytkownika po utworzeniu
+- **Naprawiono backend** - dodano dodawanie nowego sklepu do tablicy shops użytkownika
+- **Dodano odświeżanie** - automatyczne odświeżanie listy po powrocie na stronę
+- **Dodano obsługę błędów** - komunikaty gdy nie można pobrać sklepów
+
+### 🛒 Produkty
+- **Naprawiono przyciski** - "Dodaj sklep" i "Dodaj produkt" teraz używają React Router Link
+- **Dodano nawigację** - przyciski prowadzą do odpowiednich stron tworzenia
+- **Dodano ShopDetails** - zakładka "Produkty" do zarządzania produktami sklepu
+- **Dodano przekazywanie theme** - komponenty otrzymują aktualny motyw
+
+## [2025-01-08] - Naprawa Google Maps
+
+### 🗺️ MapSelector
+- **Dodano obsługę błędów Google Maps API** - graceful fallback gdy API nie działa
+- **Dodano manualne wprowadzanie adresu** - możliwość wpisania adresu bez mapy
+- **Dodano komunikaty błędów** - informacje o problemach z API
+- **Dodano walidację** - sprawdzanie poprawności wprowadzonych danych
+- **Dodano dokumentację** - opis problemu i rozwiązania
+
+## [2025-01-07] - Inicjalizacja projektu
+
+### 🚀 Podstawowa funkcjonalność
+- **Utworzono strukturę projektu** - frontend i backend
+- **Dodano autentykację** - logowanie i rejestracja
+- **Dodano system motywów** - jasny i ciemny motyw
+- **Dodano layout customization** - dostosowywanie wyglądu
+- **Dodano podstawowe komponenty** - navbar, routing, context
+- **Dodano dokumentację** - README, API docs, changelog

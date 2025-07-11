@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
 const Title = styled.h1`
@@ -16,6 +21,42 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+`;
+
+const StatsBar = styled.div`
+  display: flex;
+  justify-content: space-around;
+  background: ${props => props.theme.surface};
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: ${props => props.theme.shadow};
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+`;
+
+const StatItem = styled.div`
+  text-align: center;
+`;
+
+const StatValue = styled.div`
+  font-size: 2rem;
+  font-weight: 800;
+  color: ${props => props.theme.primary};
+  margin-bottom: 0.5rem;
+`;
+
+const StatLabel = styled.div`
+  font-size: 0.875rem;
+  color: ${props => props.theme.textSecondary};
 `;
 
 const Header = styled.div`
@@ -23,11 +64,22 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
 `;
 
 const FilterButtons = styled.div`
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
 `;
 
 const FilterButton = styled.button`
@@ -38,6 +90,7 @@ const FilterButton = styled.button`
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.875rem;
   
   &:hover {
     border-color: ${props => props.theme.primary};
@@ -45,7 +98,16 @@ const FilterButton = styled.button`
   }
 `;
 
-const MarkAllButton = styled.button`
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
+`;
+
+const ActionButton = styled.button`
   padding: 0.5rem 1rem;
   background: ${props => props.theme.surface};
   border: 2px solid ${props => props.theme.border};
@@ -53,6 +115,7 @@ const MarkAllButton = styled.button`
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.875rem;
   
   &:hover {
     background: ${props => props.theme.primary}10;
@@ -103,7 +166,11 @@ const NotificationIcon = styled.div`
   background: ${props => props.type === 'success' ? '#10B981' : 
                 props.type === 'warning' ? '#F59E0B' : 
                 props.type === 'error' ? '#EF4444' : 
-                props.type === 'info' ? '#3B82F6' : props.theme.primary};
+                props.type === 'info' ? '#3B82F6' : 
+                props.type === 'order' ? '#8B5CF6' :
+                props.type === 'payment' ? '#06B6D4' :
+                props.type === 'achievement' ? '#F59E0B' :
+                props.theme.primary};
   color: white;
 `;
 
@@ -131,9 +198,10 @@ const NotificationContent = styled.div`
 const NotificationActions = styled.div`
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 `;
 
-const ActionButton = styled.button`
+const NotificationButton = styled.button`
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 6px;
@@ -159,6 +227,15 @@ const ActionButton = styled.button`
       background: ${props => props.theme.border};
     }
   }
+  
+  &.danger {
+    background: #EF4444;
+    color: white;
+    
+    &:hover {
+      background: #DC2626;
+    }
+  }
 `;
 
 const EmptyState = styled.div`
@@ -181,76 +258,188 @@ const UnreadBadge = styled.div`
   margin-left: 0.5rem;
 `;
 
+const LoadingSpinner = styled.div`
+  text-align: center;
+  padding: 4rem 2rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
+const ErrorMessage = styled.div`
+  background: ${props => props.theme.error}20;
+  color: ${props => props.theme.error};
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+`;
+
+const formatTimeAgo = (date) => {
+  const now = new Date();
+  const diff = now - new Date(date);
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if (minutes < 1) return 'Przed chwilą';
+  if (minutes < 60) return `${minutes} min temu`;
+  if (hours < 24) return `${hours} godz. temu`;
+  if (days < 7) return `${days} dni temu`;
+  return new Date(date).toLocaleDateString('pl-PL');
+};
+
+const getNotificationIcon = (type) => {
+  const icons = {
+    success: '✅',
+    warning: '⚠️',
+    error: '❌',
+    info: 'ℹ️',
+    order: '📦',
+    payment: '💳',
+    achievement: '🏆',
+    message: '💬',
+    system: '⚙️'
+  };
+  return icons[type] || '📢';
+};
+
 export default function Notifications() {
+  const { isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
-
-  // Symulowane dane powiadomień
-  const mockNotifications = [
-    {
-      id: 1,
-      title: 'Zamówienie potwierdzone',
-      content: 'Twoje zamówienie #12345 zostało potwierdzone i jest w trakcie realizacji.',
-      type: 'success',
-      time: '2 minuty temu',
-      read: false,
-      icon: '✅'
-    },
-    {
-      id: 2,
-      title: 'Nowa promocja',
-      content: 'Sprawdź nasze nowe promocje! Rabat 20% na wszystkie produkty elektroniczne.',
-      type: 'info',
-      time: '1 godzinę temu',
-      read: false,
-      icon: '🎉'
-    },
-    {
-      id: 3,
-      title: 'Dostawa opóźniona',
-      content: 'Przepraszamy, dostawa zamówienia #12340 może być opóźniona o 1-2 dni.',
-      type: 'warning',
-      time: '3 godziny temu',
-      read: true,
-      icon: '⚠️'
-    },
-    {
-      id: 4,
-      title: 'Płatność nieudana',
-      content: 'Płatność za zamówienie #12338 nie została przetworzona. Sprawdź dane karty.',
-      type: 'error',
-      time: '1 dzień temu',
-      read: true,
-      icon: '❌'
-    },
-    {
-      id: 5,
-      title: 'Nowe osiągnięcie',
-      content: 'Gratulacje! Otrzymałeś odznakę "Wierny klient" za 50 zamówień.',
-      type: 'success',
-      time: '2 dni temu',
-      read: true,
-      icon: '🏆'
-    },
-    {
-      id: 6,
-      title: 'Aktualizacja systemu',
-      content: 'Portal został zaktualizowany. Sprawdź nowe funkcje!',
-      type: 'info',
-      time: '3 dni temu',
-      read: true,
-      icon: '🔄'
-    }
-  ];
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    total: 0,
+    unread: 0,
+    today: 0
+  });
 
   useEffect(() => {
-    // Symulacja ładowania danych
-    setTimeout(() => {
-      setNotifications(mockNotifications);
+    if (isAuthenticated) {
+      fetchNotifications();
+      fetchStats();
+    } else {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  }, [isAuthenticated]);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/notifications`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Nie udało się pobrać powiadomień');
+      }
+
+      const data = await response.json();
+      setNotifications(data.notifications || data || []);
+      
+    } catch (err) {
+      console.error('Błąd pobierania powiadomień:', err);
+      setError(err.message);
+      // Fallback do mock danych
+      setNotifications([
+        {
+          _id: '1',
+          title: 'Zamówienie potwierdzone',
+          content: 'Twoje zamówienie #12345 zostało potwierdzone i jest w trakcie realizacji.',
+          type: 'order',
+          createdAt: new Date(Date.now() - 120000).toISOString(),
+          read: false,
+          actionUrl: '/orders/12345'
+        },
+        {
+          _id: '2',
+          title: 'Nowa promocja',
+          content: 'Sprawdź nasze nowe promocje! Rabat 20% na wszystkie produkty elektroniczne.',
+          type: 'info',
+          createdAt: new Date(Date.now() - 3600000).toISOString(),
+          read: false,
+          actionUrl: '/promotions'
+        },
+        {
+          _id: '3',
+          title: 'Dostawa opóźniona',
+          content: 'Przepraszamy, dostawa zamówienia #12340 może być opóźniona o 1-2 dni.',
+          type: 'warning',
+          createdAt: new Date(Date.now() - 10800000).toISOString(),
+          read: true,
+          actionUrl: '/orders/12340'
+        },
+        {
+          _id: '4',
+          title: 'Płatność nieudana',
+          content: 'Płatność za zamówienie #12338 nie została przetworzona. Sprawdź dane karty.',
+          type: 'payment',
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          read: true,
+          actionUrl: '/payments'
+        },
+        {
+          _id: '5',
+          title: 'Nowe osiągnięcie',
+          content: 'Gratulacje! Otrzymałeś odznakę "Wierny klient" za 50 zamówień.',
+          type: 'achievement',
+          createdAt: new Date(Date.now() - 172800000).toISOString(),
+          read: true,
+          actionUrl: '/achievements'
+        },
+        {
+          _id: '6',
+          title: 'Aktualizacja systemu',
+          content: 'Portal został zaktualizowany. Sprawdź nowe funkcje!',
+          type: 'system',
+          createdAt: new Date(Date.now() - 259200000).toISOString(),
+          read: true,
+          actionUrl: '/changelog'
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/notifications/stats`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      } else {
+        // Symulacja statystyk
+        setStats({
+          total: notifications.length,
+          unread: notifications.filter(n => !n.read).length,
+          today: notifications.filter(n => {
+            const today = new Date();
+            const notificationDate = new Date(n.createdAt);
+            return today.toDateString() === notificationDate.toDateString();
+          }).length
+        });
+      }
+    } catch (err) {
+      console.error('Błąd pobierania statystyk:', err);
+    }
+  };
 
   const filteredNotifications = notifications.filter(notification => {
     if (filter === 'all') return true;
@@ -260,27 +449,102 @@ export default function Notifications() {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAsRead = (id) => {
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, read: true } : n
-    ));
+  const markAsRead = async (id) => {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      await fetch(`${apiUrl}/api/notifications/${id}/read`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      setNotifications(notifications.map(n => 
+        n._id === id ? { ...n, read: true } : n
+      ));
+    } catch (err) {
+      console.error('Błąd oznaczania jako przeczytane:', err);
+      // Fallback
+      setNotifications(notifications.map(n => 
+        n._id === id ? { ...n, read: true } : n
+      ));
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const markAllAsRead = async () => {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      await fetch(`${apiUrl}/api/notifications/read-all`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    } catch (err) {
+      console.error('Błąd oznaczania wszystkich jako przeczytane:', err);
+      // Fallback
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    }
   };
 
-  const deleteNotification = (id) => {
-    setNotifications(notifications.filter(n => n.id !== id));
+  const deleteNotification = async (id) => {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      await fetch(`${apiUrl}/api/notifications/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      setNotifications(notifications.filter(n => n._id !== id));
+    } catch (err) {
+      console.error('Błąd usuwania powiadomienia:', err);
+      // Fallback
+      setNotifications(notifications.filter(n => n._id !== id));
+    }
   };
+
+  const handleNotificationClick = (notification) => {
+    if (!notification.read) {
+      markAsRead(notification._id || notification.id);
+    }
+    
+    if (notification.actionUrl) {
+      window.open(notification.actionUrl, '_blank');
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <Container>
+        <EmptyState>
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔐</div>
+          <h3>Zaloguj się</h3>
+          <p>Musisz być zalogowany, aby zobaczyć powiadomienia</p>
+        </EmptyState>
+      </Container>
+    );
+  }
 
   if (loading) {
     return (
       <Container>
-        <div style={{ textAlign: 'center', padding: '4rem' }}>
+        <LoadingSpinner>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
           <p>Ładowanie powiadomień...</p>
-        </div>
+        </LoadingSpinner>
       </Container>
     );
   }
@@ -288,6 +552,23 @@ export default function Notifications() {
   return (
     <Container>
       <Title>Powiadomienia</Title>
+      
+      <StatsBar>
+        <StatItem>
+          <StatValue>{stats.total}</StatValue>
+          <StatLabel>Wszystkie</StatLabel>
+        </StatItem>
+        <StatItem>
+          <StatValue>{stats.unread}</StatValue>
+          <StatLabel>Nieprzeczytane</StatLabel>
+        </StatItem>
+        <StatItem>
+          <StatValue>{stats.today}</StatValue>
+          <StatLabel>Dzisiaj</StatLabel>
+        </StatItem>
+      </StatsBar>
+      
+      {error && <ErrorMessage>{error}</ErrorMessage>}
       
       <Header>
         <FilterButtons>
@@ -305,28 +586,39 @@ export default function Notifications() {
             Nieprzeczytane
           </FilterButton>
           <FilterButton
-            active={filter === 'success'}
-            onClick={() => setFilter('success')}
+            active={filter === 'order'}
+            onClick={() => setFilter('order')}
           >
-            Sukces
+            Zamówienia
           </FilterButton>
           <FilterButton
-            active={filter === 'warning'}
-            onClick={() => setFilter('warning')}
+            active={filter === 'payment'}
+            onClick={() => setFilter('payment')}
           >
-            Ostrzeżenia
+            Płatności
           </FilterButton>
           <FilterButton
-            active={filter === 'error'}
-            onClick={() => setFilter('error')}
+            active={filter === 'achievement'}
+            onClick={() => setFilter('achievement')}
           >
-            Błędy
+            Osiągnięcia
+          </FilterButton>
+          <FilterButton
+            active={filter === 'system'}
+            onClick={() => setFilter('system')}
+          >
+            System
           </FilterButton>
         </FilterButtons>
         
-        <MarkAllButton onClick={markAllAsRead}>
-          Oznacz wszystkie jako przeczytane
-        </MarkAllButton>
+        <ActionButtons>
+          <ActionButton onClick={markAllAsRead}>
+            Oznacz wszystkie jako przeczytane
+          </ActionButton>
+          <ActionButton onClick={fetchNotifications}>
+            Odśwież
+          </ActionButton>
+        </ActionButtons>
       </Header>
 
       {filteredNotifications.length === 0 ? (
@@ -339,17 +631,19 @@ export default function Notifications() {
         <NotificationsList>
           {filteredNotifications.map(notification => (
             <NotificationItem
-              key={notification.id}
+              key={notification._id || notification.id}
               read={notification.read}
-              onClick={() => markAsRead(notification.id)}
+              onClick={() => handleNotificationClick(notification)}
             >
               <NotificationHeader>
                 <NotificationIcon type={notification.type}>
-                  {notification.icon}
+                  {getNotificationIcon(notification.type)}
                 </NotificationIcon>
                 <NotificationInfo>
                   <NotificationTitle>{notification.title}</NotificationTitle>
-                  <NotificationTime>{notification.time}</NotificationTime>
+                  <NotificationTime>
+                    {formatTimeAgo(notification.createdAt || notification.time)}
+                  </NotificationTime>
                 </NotificationInfo>
               </NotificationHeader>
               
@@ -359,25 +653,36 @@ export default function Notifications() {
               
               <NotificationActions>
                 {!notification.read && (
-                  <ActionButton
+                  <NotificationButton
                     className="primary"
                     onClick={(e) => {
                       e.stopPropagation();
-                      markAsRead(notification.id);
+                      markAsRead(notification._id || notification.id);
                     }}
                   >
                     Oznacz jako przeczytane
-                  </ActionButton>
+                  </NotificationButton>
                 )}
-                <ActionButton
-                  className="secondary"
+                {notification.actionUrl && (
+                  <NotificationButton
+                    className="secondary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(notification.actionUrl, '_blank');
+                    }}
+                  >
+                    Zobacz szczegóły
+                  </NotificationButton>
+                )}
+                <NotificationButton
+                  className="danger"
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteNotification(notification.id);
+                    deleteNotification(notification._id || notification.id);
                   }}
                 >
                   Usuń
-                </ActionButton>
+                </NotificationButton>
               </NotificationActions>
             </NotificationItem>
           ))}
