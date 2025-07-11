@@ -1,0 +1,43 @@
+# Backend API Development
+
+## Route Structure
+All API routes are registered in [backend/server.js](mdc:backend/server.js) and follow the pattern:
+- `/api/shops` - Shop management
+- `/api/products` - Product management  
+- `/api/users` - User management
+- `/api/locations` - Location management
+
+## Controller Pattern
+Controllers are in `backend/controllers/` and follow this structure:
+```javascript
+exports.methodName = async (req, res) => {
+  try {
+    // Business logic
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+```
+
+## Model Dependencies
+When using populate() in queries, ensure all referenced models are imported:
+- [backend/models/shopModel.js](mdc:backend/models/shopModel.js) - Shop schema
+- [backend/models/userModel.js](mdc:backend/models/userModel.js) - User schema
+- [backend/models/locationModel.js](mdc:backend/models/locationModel.js) - Location schema
+
+## Authentication
+Use [backend/middleware/authMiddleware.js](mdc:backend/middleware/authMiddleware.js) for protected routes:
+```javascript
+router.get('/protected', authMiddleware, controller.method);
+```
+
+## Error Handling
+Always wrap controller methods in try-catch blocks and return appropriate HTTP status codes.
+
+## Database Connection
+MongoDB connection string is in environment variables, fallback in [backend/server.js](mdc:backend/server.js).
+description:
+globs:
+alwaysApply: false
+---

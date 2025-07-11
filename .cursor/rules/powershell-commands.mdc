@@ -1,0 +1,55 @@
+# PowerShell Command Syntax
+
+## Important: Use PowerShell Syntax
+Since you're on Windows with PowerShell, use semicolons (`;`) instead of `&&` for command chaining.
+
+## Correct Commands
+```powershell
+# Start backend
+cd backend; npm start
+
+# Start frontend  
+cd frontend; npm start
+
+# Install dependencies
+cd backend; npm install
+cd frontend; npm install
+
+# Run tests
+cd backend; npm test
+cd frontend; npm test
+```
+
+## Incorrect Commands (Don't Use)
+```bash
+# These will fail in PowerShell
+cd backend && npm start
+cd frontend && npm start
+```
+
+## Development Workflow
+1. Start backend: `cd backend; npm start`
+2. Start frontend: `cd frontend; npm start`
+3. Use separate terminals for each service
+
+## Package Management
+- Backend dependencies: [backend/package.json](mdc:backend/package.json)
+- Frontend dependencies: [frontend/package.json](mdc:frontend/package.json)
+
+## Common Issues
+- `EADDRINUSE` error: Port 5000 already in use, kill existing process
+- Missing script error: Check if you're in the correct directory
+- PowerShell syntax errors: Use semicolons, not &&
+
+## Testing Commands
+```powershell
+# Test backend API
+Invoke-WebRequest -Uri "http://localhost:5000/api/health" -Method GET
+
+# Test production API
+Invoke-WebRequest -Uri "https://portal-backend-igf9.onrender.com/api/health" -Method GET
+```
+description:
+globs:
+alwaysApply: false
+---

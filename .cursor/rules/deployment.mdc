@@ -1,0 +1,42 @@
+# Deployment and Environment Configuration
+
+## Backend Deployment (Render)
+- Backend is deployed on Render at `https://portal-backend-igf9.onrender.com`
+- Environment variables are configured in Render dashboard
+- MongoDB connection string is set via environment variables
+
+## Frontend Deployment
+- Frontend is deployed on Render at `https://portal-frontend-igf9.onrender.com`
+- Environment variables are in [frontend/env.production](mdc:frontend/env.production)
+
+## Environment Files
+- [backend/env.example](mdc:backend/env.example) - Backend environment template
+- [frontend/env.production](mdc:frontend/env.production) - Frontend production environment
+
+## Deployment Process
+1. Commit changes to GitHub
+2. Render automatically deploys from GitHub repository
+3. Check Render logs for deployment status
+4. Test endpoints after deployment
+
+## Common Issues
+- 404 errors often indicate backend not deployed or routes not registered
+- Check if all model imports are present when using populate()
+- Ensure environment variables are set in Render dashboard
+
+## Health Check
+Test backend health: `https://portal-backend-igf9.onrender.com/api/health`
+
+## API Endpoints
+- Shops: `https://portal-backend-igf9.onrender.com/api/shops`
+- Products: `https://portal-backend-igf9.onrender.com/api/products`
+- Users: `https://portal-backend-igf9.onrender.com/api/users`
+
+## Troubleshooting
+- If API returns 404, check if backend is deployed and routes are registered
+- If database errors occur, check MongoDB connection string
+- If frontend can't connect, verify REACT_APP_API_URL is set correctly
+description:
+globs:
+alwaysApply: false
+---

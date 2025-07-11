@@ -444,7 +444,9 @@ export default function ShopList() {
       }
 
       const data = await response.json();
-      setShops(data);
+      // Obsługa nowego formatu odpowiedzi z backendu
+      const shopsArray = data.shops || data; // Jeśli data.shops istnieje, użyj tego, w przeciwnym razie użyj data
+      setShops(shopsArray);
     } catch (err) {
       console.error('Błąd podczas pobierania sklepów:', err);
       setError(err.message);
