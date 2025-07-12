@@ -12,17 +12,19 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
     "axios": "^1.6.0",
+    "cross-spawn": "^7.0.6",
     "http-proxy-middleware": "^2.0.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "styled-components": "^6.1.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "cypress:open": "cypress open",
@@ -50,6 +52,8 @@
     ]
   },
   "devDependencies": {
-    "cypress": "^14.5.1"
+    "@vitejs/plugin-react": "^4.6.0",
+    "cypress": "^14.5.1",
+    "vite": "^7.0.4"
   }
 }
