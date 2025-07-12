@@ -1,0 +1,21 @@
+# Regularne raportowanie postępu
+
+## Zasada:
+Podczas realizacji zadań, jeśli prace trwają dłużej niż 5 minut, co 5 minut automatycznie informuj użytkownika o aktualnym postępie.
+
+- Raportuj krótko, co już zostało zrobione i co jest w trakcie.
+- Jeśli czekasz na deploy, testy lub długą operację – również informuj.
+- Jeśli zadanie się zakończyło, natychmiast informuj o tym.
+
+## Przykład:
+- "Minęło 5 minut: Wciąż pracuję nad integracją kodów SIMC/TERC w formularzu sklepu."
+- "Minęło 10 minut: Deploy na Renderze jeszcze trwa, czekam na zakończenie."
+- "Zadanie zakończone: Możesz testować nową funkcję!"
+
+## Cel:
+- Użytkownik zawsze wie, na jakim etapie są prace, nawet jeśli trwają dłużej.
+- Zwiększa to transparentność i komfort współpracy.
+description:
+globs:
+alwaysApply: false
+---

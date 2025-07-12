@@ -1,0 +1,37 @@
+# Automatyczne kontynuowanie zadań
+
+## Po uruchomieniu serwisów automatycznie kontynuuj:
+
+### Backend (po `npm start` w backend/)
+- **Testuj endpointy** - sprawdź czy API działa
+- **Sprawdzaj logi** - monitoruj błędy i status
+- **Wykonuj kolejne zadania** - nie czekaj na potwierdzenie użytkownika
+
+### Frontend (po `npm start` w frontend/)
+- **Sprawdź kompilację** - czy nie ma błędów ESLint/TypeScript
+- **Testuj funkcjonalność** - sprawdź czy komponenty działają
+- **Kontynuuj development** - wykonuj kolejne zadania
+
+### Po commit/push
+- **Automatycznie testuj** - sprawdź czy zmiany działają
+- **Monitoruj deploy** - sprawdź status na Renderze
+- **Kontynuuj development** - nie czekaj na potwierdzenie
+
+### Po naprawie błędów
+- **Automatycznie testuj** - sprawdź czy błąd został naprawiony
+- **Kontynuuj workflow** - wykonuj kolejne kroki
+- **Informuj o statusie** - podaj aktualny stan
+
+## Wyjątki:
+- **Krytyczne błędy** - zatrzymaj się i poproś o pomoc
+- **Decyzje biznesowe** - zapytaj użytkownika
+- **Zmiany konfiguracji** - potwierdź przed wykonaniem
+
+## Przykłady automatycznego kontynuowania:
+1. Backend uruchomiony → testuj `/api/health` → testuj `/api/shops` → kontynuuj development
+2. Frontend uruchomiony → sprawdź kompilację → testuj funkcjonalność → dodaj nowe features
+3. Commit wykonany → push → sprawdź deploy → testuj na Renderze
+description:
+globs:
+alwaysApply: false
+---

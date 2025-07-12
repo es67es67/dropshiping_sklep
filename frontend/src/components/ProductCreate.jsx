@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
   max-width: 800px;
@@ -403,7 +404,156 @@ const ErrorMessage = styled.div`
   margin-top: 0.5rem;
 `;
 
+const Button = styled.button`
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &.primary {
+    background: ${props => props.theme.gradient};
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background: ${props => props.theme.gradientHover};
+      transform: translateY(-2px);
+      box-shadow: ${props => props.theme.shadowHover};
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+  
+  &.secondary {
+    background: ${props => props.theme.border};
+    color: ${props => props.theme.text};
+    
+    &:hover {
+      background: ${props => props.theme.primary}20;
+      color: ${props => props.theme.primary};
+    }
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  
+  @media (max-width: 600px) {
+    flex-direction: column;
+  }
+`;
+
+const TagsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+const Tag = styled.span`
+  background: ${props => props.theme.primary}20;
+  color: ${props => props.theme.primary};
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const RemoveTag = styled.button`
+  background: none;
+  border: none;
+  color: ${props => props.theme.primary};
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0;
+  line-height: 1;
+  
+  &:hover {
+    color: ${props => props.theme.error};
+  }
+`;
+
+const ImageUpload = styled.div`
+  border: 2px dashed ${props => props.theme.border};
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: ${props => props.theme.primary};
+    background: ${props => props.theme.primary}10;
+  }
+  
+  input[type="file"] {
+    display: none;
+  }
+`;
+
+const UploadIcon = styled.div`
+  font-size: 3rem;
+  margin-bottom: 1rem;
+`;
+
+const UploadText = styled.div`
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: ${props => props.theme.text};
+  margin-bottom: 0.5rem;
+`;
+
+const UploadHint = styled.div`
+  font-size: 0.875rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
+const ImagePreview = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+`;
+
+const PreviewImage = styled.div`
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid ${props => props.theme.border};
+`;
+
+const RemoveButton = styled.button`
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  background: ${props => props.theme.error};
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  
+  &:hover {
+    background: ${props => props.theme.error}dd;
+  }
+`;
+
 export default function ProductCreate() {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -413,13 +563,16 @@ export default function ProductCreate() {
     sku: '',
     weight: '',
     dimensions: '',
-    tags: []
+    tags: [],
+    shopId: ''
   });
   
   const [images, setImages] = useState([]);
   const [tagInput, setTagInput] = useState('');
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userShops, setUserShops] = useState([]);
+  const [loadingShops, setLoadingShops] = useState(true);
 
   const categories = [
     'Elektronika',
@@ -432,6 +585,43 @@ export default function ProductCreate() {
     'Zabawki',
     'Inne'
   ];
+
+  // Pobierz sklepy użytkownika
+  useEffect(() => {
+    fetchUserShops();
+  }, []);
+
+  const fetchUserShops = async () => {
+    try {
+      setLoadingShops(true);
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/shops/user`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Nie udało się pobrać Twoich sklepów');
+      }
+
+      const shops = await response.json();
+      setUserShops(shops);
+      
+      // Automatycznie wybierz pierwszy sklep jeśli użytkownik ma tylko jeden
+      if (shops.length === 1) {
+        setFormData(prev => ({ ...prev, shopId: shops[0]._id }));
+      }
+    } catch (err) {
+      console.error('Błąd podczas pobierania sklepów:', err);
+      setErrors({ shops: err.message });
+    } finally {
+      setLoadingShops(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -487,6 +677,7 @@ export default function ProductCreate() {
     if (!formData.description.trim()) newErrors.description = 'Opis produktu jest wymagany';
     if (!formData.price || formData.price <= 0) newErrors.price = 'Cena musi być większa od 0';
     if (!formData.category) newErrors.category = 'Kategoria jest wymagana';
+    if (!formData.shopId) newErrors.shopId = 'Musisz wybrać sklep';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -499,10 +690,42 @@ export default function ProductCreate() {
     
     setIsSubmitting(true);
     
-    // Symulacja wysyłania danych
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const productData = {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        category: formData.category,
+        location: 'Polska', // Domyślna lokalizacja
+        shopId: formData.shopId,
+        brand: formData.brand,
+        sku: formData.sku,
+        weight: formData.weight,
+        dimensions: formData.dimensions,
+        tags: formData.tags
+      };
+      
+      const response = await fetch(`${apiUrl}/api/products`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Nie udało się dodać produktu');
+      }
+
+      const newProduct = await response.json();
+      
       alert('Produkt został dodany pomyślnie!');
+      
       // Reset form
       setFormData({
         name: '',
@@ -513,10 +736,18 @@ export default function ProductCreate() {
         sku: '',
         weight: '',
         dimensions: '',
-        tags: []
+        tags: [],
+        shopId: formData.shopId // Zachowaj wybrany sklep
       });
       setImages([]);
-    }, 2000);
+      setErrors({});
+      
+    } catch (err) {
+      console.error('Błąd podczas dodawania produktu:', err);
+      alert('Błąd podczas dodawania produktu: ' + err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -530,7 +761,8 @@ export default function ProductCreate() {
         sku: '',
         weight: '',
         dimensions: '',
-        tags: []
+        tags: [],
+        shopId: formData.shopId // Zachowaj wybrany sklep
       });
       setImages([]);
       setErrors({});
@@ -542,6 +774,37 @@ export default function ProductCreate() {
       <Title>Dodaj nowy produkt</Title>
       
       <Form onSubmit={handleSubmit}>
+        <FormSection>
+          <SectionTitle>🏪 Wybór sklepu</SectionTitle>
+          <FormRow>
+            <Label>Sklep *</Label>
+            {loadingShops ? (
+              <div style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>
+                Ładowanie Twoich sklepów...
+              </div>
+            ) : userShops.length === 0 ? (
+              <div style={{ padding: '1rem', textAlign: 'center', color: '#ef4444' }}>
+                Nie masz żadnych sklepów. <a href="/shop-create" style={{ color: '#00D4AA' }}>Utwórz pierwszy sklep</a>
+              </div>
+            ) : (
+              <Select
+                name="shopId"
+                value={formData.shopId}
+                onChange={handleInputChange}
+              >
+                <option value="">Wybierz sklep</option>
+                {userShops.map(shop => (
+                  <option key={shop._id} value={shop._id}>
+                    {shop.name} {!shop.isActive && '(Nieaktywny)'}
+                  </option>
+                ))}
+              </Select>
+            )}
+            {errors.shopId && <ErrorMessage>{errors.shopId}</ErrorMessage>}
+            {errors.shops && <ErrorMessage>{errors.shops}</ErrorMessage>}
+          </FormRow>
+        </FormSection>
+
         <FormSection>
           <SectionTitle>📝 Podstawowe informacje</SectionTitle>
           <FormGrid>
