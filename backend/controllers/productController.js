@@ -1,5 +1,6 @@
 const Product = require('../models/productModel');
 const Shop = require('../models/shopModel'); // Dodane import dla Shop
+const Location = require('../models/locationModel'); // Dodane import dla Location
 
 exports.createProduct = async (req, res) => {
   try {
@@ -22,12 +23,25 @@ exports.createProduct = async (req, res) => {
     
     // W praktyce: images to URL po uploadzie zdjęć na serwer
     const images = req.files?.map(file => file.path) || [];
+    
+    // Użyj lokalizacji sklepu jeśli nie podano lokalizacji produktu
+    let productLocation = location;
+    if (!productLocation) {
+      if (shop.location) {
+        // Jeśli sklep ma przypisaną lokalizację, użyj jej nazwy
+        const locationDoc = await Location.findById(shop.location);
+        productLocation = locationDoc ? locationDoc.name : 'Nie określono';
+      } else {
+        productLocation = 'Nie określono';
+      }
+    }
+    
     const product = new Product({ 
       name, 
       price, 
       description, 
       category, 
-      location, 
+      location: productLocation,
       shop: shopId, 
       images 
     });
