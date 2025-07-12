@@ -43,9 +43,7 @@ app.use(cors({
     'http://localhost:3000',
     'https://portal-frontend.onrender.com',
     'https://portal-frontend-igf9.onrender.com',
-    'https://portal-frontend-ysqz.onrender.com',
-    'https://portal-frontend-*.onrender.com', // Wildcard dla wszystkich subdomen
-    '*' // Tymczasowo pozwól wszystkim (do usunięcia w produkcji)
+    'https://portal-frontend-ysqz.onrender.com'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -237,6 +235,19 @@ app.use('/api/posts', postRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Middleware anty-XSS/NoSQL injection dla wyszukiwania produktów
+app.use('/api/products', (req, res, next) => {
+  const search = req.query.search;
+  if (search) {
+    // Prosta detekcja XSS/NoSQL injection
+    const xssPattern = /<script|onerror=|javascript:|\$where|\$regex|\$ne|\$gt|\$lt|\$in|\$or|\$and|\$nor|\$not|\$exists|\$expr|\$function|\$accumulator/i;
+    if (xssPattern.test(search)) {
+      return res.status(403).json({ error: 'Wykryto próbę ataku XSS lub NoSQL injection w parametrze wyszukiwania.' });
+    }
+  }
+  next();
+});
 
 // Health check
 app.get('/api/health', (req, res) => {

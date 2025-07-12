@@ -5,8 +5,8 @@ const User = require('../models/userModel');
 const rateLimitStore = new Map();
 
 // Rate limiting configuration
-const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
-const RATE_LIMIT_MAX_REQUESTS = 100; // max requests per window
+const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minut
+const RATE_LIMIT_MAX_REQUESTS = 500; // max requests per window (łagodniej na czas testów)
 
 // Rate limiting middleware
 const rateLimiter = (req, res, next) => {
@@ -29,6 +29,7 @@ const rateLimiter = (req, res, next) => {
       clientData.requests++;
       
       if (clientData.requests > RATE_LIMIT_MAX_REQUESTS) {
+        console.warn(`⚠️ Rate limit exceeded for IP: ${clientId}`);
         return res.status(429).json({ 
           error: 'Zbyt wiele żądań. Spróbuj ponownie później.',
           retryAfter: Math.ceil((clientData.resetTime - now) / 1000)
