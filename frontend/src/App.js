@@ -33,6 +33,7 @@ import AdminPanel from './pages/AdminPanel';
 import LocalProducts from './pages/LocalProducts';
 import MyProducts from './pages/MyProducts';
 import MyShops from './pages/MyShops';
+import LiveShopping from './components/LiveShopping';
 
 function App() {
   const [theme, setTheme] = useState('light');
@@ -186,6 +187,7 @@ function App() {
                 <Route path="/local-products" element={<LocalProducts />} />
                 <Route path="/my-products" element={<MyProducts />} />
                 <Route path="/my-shops" element={<MyShops />} />
+                <Route path="/shop/:shopId/live" element={<LiveShopping />} />
               </Routes>
             </div>
           </div>
@@ -232,6 +234,7 @@ function App() {
                 <Route path="/local-products" element={<LocalProducts />} />
                 <Route path="/my-products" element={<MyProducts />} />
                 <Route path="/my-shops" element={<MyShops />} />
+                <Route path="/shop/:shopId/live" element={<LiveShopping />} />
               </Routes>
             </div>
           </div>
@@ -278,6 +281,7 @@ function App() {
                 <Route path="/local-products" element={<LocalProducts />} />
                 <Route path="/my-products" element={<MyProducts />} />
                 <Route path="/my-shops" element={<MyShops />} />
+                <Route path="/shop/:shopId/live" element={<LiveShopping />} />
               </Routes>
             </div>
           </div>

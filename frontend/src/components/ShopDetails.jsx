@@ -495,6 +495,11 @@ export default function ShopDetails({ theme }) {
           <ActionButton className="primary">
             🛒 Przejdź do sklepu
           </ActionButton>
+          <Link to={`/shop/${shopId}/live`} style={{ textDecoration: 'none', flex: 1 }}>
+            <ActionButton className="secondary">
+              🎥 Live Shopping
+            </ActionButton>
+          </Link>
           <ActionButton className="secondary">
             💬 Skontaktuj się
           </ActionButton>
