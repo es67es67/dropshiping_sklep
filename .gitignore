@@ -211,4 +211,15 @@ dist/
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
->>>>>>> 6add9febfdb24d8b2c284ab11b37430803c7ed21
+
+# Demo and test files
+demo-screenshots/
+demo-report.json
+demo-report.html
+test-results/
+puppeteer-screenshots/
+
+# Temporary files
+*.tmp
+*.temp
+activate-users.js

@@ -574,6 +574,7 @@ export default function ProductCreate() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userShops, setUserShops] = useState([]);
   const [loadingShops, setLoadingShops] = useState(true);
+  const [hasPermission, setHasPermission] = useState(false);
 
   const categories = [
     'Elektronika',
@@ -612,13 +613,20 @@ export default function ProductCreate() {
       const shops = await response.json();
       setUserShops(shops);
       
-      // Automatycznie wybierz pierwszy sklep jeśli użytkownik ma tylko jeden
-      if (shops.length === 1) {
-        setFormData(prev => ({ ...prev, shopId: shops[0]._id }));
+      // Sprawdź uprawnienia - użytkownik musi mieć sklepy
+      if (shops.length > 0) {
+        setHasPermission(true);
+        // Automatycznie wybierz pierwszy sklep jeśli użytkownik ma tylko jeden
+        if (shops.length === 1) {
+          setFormData(prev => ({ ...prev, shopId: shops[0]._id }));
+        }
+      } else {
+        setHasPermission(false);
       }
     } catch (err) {
       console.error('Błąd podczas pobierania sklepów:', err);
       setErrors({ shops: err.message });
+      setHasPermission(false);
     } finally {
       setLoadingShops(false);
     }
@@ -777,20 +785,12 @@ export default function ProductCreate() {
     <Container>
       <Title>Dodaj nowy produkt</Title>
       
-      <Form onSubmit={handleSubmit}>
-        <FormSection>
-          <SectionTitle>🏪 Wybór sklepu</SectionTitle>
-          <FormRow>
-            <Label>Sklep *</Label>
-            {loadingShops ? (
-              <div style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>
-                Ładowanie Twoich sklepów...
-              </div>
-            ) : userShops.length === 0 ? (
-              <div style={{ padding: '1rem', textAlign: 'center', color: '#ef4444' }}>
-                Nie masz żadnych sklepów. <a href="/shop-create" style={{ color: '#00D4AA' }}>Utwórz pierwszy sklep</a>
-              </div>
-            ) : (
+      {!loadingShops && userShops.length > 0 ? (
+        <Form onSubmit={handleSubmit}>
+          <FormSection>
+            <SectionTitle>🏪 Wybór sklepu</SectionTitle>
+            <FormRow>
+              <Label>Sklep *</Label>
               <Select
                 name="shopId"
                 value={formData.shopId}
@@ -803,205 +803,213 @@ export default function ProductCreate() {
                   </option>
                 ))}
               </Select>
-            )}
-            {errors.shopId && <ErrorMessage>{errors.shopId}</ErrorMessage>}
-            {errors.shops && <ErrorMessage>{errors.shops}</ErrorMessage>}
-          </FormRow>
-        </FormSection>
-
-        <FormSection>
-          <SectionTitle>📝 Podstawowe informacje</SectionTitle>
-          <FormGrid>
-            <FormRow>
-              <Label>Nazwa produktu *</Label>
-              <Input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Wprowadź nazwę produktu"
-              />
-              {errors.name && <ErrorMessage>{errors.name}</ErrorMessage>}
+              {errors.shopId && <ErrorMessage>{errors.shopId}</ErrorMessage>}
+              {errors.shops && <ErrorMessage>{errors.shops}</ErrorMessage>}
             </FormRow>
-            
+          </FormSection>
+
+          <FormSection>
+            <SectionTitle>📝 Podstawowe informacje</SectionTitle>
+            <FormGrid>
+              <FormRow>
+                <Label>Nazwa produktu *</Label>
+                <Input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Wprowadź nazwę produktu"
+                />
+                {errors.name && <ErrorMessage>{errors.name}</ErrorMessage>}
+              </FormRow>
+              
+              <FormRow>
+                <Label>Kategoria *</Label>
+                <Select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Wybierz kategorię</option>
+                  {categories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </Select>
+                {errors.category && <ErrorMessage>{errors.category}</ErrorMessage>}
+              </FormRow>
+              
+              <FormRow>
+                <Label>Cena (zł) *</Label>
+                <Input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                />
+                {errors.price && <ErrorMessage>{errors.price}</ErrorMessage>}
+              </FormRow>
+              
+              <FormRow>
+                <Label>Marka</Label>
+                <Input
+                  type="text"
+                  name="brand"
+                  value={formData.brand}
+                  onChange={handleInputChange}
+                  placeholder="Nazwa marki"
+                />
+              </FormRow>
+            </FormGrid>
+          </FormSection>
+
+          <FormSection>
+            <SectionTitle>📄 Opis produktu</SectionTitle>
             <FormRow>
-              <Label>Kategoria *</Label>
-              <Select
-                name="category"
-                value={formData.category}
+              <Label>Opis *</Label>
+              <TextArea
+                name="description"
+                value={formData.description}
                 onChange={handleInputChange}
-              >
-                <option value="">Wybierz kategorię</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
+                placeholder="Opisz szczegółowo swój produkt..."
+              />
+              {errors.description && <ErrorMessage>{errors.description}</ErrorMessage>}
+            </FormRow>
+          </FormSection>
+
+          <FormSection>
+            <SectionTitle>🏷️ Tagi</SectionTitle>
+            <FormRow>
+              <Label>Dodaj tagi</Label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <Input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  placeholder="Wprowadź tag"
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                />
+                <Button type="button" className="secondary" onClick={addTag}>
+                  Dodaj
+                </Button>
+              </div>
+              <TagsContainer>
+                {formData.tags.map(tag => (
+                  <Tag key={tag}>
+                    {tag}
+                    <RemoveTag onClick={() => removeTag(tag)}>×</RemoveTag>
+                  </Tag>
                 ))}
-              </Select>
-              {errors.category && <ErrorMessage>{errors.category}</ErrorMessage>}
+              </TagsContainer>
             </FormRow>
-            
-            <FormRow>
-              <Label>Cena (zł) *</Label>
-              <Input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleInputChange}
-                placeholder="0.00"
-                step="0.01"
-                min="0"
-              />
-              {errors.price && <ErrorMessage>{errors.price}</ErrorMessage>}
-            </FormRow>
-            
-            <FormRow>
-              <Label>Marka</Label>
-              <Input
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleInputChange}
-                placeholder="Nazwa marki"
-              />
-            </FormRow>
-          </FormGrid>
-        </FormSection>
+          </FormSection>
 
-        <FormSection>
-          <SectionTitle>📄 Opis produktu</SectionTitle>
-          <FormRow>
-            <Label>Opis *</Label>
-            <TextArea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Opisz szczegółowo swój produkt..."
-            />
-            {errors.description && <ErrorMessage>{errors.description}</ErrorMessage>}
-          </FormRow>
-        </FormSection>
+          <FormSection>
+            <SectionTitle>📦 Szczegóły techniczne</SectionTitle>
+            <FormGrid>
+              <FormRow>
+                <Label>SKU</Label>
+                <Input
+                  type="text"
+                  name="sku"
+                  value={formData.sku}
+                  onChange={handleInputChange}
+                  placeholder="Kod produktu"
+                />
+              </FormRow>
+              
+              <FormRow>
+                <Label>Stan magazynowy</Label>
+                <Input
+                  type="number"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleInputChange}
+                  placeholder="0"
+                  min="0"
+                />
+              </FormRow>
+              
+              <FormRow>
+                <Label>Waga (kg)</Label>
+                <Input
+                  type="number"
+                  name="weight"
+                  value={formData.weight}
+                  onChange={handleInputChange}
+                  placeholder="0.0"
+                  step="0.1"
+                  min="0"
+                />
+              </FormRow>
+              
+              <FormRow>
+                <Label>Wymiary (cm)</Label>
+                <Input
+                  type="text"
+                  name="dimensions"
+                  value={formData.dimensions}
+                  onChange={handleInputChange}
+                  placeholder="Dł. x Szer. x Wys."
+                />
+              </FormRow>
+            </FormGrid>
+          </FormSection>
 
-        <FormSection>
-          <SectionTitle>🏷️ Tagi</SectionTitle>
-          <FormRow>
-            <Label>Dodaj tagi</Label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <Input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                placeholder="Wprowadź tag"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+          <FormSection>
+            <SectionTitle>🖼️ Zdjęcia produktu</SectionTitle>
+            <ImageUpload>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                style={{ display: 'none' }}
+                id="image-upload"
               />
-              <Button type="button" className="secondary" onClick={addTag}>
-                Dodaj
-              </Button>
-            </div>
-            <TagsContainer>
-              {formData.tags.map(tag => (
-                <Tag key={tag}>
-                  {tag}
-                  <RemoveTag onClick={() => removeTag(tag)}>×</RemoveTag>
-                </Tag>
-              ))}
-            </TagsContainer>
-          </FormRow>
-        </FormSection>
-
-        <FormSection>
-          <SectionTitle>📦 Szczegóły techniczne</SectionTitle>
-          <FormGrid>
-            <FormRow>
-              <Label>SKU</Label>
-              <Input
-                type="text"
-                name="sku"
-                value={formData.sku}
-                onChange={handleInputChange}
-                placeholder="Kod produktu"
-              />
-            </FormRow>
+              <label htmlFor="image-upload">
+                <UploadIcon>📷</UploadIcon>
+                <UploadText>Kliknij aby dodać zdjęcia</UploadText>
+                <UploadHint>Maksymalnie 10 zdjęć, format JPG/PNG</UploadHint>
+              </label>
+            </ImageUpload>
             
-            <FormRow>
-              <Label>Stan magazynowy</Label>
-              <Input
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleInputChange}
-                placeholder="0"
-                min="0"
-              />
-            </FormRow>
-            
-            <FormRow>
-              <Label>Waga (kg)</Label>
-              <Input
-                type="number"
-                name="weight"
-                value={formData.weight}
-                onChange={handleInputChange}
-                placeholder="0.0"
-                step="0.1"
-                min="0"
-              />
-            </FormRow>
-            
-            <FormRow>
-              <Label>Wymiary (cm)</Label>
-              <Input
-                type="text"
-                name="dimensions"
-                value={formData.dimensions}
-                onChange={handleInputChange}
-                placeholder="Dł. x Szer. x Wys."
-              />
-            </FormRow>
-          </FormGrid>
-        </FormSection>
+            {images.length > 0 && (
+              <ImagePreview>
+                {images.map(image => (
+                  <PreviewImage key={image.id}>
+                    <img
+                      src={image.preview}
+                      alt="Preview"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    <RemoveButton onClick={() => removeImage(image.id)}>×</RemoveButton>
+                  </PreviewImage>
+                ))}
+              </ImagePreview>
+            )}
+          </FormSection>
 
-        <FormSection>
-          <SectionTitle>🖼️ Zdjęcia produktu</SectionTitle>
-          <ImageUpload>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleImageUpload}
-              style={{ display: 'none' }}
-              id="image-upload"
-            />
-            <label htmlFor="image-upload">
-              <UploadIcon>📷</UploadIcon>
-              <UploadText>Kliknij aby dodać zdjęcia</UploadText>
-              <UploadHint>Maksymalnie 10 zdjęć, format JPG/PNG</UploadHint>
-            </label>
-          </ImageUpload>
-          
-          {images.length > 0 && (
-            <ImagePreview>
-              {images.map(image => (
-                <PreviewImage key={image.id}>
-                  <img
-                    src={image.preview}
-                    alt="Preview"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  <RemoveButton onClick={() => removeImage(image.id)}>×</RemoveButton>
-                </PreviewImage>
-              ))}
-            </ImagePreview>
-          )}
-        </FormSection>
-
-        <ButtonGroup>
-          <Button type="submit" className="primary" disabled={isSubmitting}>
-            {isSubmitting ? 'Dodawanie...' : 'Dodaj produkt'}
-          </Button>
-          <Button type="button" className="secondary" onClick={handleReset}>
-            Resetuj
-          </Button>
-        </ButtonGroup>
-      </Form>
+          <ButtonGroup>
+            <Button type="submit" className="primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Dodawanie...' : 'Dodaj produkt'}
+            </Button>
+            <Button type="button" className="secondary" onClick={handleReset}>
+              Resetuj
+            </Button>
+          </ButtonGroup>
+        </Form>
+      ) : loadingShops ? (
+        <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+          Ładowanie Twoich sklepów...
+        </div>
+      ) : (
+        <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>
+          Nie masz żadnych sklepów. <a href="/shop-create" style={{ color: '#00D4AA' }}>Utwórz pierwszy sklep</a> aby móc dodawać produkty.
+        </div>
+      )}
     </Container>
   );
 } 

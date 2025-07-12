@@ -1,4 +1,4 @@
-// Skrypt monitorowania Firefox z Puppeteer - ROZBUDOWANY
+// Skrypt monitorowania Chrome z Puppeteer - POPRAWIONY
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
@@ -7,21 +7,20 @@ const frontendUrl = 'https://portal-frontend-ysqz.onrender.com';
 const backendUrl = 'https://portal-backend-igf9.onrender.com';
 
 // Upewnij się, że katalog screenshots istnieje
-const screenshotsDir = 'D:/portal/firefox-screenshots';
+const screenshotsDir = 'D:/portal/chrome-screenshots-fixed';
 if (!fs.existsSync(screenshotsDir)) {
     fs.mkdirSync(screenshotsDir, { recursive: true });
 }
 
-async function monitorFirefox() {
-    console.log('🚀 Rozbudowane monitorowanie Firefox z Puppeteer...');
+async function monitorChromeFixed() {
+    console.log('🚀 Rozbudowane monitorowanie Chrome z Puppeteer (POPRAWIONE)...');
     
     let browser;
     let page;
     
     try {
-        // Uruchom Firefox
+        // Uruchom Chrome
         browser = await puppeteer.launch({
-            product: 'firefox',
             headless: false, // Pokaż przeglądarkę
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
             slowMo: 1000 // Spowolnij akcje dla lepszej widoczności
@@ -39,13 +38,13 @@ async function monitorFirefox() {
             
             // Zapisz do pliku
             const logEntry = `[${timestamp}] [${level.toUpperCase()}] ${text}\n`;
-            fs.appendFileSync('D:/portal/firefox-console-logs.txt', logEntry);
+            fs.appendFileSync('D:/portal/chrome-console-logs-fixed.txt', logEntry);
         });
         
         // Przechwytuj błędy
         page.on('pageerror', error => {
             console.log(`❌ Błąd strony: ${error.message}`);
-            fs.appendFileSync('D:/portal/firefox-errors.txt', `${new Date().toISOString()}: ${error.message}\n`);
+            fs.appendFileSync('D:/portal/chrome-errors-fixed.txt', `${new Date().toISOString()}: ${error.message}\n`);
         });
         
         // Przechwytuj błędy sieciowe
@@ -71,17 +70,25 @@ async function monitorFirefox() {
         
         // Generuj unikalne dane testowe
         const timestamp = Date.now();
-        const testUsername = `TestUser${timestamp}`;
+        const testFirstName = `TestUser${timestamp}`;
+        const testLastName = `TestLastName${timestamp}`;
         const testEmail = `test${timestamp}@example.com`;
         const testPassword = 'Test123!';
         
-        console.log(`👤 Rejestruję użytkownika: ${testUsername} (${testEmail})`);
+        console.log(`👤 Rejestruję użytkownika: ${testFirstName} ${testLastName} (${testEmail})`);
         
-        // Wypełnij formularz rejestracji
-        await page.type('input[name="username"]', testUsername);
+        // Wypełnij formularz rejestracji (poprawione selektory)
+        await page.type('input[name="firstName"]', testFirstName);
+        await page.type('input[name="lastName"]', testLastName);
         await page.type('input[name="email"]', testEmail);
         await page.type('input[name="password"]', testPassword);
         await page.type('input[name="confirmPassword"]', testPassword);
+        await page.type('input[name="phone"]', '+48 123 456 789');
+        await page.type('input[name="city"]', 'Warszawa');
+        
+        // Zaznacz checkboxy
+        await page.click('input[name="acceptTerms"]');
+        await page.click('input[name="acceptNewsletter"]');
         
         const registerScreenshotPath = `${screenshotsDir}/02_register_form_${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
         await page.screenshot({ path: registerScreenshotPath });
@@ -100,8 +107,8 @@ async function monitorFirefox() {
         await page.goto(`${frontendUrl}/login`);
         await page.waitForTimeout(2000);
         
-        // Wypełnij formularz logowania
-        await page.type('input[name="email"]', testEmail);
+        // Wypełnij formularz logowania (poprawione selektory)
+        await page.type('input[name="emailOrUsername"]', testEmail);
         await page.type('input[name="password"]', testPassword);
         
         const loginScreenshotPath = `${screenshotsDir}/04_login_form_${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
@@ -130,7 +137,7 @@ async function monitorFirefox() {
         await page.goto(`${frontendUrl}/shop-create`);
         await page.waitForTimeout(3000);
         
-        // Wypełnij formularz sklepu
+        // Wypełnij formularz sklepu (poprawione selektory)
         const shopName = `Test Shop ${timestamp}`;
         const shopDescription = 'To jest testowy sklep utworzony przez Puppeteer';
         
@@ -140,8 +147,10 @@ async function monitorFirefox() {
         await page.type('input[name="address"]', 'Testowa ulica 123');
         await page.type('input[name="city"]', 'Warszawa');
         await page.type('input[name="postalCode"]', '00-001');
-        await page.type('input[name="phone"]', '123456789');
+        await page.type('input[name="phone"]', '+48 123 456 789');
         await page.type('input[name="email"]', 'shop@test.com');
+        await page.type('input[name="website"]', 'https://test-shop.pl');
+        await page.type('input[name="openingHours"]', 'Pon-Pt 9:00-18:00, Sob 9:00-14:00');
         
         const shopFormScreenshotPath = `${screenshotsDir}/07_shop_form_${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
         await page.screenshot({ path: shopFormScreenshotPath, fullPage: true });
@@ -178,17 +187,40 @@ async function monitorFirefox() {
         await page.goto(`${frontendUrl}/product-create`);
         await page.waitForTimeout(3000);
         
-        // Wypełnij formularz produktu
+        // Sprawdź jakie pola są w formularzu produktu
+        const productInputs = await page.evaluate(() => {
+            const inputElements = document.querySelectorAll('input, textarea, select');
+            return Array.from(inputElements).map(input => ({
+                name: input.name,
+                id: input.id,
+                type: input.type,
+                placeholder: input.placeholder,
+                tagName: input.tagName
+            }));
+        });
+        
+        console.log('📋 Pola formularza produktu:');
+        productInputs.forEach((input, index) => {
+            console.log(`${index + 1}. ${input.tagName}[name="${input.name}"][type="${input.type}"] placeholder="${input.placeholder}"`);
+        });
+        
+        // Wypełnij formularz produktu (bazując na typowych polach)
         const productName = `Test Product ${timestamp}`;
         const productDescription = 'To jest testowy produkt utworzony przez Puppeteer';
         
-        await page.type('input[name="name"]', productName);
-        await page.type('textarea[name="description"]', productDescription);
-        await page.type('input[name="price"]', '99.99');
-        await page.select('select[name="category"]', 'Elektronika');
-        await page.type('input[name="brand"]', 'TestBrand');
-        await page.type('input[name="sku"]', `SKU${timestamp}`);
-        await page.type('input[name="stock"]', '10');
+        // Wypełnij pola jeśli istnieją
+        if (productInputs.find(i => i.name === 'name')) {
+            await page.type('input[name="name"]', productName);
+        }
+        if (productInputs.find(i => i.name === 'description')) {
+            await page.type('textarea[name="description"]', productDescription);
+        }
+        if (productInputs.find(i => i.name === 'price')) {
+            await page.type('input[name="price"]', '99.99');
+        }
+        if (productInputs.find(i => i.name === 'category')) {
+            await page.select('select[name="category"]', 'Elektronika');
+        }
         
         const productFormScreenshotPath = `${screenshotsDir}/11_product_form_${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
         await page.screenshot({ path: productFormScreenshotPath, fullPage: true });
@@ -252,8 +284,8 @@ async function monitorFirefox() {
 
         console.log('\n✅ Wszystkie testy zakończone pomyślnie!');
         console.log(`📁 Screenshoty zapisane w: ${screenshotsDir}`);
-        console.log(`📄 Logi zapisane w: D:/portal/firefox-console-logs.txt`);
-        console.log(`❌ Błędy zapisane w: D:/portal/firefox-errors.txt`);
+        console.log(`📄 Logi zapisane w: D:/portal/chrome-console-logs-fixed.txt`);
+        console.log(`❌ Błędy zapisane w: D:/portal/chrome-errors-fixed.txt`);
         
     } catch (error) {
         console.error('❌ Błąd podczas testowania:', error);
@@ -273,4 +305,4 @@ async function monitorFirefox() {
 }
 
 // Uruchom monitoring
-monitorFirefox(); 
+monitorChromeFixed(); 

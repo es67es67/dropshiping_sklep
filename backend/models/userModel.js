@@ -48,6 +48,7 @@ const userSchema = new mongoose.Schema({
   languages: [{ type: String }],
   
   // Status i aktywność
+  isActive: { type: Boolean, default: true },
   isVerified: { type: Boolean, default: false },
   isOnline: { type: Boolean, default: false },
   lastSeen: { type: Date, default: Date.now },

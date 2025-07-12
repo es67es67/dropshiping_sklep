@@ -1,4 +1,4 @@
-// Skrypt monitorowania Firefox z Puppeteer - ROZBUDOWANY
+// Skrypt monitorowania Chrome z Puppeteer - ROZBUDOWANY
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
@@ -7,21 +7,20 @@ const frontendUrl = 'https://portal-frontend-ysqz.onrender.com';
 const backendUrl = 'https://portal-backend-igf9.onrender.com';
 
 // Upewnij się, że katalog screenshots istnieje
-const screenshotsDir = 'D:/portal/firefox-screenshots';
+const screenshotsDir = 'D:/portal/chrome-screenshots';
 if (!fs.existsSync(screenshotsDir)) {
     fs.mkdirSync(screenshotsDir, { recursive: true });
 }
 
-async function monitorFirefox() {
-    console.log('🚀 Rozbudowane monitorowanie Firefox z Puppeteer...');
+async function monitorChrome() {
+    console.log('🚀 Rozbudowane monitorowanie Chrome z Puppeteer...');
     
     let browser;
     let page;
     
     try {
-        // Uruchom Firefox
+        // Uruchom Chrome
         browser = await puppeteer.launch({
-            product: 'firefox',
             headless: false, // Pokaż przeglądarkę
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
             slowMo: 1000 // Spowolnij akcje dla lepszej widoczności
@@ -39,13 +38,13 @@ async function monitorFirefox() {
             
             // Zapisz do pliku
             const logEntry = `[${timestamp}] [${level.toUpperCase()}] ${text}\n`;
-            fs.appendFileSync('D:/portal/firefox-console-logs.txt', logEntry);
+            fs.appendFileSync('D:/portal/chrome-console-logs.txt', logEntry);
         });
         
         // Przechwytuj błędy
         page.on('pageerror', error => {
             console.log(`❌ Błąd strony: ${error.message}`);
-            fs.appendFileSync('D:/portal/firefox-errors.txt', `${new Date().toISOString()}: ${error.message}\n`);
+            fs.appendFileSync('D:/portal/chrome-errors.txt', `${new Date().toISOString()}: ${error.message}\n`);
         });
         
         // Przechwytuj błędy sieciowe
@@ -252,8 +251,8 @@ async function monitorFirefox() {
 
         console.log('\n✅ Wszystkie testy zakończone pomyślnie!');
         console.log(`📁 Screenshoty zapisane w: ${screenshotsDir}`);
-        console.log(`📄 Logi zapisane w: D:/portal/firefox-console-logs.txt`);
-        console.log(`❌ Błędy zapisane w: D:/portal/firefox-errors.txt`);
+        console.log(`📄 Logi zapisane w: D:/portal/chrome-console-logs.txt`);
+        console.log(`❌ Błędy zapisane w: D:/portal/chrome-errors.txt`);
         
     } catch (error) {
         console.error('❌ Błąd podczas testowania:', error);
@@ -273,4 +272,4 @@ async function monitorFirefox() {
 }
 
 // Uruchom monitoring
-monitorFirefox(); 
+monitorChrome(); 

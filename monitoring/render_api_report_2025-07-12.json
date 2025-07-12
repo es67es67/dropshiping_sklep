@@ -1,0 +1,378 @@
+{
+  "timestamp": "2025-07-12T11:44:35.274Z",
+  "services": [
+    {
+      "name": "Backend",
+      "lastDeploy": "2025-07-12T11:30:14.613498Z",
+      "success": true
+    },
+    {
+      "name": "Frontend",
+      "lastDeploy": "2025-07-12T11:28:34.032489Z",
+      "success": true
+    },
+    {
+      "name": "Backend",
+      "logs": [],
+      "error": "404 page not found\n",
+      "success": false
+    },
+    {
+      "name": "Frontend",
+      "logs": [],
+      "error": "404 page not found\n",
+      "success": false
+    },
+    {
+      "name": "Backend",
+      "deployments": [
+        {
+          "deploy": {
+            "id": "dep-d1p4dnruibrs73e50oc0",
+            "commit": {
+              "id": "9b70d42556080c45381e2fca4d2bbd2193b4c9f3",
+              "message": "Migracja frontendu na Vite: aktualizacja package.json, package-lock.json, dodanie vite.config.js",
+              "createdAt": "2025-07-12T11:28:25Z"
+            },
+            "status": "live",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T11:28:31.925069Z",
+            "updatedAt": "2025-07-12T11:30:39.550801Z",
+            "startedAt": "2025-07-12T11:28:31.894321Z",
+            "finishedAt": "2025-07-12T11:30:14.056062Z"
+          },
+          "cursor": "t4oA3trFAsFkbnJ1aWJyczczZTUwb2Mw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1p1debuibrs73e4is0g",
+            "commit": {
+              "id": "f42558dc9d4386dcc4f4d44ef83c58e57a837f44",
+              "message": "Fix: restrykcyjne uprawnienia sklepów i produktów, poprawki widoków, obsuga stock, walidacja waciciela, poprawa API i modeli",
+              "createdAt": "2025-07-12T08:02:58Z"
+            },
+            "status": "deactivated",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T08:03:06.183232Z",
+            "updatedAt": "2025-07-12T11:30:14.054686Z",
+            "startedAt": "2025-07-12T08:03:06.149772Z",
+            "finishedAt": "2025-07-12T08:04:11.111101Z"
+          },
+          "cursor": "wPetr3_3gJZkZWJ1aWJyczczZTRpczBn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1p158je5dus7397uldg",
+            "commit": {
+              "id": "af908127f97db086d10492a587f3a36b16d64225",
+              "message": "Fix: poprawa obsugi pola location w rejestracji uytkownika, poprawki tras, logowanie handlerów, naprawa testów i automatyzacji",
+              "createdAt": "2025-07-12T07:45:31Z"
+            },
+            "status": "deactivated",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T07:45:39.052393Z",
+            "updatedAt": "2025-07-12T08:04:11.109899Z",
+            "startedAt": "2025-07-12T07:45:39.027515Z",
+            "finishedAt": "2025-07-12T07:47:25.731205Z"
+          },
+          "cursor": "wPetr3_3gJY1OGplNWR1czczOTd1bGRn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1oulhidbo4c73ago2ug",
+            "commit": {
+              "id": "a4128465e7b87a8b0ba7fcc36571ef9a5faf1772",
+              "message": "Enhance security with rate limiting, role-based access control, and improved authentication",
+              "createdAt": "2025-07-12T04:55:28Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T04:55:35.685407Z",
+            "updatedAt": "2025-07-12T04:56:33.983865Z",
+            "startedAt": "2025-07-12T04:55:35.663931Z",
+            "finishedAt": "2025-07-12T04:56:33.98336Z"
+          },
+          "cursor": "5x_fAnAswBpsaGlkYm80YzczYWdvMnVn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1ouk2k9c44c7397m1a0",
+            "commit": {
+              "id": "a92e8287012e1e028a0d207e55d02d8a5a0563d9",
+              "message": "Add Live Shopping functionality with real-time chat and stream management",
+              "createdAt": "2025-07-12T04:52:13Z"
+            },
+            "status": "deactivated",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T04:52:26.957439Z",
+            "updatedAt": "2025-07-12T07:47:25.729677Z",
+            "startedAt": "2025-07-12T04:52:26.932287Z",
+            "finishedAt": "2025-07-12T04:53:34.470679Z"
+          },
+          "cursor": "5x_fAnAswBprMms5YzQ0YzczOTdtMWEw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1ouisjuibrs73e482v0",
+            "commit": {
+              "id": "579eec5a80de1b540a803fe5a8a03c771191647e",
+              "message": "Fix product creation location validation and backend connection issues\\n\\n- Fixed product location validation by properly handling shop location references\\n- Added Location model import to product controller\\n- Improved error handling for location field in product creation\\n- Fixed shop stats update to use correct field names\\n- Enhanced product creation with proper location fallback logic",
+              "createdAt": "2025-07-12T04:45:47Z"
+            },
+            "status": "deactivated",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T04:49:55.576691Z",
+            "updatedAt": "2025-07-12T04:53:34.469001Z",
+            "startedAt": "2025-07-12T04:49:55.548912Z",
+            "finishedAt": "2025-07-12T04:51:03.714653Z"
+          },
+          "cursor": "5x_fAnAswBppc2p1aWJyczczZTQ4MnYw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1oug2ruibrs73e47qgg",
+            "commit": {
+              "id": "96771dcff1435c69a10ff666191f6cfb405b1c35",
+              "message": "Add My Shops page with routing and implement product permission restrictions\n\n- Added MyShops page component with shop management functionality\n- Added routing for /my-shops in all layout variants\n- Implemented backend permission checks for product creation/editing/deletion\n- Updated ProductCreate component with shop selection and proper API integration\n- Added update and delete product endpoints with owner verification\n- Enhanced product controller with proper error handling and shop statistics updates\n- Added comprehensive form validation and user feedback\n- Integrated with existing shop management system",
+              "createdAt": "2025-07-12T04:43:47Z"
+            },
+            "status": "deactivated",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T04:43:55.861188Z",
+            "updatedAt": "2025-07-12T04:51:03.712848Z",
+            "startedAt": "2025-07-12T04:43:55.833529Z",
+            "finishedAt": "2025-07-12T04:46:43.581714Z"
+          },
+          "cursor": "5x_fAnAswBpnMnJ1aWJyczczZTQ3cWdn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1on86umcj7s73acimd0",
+            "commit": {
+              "id": "8cce3ea14001d85fec8e07f01e7f8b72b1e10eb0",
+              "message": "Add filter to show all shops including inactive ones",
+              "createdAt": "2025-07-11T20:19:53Z"
+            },
+            "status": "deactivated",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-11T20:29:16.410953Z",
+            "updatedAt": "2025-07-12T04:46:43.580075Z",
+            "startedAt": "2025-07-11T20:29:16.38347Z",
+            "finishedAt": "2025-07-11T20:31:37.597831Z"
+          },
+          "cursor": "NbhKRtBJoN04NnVtY2o3czczYWNpbWQw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1omtet6ubrc73el3kd0",
+            "commit": {
+              "id": "211eef2b50092f6b62b6b8aebf410151f9c16503",
+              "message": "Fix duplicate LocationDetails identifier in LocationDetails.jsx",
+              "createdAt": "2025-07-11T20:06:13Z"
+            },
+            "status": "deactivated",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-11T20:06:20.755591Z",
+            "updatedAt": "2025-07-11T20:31:37.595625Z",
+            "startedAt": "2025-07-11T20:06:20.727943Z",
+            "finishedAt": "2025-07-11T20:07:15.94415Z"
+          },
+          "cursor": "zD4ooBbwJVZ0ZXQ2dWJyYzczZWwza2Qw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1omsabipnbc73f7ve0g",
+            "commit": {
+              "id": "8945a9cd56f9a27ccceccfdd96bf94782e0cb96a",
+              "message": "Fix shop API endpoint and add Cursor rules for development",
+              "createdAt": "2025-07-11T19:54:18Z"
+            },
+            "status": "deactivated",
+            "trigger": "manual",
+            "createdAt": "2025-07-11T20:03:54.583862Z",
+            "updatedAt": "2025-07-11T20:07:15.938053Z",
+            "startedAt": "2025-07-11T20:03:54.545997Z",
+            "finishedAt": "2025-07-11T20:06:12.473592Z"
+          },
+          "cursor": "zD4ooBbwJVZzYWJpcG5iYzczZjd2ZTBn"
+        }
+      ],
+      "success": true
+    },
+    {
+      "name": "Frontend",
+      "deployments": [
+        {
+          "deploy": {
+            "id": "dep-d1p4do3uibrs73e50oh0",
+            "commit": {
+              "id": "9b70d42556080c45381e2fca4d2bbd2193b4c9f3",
+              "message": "Migracja frontendu na Vite: aktualizacja package.json, package-lock.json, dodanie vite.config.js",
+              "createdAt": "2025-07-12T11:28:25Z"
+            },
+            "status": "build_in_progress",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T11:28:33.446108Z",
+            "updatedAt": "2025-07-12T11:28:33.446108Z",
+            "startedAt": "2025-07-12T11:28:33.443275Z"
+          },
+          "cursor": "t4oA3trFAsFkbzN1aWJyczczZTUwb2gw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1p1ddruibrs73e4irs0",
+            "commit": {
+              "id": "f42558dc9d4386dcc4f4d44ef83c58e57a837f44",
+              "message": "Fix: restrykcyjne uprawnienia sklepów i produktów, poprawki widoków, obsuga stock, walidacja waciciela, poprawa API i modeli",
+              "createdAt": "2025-07-12T08:02:58Z"
+            },
+            "status": "build_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T08:03:04.39847Z",
+            "updatedAt": "2025-07-12T10:03:34.730748Z",
+            "startedAt": "2025-07-12T08:03:04.395773Z",
+            "finishedAt": "2025-07-12T10:03:34.730128Z"
+          },
+          "cursor": "wPetr3_3gJZkZHJ1aWJyczczZTRpcnMw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1p1cvvfte5s73brcljg",
+            "commit": {
+              "id": "af908127f97db086d10492a587f3a36b16d64225",
+              "message": "Fix: poprawa obsugi pola location w rejestracji uytkownika, poprawki tras, logowanie handlerów, naprawa testów i automatyzacji",
+              "createdAt": "2025-07-12T07:45:31Z"
+            },
+            "status": "canceled",
+            "trigger": "manual",
+            "createdAt": "2025-07-12T08:02:08.18033Z",
+            "updatedAt": "2025-07-12T08:03:04.510047Z",
+            "startedAt": "2025-07-12T08:02:08.171111Z",
+            "finishedAt": "2025-07-12T08:03:04.509374Z"
+          },
+          "cursor": "wPetr3_3gJZjdnZmdGU1czczYnJjbGpn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1p1583e5dus7397ula0",
+            "commit": {
+              "id": "af908127f97db086d10492a587f3a36b16d64225",
+              "message": "Fix: poprawa obsugi pola location w rejestracji uytkownika, poprawki tras, logowanie handlerów, naprawa testów i automatyzacji",
+              "createdAt": "2025-07-12T07:45:31Z"
+            },
+            "status": "canceled",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T07:45:37.753305Z",
+            "updatedAt": "2025-07-12T08:02:08.475323Z",
+            "startedAt": "2025-07-12T07:45:37.750441Z",
+            "finishedAt": "2025-07-12T08:02:08.474834Z"
+          },
+          "cursor": "wPetr3_3gJY1ODNlNWR1czczOTd1bGEw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1ouli2dbo4c73ago33g",
+            "commit": {
+              "id": "a4128465e7b87a8b0ba7fcc36571ef9a5faf1772",
+              "message": "Enhance security with rate limiting, role-based access control, and improved authentication",
+              "createdAt": "2025-07-12T04:55:28Z"
+            },
+            "status": "build_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T04:55:37.066392Z",
+            "updatedAt": "2025-07-12T04:56:31.8884Z",
+            "startedAt": "2025-07-12T04:55:37.063775Z",
+            "finishedAt": "2025-07-12T04:56:31.887826Z"
+          },
+          "cursor": "5x_fAnAswBpsaTJkYm80YzczYWdvMzNn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1ouk2s9c44c7397m1f0",
+            "commit": {
+              "id": "a92e8287012e1e028a0d207e55d02d8a5a0563d9",
+              "message": "Add Live Shopping functionality with real-time chat and stream management",
+              "createdAt": "2025-07-12T04:52:13Z"
+            },
+            "status": "build_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T04:52:28.35761Z",
+            "updatedAt": "2025-07-12T04:53:26.405047Z",
+            "startedAt": "2025-07-12T04:52:28.354733Z",
+            "finishedAt": "2025-07-12T04:53:26.404509Z"
+          },
+          "cursor": "5x_fAnAswBprMnM5YzQ0YzczOTdtMWYw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1ouit3uibrs73e48340",
+            "commit": {
+              "id": "579eec5a80de1b540a803fe5a8a03c771191647e",
+              "message": "Fix product creation location validation and backend connection issues\\n\\n- Fixed product location validation by properly handling shop location references\\n- Added Location model import to product controller\\n- Improved error handling for location field in product creation\\n- Fixed shop stats update to use correct field names\\n- Enhanced product creation with proper location fallback logic",
+              "createdAt": "2025-07-12T04:45:47Z"
+            },
+            "status": "build_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T04:49:57.238856Z",
+            "updatedAt": "2025-07-12T04:50:52.413898Z",
+            "startedAt": "2025-07-12T04:49:57.235885Z",
+            "finishedAt": "2025-07-12T04:50:52.413467Z"
+          },
+          "cursor": "5x_fAnAswBppdDN1aWJyczczZTQ4MzQw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1oug33uibrs73e47qlg",
+            "commit": {
+              "id": "96771dcff1435c69a10ff666191f6cfb405b1c35",
+              "message": "Add My Shops page with routing and implement product permission restrictions\n\n- Added MyShops page component with shop management functionality\n- Added routing for /my-shops in all layout variants\n- Implemented backend permission checks for product creation/editing/deletion\n- Updated ProductCreate component with shop selection and proper API integration\n- Added update and delete product endpoints with owner verification\n- Enhanced product controller with proper error handling and shop statistics updates\n- Added comprehensive form validation and user feedback\n- Integrated with existing shop management system",
+              "createdAt": "2025-07-12T04:43:47Z"
+            },
+            "status": "build_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T04:43:57.272299Z",
+            "updatedAt": "2025-07-12T04:44:49.325379Z",
+            "startedAt": "2025-07-12T04:43:57.269384Z",
+            "finishedAt": "2025-07-12T04:44:49.324782Z"
+          },
+          "cursor": "5x_fAnAswBpnMzN1aWJyczczZTQ3cWxn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1on86mmcj7s73acim90",
+            "commit": {
+              "id": "8cce3ea14001d85fec8e07f01e7f8b72b1e10eb0",
+              "message": "Add filter to show all shops including inactive ones",
+              "createdAt": "2025-07-11T20:19:53Z"
+            },
+            "status": "live",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-11T20:29:14.902446Z",
+            "updatedAt": "2025-07-11T20:30:21.744797Z",
+            "startedAt": "2025-07-11T20:29:14.896779Z",
+            "finishedAt": "2025-07-11T20:30:21.744504Z"
+          },
+          "cursor": "NbhKRtBJoN04Nm1tY2o3czczYWNpbTkw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1omtfd6ubrc73el3kl0",
+            "commit": {
+              "id": "211eef2b50092f6b62b6b8aebf410151f9c16503",
+              "message": "Fix duplicate LocationDetails identifier in LocationDetails.jsx",
+              "createdAt": "2025-07-11T20:06:13Z"
+            },
+            "status": "deactivated",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-11T20:06:22.571577Z",
+            "updatedAt": "2025-07-11T20:30:21.741573Z",
+            "startedAt": "2025-07-11T20:06:22.568627Z",
+            "finishedAt": "2025-07-11T20:07:53.448763Z"
+          },
+          "cursor": "zD4ooBbwJVZ0ZmQ2dWJyYzczZWwza2ww"
+        }
+      ],
+      "success": true
+    }
+  ]
+}

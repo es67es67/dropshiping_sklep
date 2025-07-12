@@ -372,7 +372,12 @@ export default function Settings() {
       const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`${apiUrl}/api/users/settings`, {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      
+      const response = await fetch(`${apiUrl}/api/users/layout-settings/portal`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -381,9 +386,20 @@ export default function Settings() {
 
       if (response.ok) {
         const data = await response.json();
-        setSettings(data);
+        console.log('Pobrane ustawienia layoutu:', data);
+        
+        // Zaktualizuj ustawienia na podstawie pobranych danych
+        setSettings(prev => ({
+          ...prev,
+          theme: data.theme || 'light',
+          language: data.language || 'pl',
+          preferences: {
+            ...prev.preferences,
+            compactView: data.layout === 'compact'
+          }
+        }));
       } else {
-        console.error('Błąd podczas ładowania ustawień');
+        console.error('Błąd podczas ładowania ustawień layoutu');
         // Użyj domyślnych ustawień
       }
     } catch (error) {
@@ -401,13 +417,20 @@ export default function Settings() {
       const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
-      const response = await fetch(`${apiUrl}/api/users/settings`, {
-        method: 'PUT',
+      // Zapisz ustawienia layoutu
+      const layoutSettings = {
+        theme: settings.theme,
+        layout: settings.preferences.compactView ? 'compact' : 'modern',
+        language: settings.language
+      };
+      
+      const response = await fetch(`${apiUrl}/api/users/layout-settings`, {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(settings)
+        body: JSON.stringify(layoutSettings)
       });
 
       if (response.ok) {
@@ -417,7 +440,13 @@ export default function Settings() {
         // Zastosuj zmiany motywu
         if (settings.theme) {
           document.documentElement.setAttribute('data-theme', settings.theme);
+          localStorage.setItem('theme', settings.theme);
         }
+        
+        // Odśwież stronę aby zastosować zmiany
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       } else {
         const error = await response.json();
         setMessage({ type: 'error', text: error.message || 'Błąd podczas zapisywania ustawień' });
