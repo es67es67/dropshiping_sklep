@@ -26,7 +26,7 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       firstName: firstName || '',
       lastName: lastName || '',
-      location: location || '',
+      // location: location || '', // Usuwamy to, bo location to ObjectId
       level: 1,
       points: 0,
       isOnline: true,

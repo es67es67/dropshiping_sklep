@@ -134,7 +134,7 @@ router.get('/counties/:countyCode/municipalities', locationController.getMunicip
 router.get('/analytics', locationController.getLocationAnalytics);
 
 // Import danych lokalizacji
-router.post('/import', authMiddleware, (req, res) => {
+router.post('/import', authMiddleware.authenticateToken, (req, res) => {
   // TODO: Implementacja importu
   res.json({ 
     success: true, 
@@ -147,7 +147,7 @@ router.post('/import', authMiddleware, (req, res) => {
 });
 
 // Eksport danych lokalizacji
-router.post('/export', authMiddleware, (req, res) => {
+router.post('/export', authMiddleware.authenticateToken, (req, res) => {
   // TODO: Implementacja eksportu
   res.json({
     success: true,
@@ -159,7 +159,7 @@ router.post('/export', authMiddleware, (req, res) => {
 });
 
 // Pobierz wygenerowany plik eksportu
-router.get('/export/download/:token', authMiddleware, (req, res) => {
+router.get('/export/download/:token', authMiddleware.authenticateToken, (req, res) => {
   // TODO: Implementacja pobierania pliku
   res.json({ message: 'Plik eksportu' });
 });

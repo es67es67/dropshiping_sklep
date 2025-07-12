@@ -1,7 +1,20 @@
 {
+  "name": "portal-monitoring",
+  "version": "1.0.0",
+  "description": "Portal e-commerce z monitoringiem",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "monitor": "node monitoring/portal-monitor.js",
+    "monitor-render": "node monitoring/render-monitor.js",
+    "monitor-portal": "node monitoring/portal-tests.js"
+  },
   "dependencies": {
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.2",
-    "mongoose": "^8.16.1"
-  }
+    "puppeteer": "^21.0.0",
+    "nodemailer": "^6.9.0",
+    "fs-extra": "^11.0.0"
+  },
+  "keywords": ["monitoring", "e-commerce", "portal"],
+  "author": "",
+  "license": "ISC"
 }

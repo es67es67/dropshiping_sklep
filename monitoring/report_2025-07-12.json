@@ -1,0 +1,43 @@
+{
+  "timestamp": "2025-07-12T06:54:37.385Z",
+  "totalTests": 5,
+  "passedTests": 0,
+  "failedTests": 5,
+  "results": [
+    {
+      "test": "Portal Health",
+      "success": false,
+      "message": "Strona nie załadowała się poprawnie",
+      "timestamp": "2025-07-12T06:53:52.340Z",
+      "screenshot": "D:\\portal\\monitoring\\screenshots\\portal-health-error_2025-07-12T06-53-52-066Z.png"
+    },
+    {
+      "test": "Registration",
+      "success": false,
+      "message": "Błąd: Waiting for selector `input[type=\"email\"]` failed: Waiting failed: 10000ms exceeded",
+      "timestamp": "2025-07-12T06:54:04.329Z",
+      "screenshot": "D:\\portal\\monitoring\\screenshots\\registration-error_2025-07-12T06-54-04-092Z.png"
+    },
+    {
+      "test": "Login",
+      "success": false,
+      "message": "Błąd: Waiting for selector `input[type=\"email\"]` failed: Waiting failed: 10000ms exceeded",
+      "timestamp": "2025-07-12T06:54:15.361Z",
+      "screenshot": "D:\\portal\\monitoring\\screenshots\\login-error_2025-07-12T06-54-15-108Z.png"
+    },
+    {
+      "test": "Shop Creation",
+      "success": false,
+      "message": "Błąd: Waiting for selector `input[name=\"name\"]` failed: Waiting failed: 10000ms exceeded",
+      "timestamp": "2025-07-12T06:54:26.364Z",
+      "screenshot": "D:\\portal\\monitoring\\screenshots\\shop-creation-error_2025-07-12T06-54-26-130Z.png"
+    },
+    {
+      "test": "Product Creation",
+      "success": false,
+      "message": "Błąd: Waiting for selector `input[name=\"name\"]` failed: Waiting failed: 10000ms exceeded",
+      "timestamp": "2025-07-12T06:54:37.383Z",
+      "screenshot": "D:\\portal\\monitoring\\screenshots\\product-creation-error_2025-07-12T06-54-37-152Z.png"
+    }
+  ]
+}

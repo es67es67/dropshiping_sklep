@@ -4,7 +4,7 @@ const postController = require('../controllers/postController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // Wszystkie routes wymagają autoryzacji
-router.use(authMiddleware);
+router.use(authMiddleware.authenticateToken);
 
 // Posty
 router.post('/', postController.createPost);

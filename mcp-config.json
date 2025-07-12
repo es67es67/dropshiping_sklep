@@ -1,0 +1,186 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN_HERE",
+        "GITHUB_REPO": "YOUR_USERNAME/portal"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "env": {
+        "MCP_FILESYSTEM_ROOT": "D:/portal"
+      }
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "YOUR_BRAVE_API_KEY_HERE"
+      }
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "YOUR_MONGODB_CONNECTION_STRING_HERE"
+      }
+    },
+    "render": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-render"],
+      "env": {
+        "RENDER_API_KEY": "YOUR_RENDER_API_KEY_HERE"
+      }
+    },
+    "web-browser": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-web-browser"],
+      "env": {
+        "BROWSER_HEADLESS": "true"
+      }
+    },
+    "terminal": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-terminal"],
+      "env": {
+        "TERMINAL_SHELL": "powershell.exe"
+      }
+    },
+    "sentry": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sentry"],
+      "env": {
+        "SENTRY_DSN": "YOUR_SENTRY_DSN_HERE",
+        "SENTRY_ORG": "YOUR_ORG_SLUG",
+        "SENTRY_PROJECT": "portal-ecommerce"
+      }
+    },
+    "cypress": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-cypress"],
+      "env": {
+        "CYPRESS_PROJECT_PATH": "D:/portal/frontend"
+      }
+    },
+    "mongodb": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-mongodb"],
+      "env": {
+        "MONGODB_URI": "YOUR_MONGODB_URI_HERE",
+        "MONGODB_DATABASE": "portal"
+      }
+    },
+    "screenshot": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-screenshot"],
+      "env": {
+        "SCREENSHOT_OUTPUT_DIR": "D:/portal/screenshots",
+        "SCREENSHOT_BROWSER": "chrome",
+        "SCREENSHOT_TARGET_URL": "https://portal-frontend-ysqz.onrender.com/"
+      }
+    },
+    "performance": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-performance"],
+      "env": {
+        "PERFORMANCE_TARGET_URL": "https://portal-frontend-ysqz.onrender.com/",
+        "PERFORMANCE_OUTPUT_DIR": "D:/portal/performance-reports"
+      }
+    },
+    "error-monitoring": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-error-monitoring"],
+      "env": {
+        "ERROR_LOG_PATH": "D:/portal/backend/logs",
+        "ERROR_SCREENSHOT_DIR": "D:/portal/error-screenshots"
+      }
+    },
+    "render-logs": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-render-logs"],
+      "env": {
+        "RENDER_API_KEY": "YOUR_RENDER_API_KEY_HERE",
+        "RENDER_SERVICE_ID_FRONTEND": "YOUR_FRONTEND_SERVICE_ID",
+        "RENDER_SERVICE_ID_BACKEND": "YOUR_BACKEND_SERVICE_ID",
+        "LOG_OUTPUT_DIR": "D:/portal/render-logs"
+      }
+    },
+    "firefox-devtools": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-firefox-devtools"],
+      "env": {
+        "FIREFOX_PROFILE_PATH": "C:/Users/%USERNAME%/AppData/Roaming/Mozilla/Firefox/Profiles",
+        "DEVTOOLS_PORT": "9222",
+        "CONSOLE_LOG_DIR": "D:/portal/firefox-logs"
+      }
+    },
+    "browser-console": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-browser-console"],
+      "env": {
+        "BROWSER_TYPE": "firefox",
+        "CONSOLE_LOG_PATH": "D:/portal/browser-console-logs",
+        "AUTO_SCREENSHOT_ON_ERROR": "true"
+      }
+    },
+    "web-monitoring": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-web-monitoring"],
+      "env": {
+        "TARGET_URLS": "https://portal-frontend-ysqz.onrender.com,https://portal-backend-igf9.onrender.com",
+        "MONITOR_INTERVAL": "30",
+        "ERROR_NOTIFICATION": "true",
+        "SCREENSHOT_ON_ERROR": "true"
+      }
+    }
+  },
+  "monitoring": {
+    "portal": {
+      "frontend_url": "https://portal-frontend-ysqz.onrender.com/",
+      "backend_url": "https://portal-backend-igf9.onrender.com/",
+      "check_interval": 300,
+      "screenshot_on_error": true,
+      "performance_monitoring": true
+    }
+  },
+  "notifications": {
+    "discord": {
+      "webhook_url": "YOUR_DISCORD_WEBHOOK_URL",
+      "enabled": true
+    },
+    "email": {
+      "smtp_host": "smtp.gmail.com",
+      "smtp_port": 587,
+      "email": "YOUR_EMAIL@gmail.com",
+      "password": "YOUR_APP_PASSWORD",
+      "enabled": false
+    }
+  },
+  "automation": {
+    "auto_deploy": {
+      "enabled": true,
+      "trigger_on_push": true,
+      "run_tests": true
+    },
+    "backup": {
+      "enabled": true,
+      "schedule": "0 2 * * *",
+      "backup_path": "D:/portal/backups"
+    },
+    "health_check": {
+      "enabled": true,
+      "check_interval": 60,
+      "endpoints": [
+        "/api/health",
+        "/api/shops",
+        "/api/products",
+        "/api/users",
+        "/api/locations"
+      ]
+    }
+  }
+} 
