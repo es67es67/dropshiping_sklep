@@ -222,19 +222,20 @@ const Select = styled.select`
   }
 `;
 
-export default function ShopProducts({ shopId, theme }) {
+export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [shopOwner, setShopOwner] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
     category: '',
     brand: '',
-    stock: '',
+    stock: '0',
     images: []
   });
 
@@ -251,9 +252,34 @@ export default function ShopProducts({ shopId, theme }) {
     'Inne'
   ];
 
+  // Sprawdź czy użytkownik jest właścicielem sklepu
+  const isOwner = propIsOwner !== undefined ? propIsOwner : (shopOwner && user && shopOwner._id === user._id);
+
   useEffect(() => {
+    fetchShopDetails();
     fetchProducts();
   }, [shopId]);
+
+  const fetchShopDetails = async () => {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/shops/${shopId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const shopData = await response.json();
+        setShopOwner(shopData.owner);
+      }
+    } catch (error) {
+      console.error('Błąd podczas pobierania szczegółów sklepu:', error);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -295,9 +321,9 @@ export default function ShopProducts({ shopId, theme }) {
       
       const productData = {
         ...formData,
-        shop: shopId,
+        shopId: shopId, // Backend oczekuje shopId
         price: parseFloat(formData.price),
-        stock: parseInt(formData.stock)
+        stock: parseInt(formData.stock) || 0
       };
 
       const url = editingProduct 
@@ -339,7 +365,7 @@ export default function ShopProducts({ shopId, theme }) {
       price: product.price.toString(),
       category: product.category,
       brand: product.brand || '',
-      stock: product.stock.toString(),
+      stock: (product.stock || 0).toString(),
       images: product.images || []
     });
     setShowAddModal(true);
@@ -380,7 +406,7 @@ export default function ShopProducts({ shopId, theme }) {
       price: '',
       category: '',
       brand: '',
-      stock: '',
+      stock: '0',
       images: []
     });
   };
@@ -401,9 +427,11 @@ export default function ShopProducts({ shopId, theme }) {
       
       <Header>
         <h2>Lista produktów ({products.length})</h2>
-        <Button onClick={() => setShowAddModal(true)}>
-          ➕ Dodaj produkt
-        </Button>
+        {isOwner && (
+          <Button onClick={() => setShowAddModal(true)}>
+            ➕ Dodaj produkt
+          </Button>
+        )}
       </Header>
 
       {products.length === 0 ? (
@@ -423,18 +451,22 @@ export default function ShopProducts({ shopId, theme }) {
               <ProductPrice>{product.price} zł</ProductPrice>
               <ProductDescription>{product.description}</ProductDescription>
               <ProductActions>
-                <ActionButton 
-                  className="edit" 
-                  onClick={() => handleEdit(product)}
-                >
-                  ✏️ Edytuj
-                </ActionButton>
-                <ActionButton 
-                  className="delete" 
-                  onClick={() => handleDelete(product._id)}
-                >
-                  🗑️ Usuń
-                </ActionButton>
+                {isOwner && (
+                  <>
+                    <ActionButton 
+                      className="edit" 
+                      onClick={() => handleEdit(product)}
+                    >
+                      ✏️ Edytuj
+                    </ActionButton>
+                    <ActionButton 
+                      className="delete" 
+                      onClick={() => handleDelete(product._id)}
+                    >
+                      🗑️ Usuń
+                    </ActionButton>
+                  </>
+                )}
               </ProductActions>
             </ProductCard>
           ))}

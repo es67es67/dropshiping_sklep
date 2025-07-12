@@ -563,6 +563,7 @@ export default function ProductCreate() {
     sku: '',
     weight: '',
     dimensions: '',
+    stock: '0',
     tags: [],
     shopId: ''
   });
@@ -700,11 +701,12 @@ export default function ProductCreate() {
         price: parseFloat(formData.price),
         category: formData.category,
         location: 'Polska', // Domyślna lokalizacja
-        shopId: formData.shopId,
+        shopId: formData.shopId, // Backend oczekuje shopId
         brand: formData.brand,
         sku: formData.sku,
         weight: formData.weight,
         dimensions: formData.dimensions,
+        stock: parseInt(formData.stock) || 0,
         tags: formData.tags
       };
       
@@ -736,6 +738,7 @@ export default function ProductCreate() {
         sku: '',
         weight: '',
         dimensions: '',
+        stock: '0',
         tags: [],
         shopId: formData.shopId // Zachowaj wybrany sklep
       });
@@ -761,6 +764,7 @@ export default function ProductCreate() {
         sku: '',
         weight: '',
         dimensions: '',
+        stock: '0',
         tags: [],
         shopId: formData.shopId // Zachowaj wybrany sklep
       });
@@ -914,6 +918,18 @@ export default function ProductCreate() {
                 value={formData.sku}
                 onChange={handleInputChange}
                 placeholder="Kod produktu"
+              />
+            </FormRow>
+            
+            <FormRow>
+              <Label>Stan magazynowy</Label>
+              <Input
+                type="number"
+                name="stock"
+                value={formData.stock}
+                onChange={handleInputChange}
+                placeholder="0"
+                min="0"
               />
             </FormRow>
             

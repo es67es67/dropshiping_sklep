@@ -4,7 +4,20 @@ const Location = require('../models/locationModel'); // Dodane import dla Locati
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, price, description, category, location, shopId } = req.body;
+    const { 
+      name, 
+      price, 
+      description, 
+      category, 
+      location, 
+      shopId,
+      stock,
+      brand,
+      sku,
+      weight,
+      dimensions,
+      tags
+    } = req.body;
     
     // Sprawdź czy użytkownik podał shopId
     if (!shopId) {
@@ -42,7 +55,13 @@ exports.createProduct = async (req, res) => {
       description, 
       category, 
       location: productLocation,
-      shop: shopId, 
+      shop: shopId,
+      stock: stock || 0,
+      brand: brand || '',
+      sku: sku || '',
+      weight: weight || 0,
+      dimensions: dimensions || '',
+      tags: tags || [],
       images 
     });
     await product.save();

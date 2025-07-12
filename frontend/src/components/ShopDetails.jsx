@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import ShopProducts from './ShopProducts';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -384,50 +385,45 @@ const Tab = styled.button`
 
 export default function ShopDetails({ theme }) {
   const { shopId } = useParams();
+  const { user } = useAuth();
   const [shop, setShop] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('details');
 
-  // Symulowane dane sklepu
-  const mockShop = {
-    id: shopId,
-    name: 'TechStore Pro',
-    description: 'Sklep z elektroniką i akcesoriami komputerowymi. Oferujemy szeroki wybór laptopów, smartfonów, tabletów i akcesoriów. Wszystkie produkty są oryginalne i objęte gwarancją producenta.',
-    category: 'electronics',
-    status: 'open',
-    location: 'Warszawa, Śródmieście',
-    address: 'ul. Marszałkowska 123, 00-001 Warszawa',
-    phone: '+48 123 456 789',
-    email: 'kontakt@techstorepro.pl',
-    website: 'www.techstorepro.pl',
-    rating: 4.8,
-    reviews: 156,
-    products: 234,
-    orders: 1247,
-    revenue: '2.5M PLN',
-    image: '💻',
-    founded: '2020',
-    employees: 15,
-    delivery: ['Kurier', 'Paczkomat', 'Odbiór osobisty'],
-    payment: ['Karta', 'Przelew', 'Pobranie', 'PayPal'],
-    hours: {
-      monday: '9:00 - 18:00',
-      tuesday: '9:00 - 18:00',
-      wednesday: '9:00 - 18:00',
-      thursday: '9:00 - 18:00',
-      friday: '9:00 - 18:00',
-      saturday: '10:00 - 16:00',
-      sunday: 'Zamknięte'
-    }
-  };
+  // Sprawdź czy użytkownik jest właścicielem sklepu
+  const isOwner = shop && user && shop.owner && shop.owner._id === user._id;
 
   useEffect(() => {
-    // Symulacja ładowania danych
-    setTimeout(() => {
-      setShop(mockShop);
-      setLoading(false);
-    }, 1000);
+    fetchShopDetails();
   }, [shopId]);
+
+  const fetchShopDetails = async () => {
+    try {
+      setLoading(true);
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/shops/${shopId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Nie udało się pobrać szczegółów sklepu');
+      }
+
+      const shopData = await response.json();
+      setShop(shopData);
+    } catch (err) {
+      console.error('Błąd podczas pobierania szczegółów sklepu:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -435,6 +431,21 @@ export default function ShopDetails({ theme }) {
         <div style={{ textAlign: 'center', padding: '4rem' }}>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
           <p>Ładowanie szczegółów sklepu...</p>
+        </div>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <div style={{ textAlign: 'center', padding: '4rem' }}>
+          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>❌</div>
+          <h3>Błąd podczas ładowania sklepu</h3>
+          <p>{error}</p>
+          <button onClick={fetchShopDetails} style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>
+            Spróbuj ponownie
+          </button>
         </div>
       </Container>
     );
@@ -462,47 +473,65 @@ export default function ShopDetails({ theme }) {
 
       <ShopHero>
         <ShopHeader>
-          <ShopLogo>{shop.image}</ShopLogo>
+          <ShopLogo>🏪</ShopLogo>
           <ShopInfo>
             <ShopName>{shop.name}</ShopName>
             <ShopDescription>{shop.description}</ShopDescription>
-            <StatusBadge status={shop.status}>
-              {shop.status === 'open' ? '🟢 Otwarte' : '🔴 Zamknięte'}
+            <StatusBadge status={shop.isActive ? 'open' : 'closed'}>
+              {shop.isActive ? '🟢 Aktywny' : '🔴 Nieaktywny'}
             </StatusBadge>
           </ShopInfo>
         </ShopHeader>
 
         <ShopStats>
           <Stat>
-            <StatValue>{shop.rating}</StatValue>
+            <StatValue>{shop.rating || 'Brak'}</StatValue>
             <StatLabel>Ocena</StatLabel>
           </Stat>
           <Stat>
-            <StatValue>{shop.reviews}</StatValue>
+            <StatValue>{shop.stats?.totalReviews || 0}</StatValue>
             <StatLabel>Recenzje</StatLabel>
           </Stat>
           <Stat>
-            <StatValue>{shop.products}</StatValue>
+            <StatValue>{shop.stats?.totalProducts || 0}</StatValue>
             <StatLabel>Produktów</StatLabel>
           </Stat>
           <Stat>
-            <StatValue>{shop.orders}</StatValue>
+            <StatValue>{shop.stats?.totalOrders || 0}</StatValue>
             <StatLabel>Zamówień</StatLabel>
           </Stat>
         </ShopStats>
 
         <ActionButtons>
-          <ActionButton className="primary">
-            🛒 Przejdź do sklepu
-          </ActionButton>
-          <Link to={`/shop/${shopId}/live`} style={{ textDecoration: 'none', flex: 1 }}>
-            <ActionButton className="secondary">
-              🎥 Live Shopping
-            </ActionButton>
-          </Link>
-          <ActionButton className="secondary">
-            💬 Skontaktuj się
-          </ActionButton>
+          {isOwner ? (
+            <>
+              <Link to={`/shop/${shopId}/edit`} style={{ textDecoration: 'none', flex: 1 }}>
+                <ActionButton className="primary">
+                  ✏️ Edytuj sklep
+                </ActionButton>
+              </Link>
+              <Link to={`/shop/${shopId}/live`} style={{ textDecoration: 'none', flex: 1 }}>
+                <ActionButton className="secondary">
+                  🎥 Live Shopping
+                </ActionButton>
+              </Link>
+              <ActionButton className="secondary">
+                📊 Statystyki
+              </ActionButton>
+            </>
+          ) : (
+            <>
+              <ActionButton className="primary">
+                🛒 Przejdź do sklepu
+              </ActionButton>
+              <ActionButton className="secondary">
+                💬 Skontaktuj się
+              </ActionButton>
+              <ActionButton className="secondary">
+                👁️ Obserwuj
+              </ActionButton>
+            </>
+          )}
         </ActionButtons>
       </ShopHero>
 
@@ -525,41 +554,57 @@ export default function ShopDetails({ theme }) {
         <ShopDetailsContainer>
           <DetailSection>
             <SectionTitle>📞 Informacje kontaktowe</SectionTitle>
-            <DetailItem>
-              <DetailLabel>Adres:</DetailLabel>
-              <DetailValue>{shop.address}</DetailValue>
-            </DetailItem>
-            <DetailItem>
-              <DetailLabel>Telefon:</DetailLabel>
-              <DetailValue>{shop.phone}</DetailValue>
-            </DetailItem>
-            <DetailItem>
-              <DetailLabel>Email:</DetailLabel>
-              <DetailValue>{shop.email}</DetailValue>
-            </DetailItem>
-            <DetailItem>
-              <DetailLabel>Strona WWW:</DetailLabel>
-              <DetailValue>{shop.website}</DetailValue>
-            </DetailItem>
+            {shop.address && (
+              <DetailItem>
+                <DetailLabel>Adres:</DetailLabel>
+                <DetailValue>{shop.address.street} {shop.address.houseNumber}, {shop.address.postalCode} {shop.address.city}</DetailValue>
+              </DetailItem>
+            )}
+            {shop.phone && (
+              <DetailItem>
+                <DetailLabel>Telefon:</DetailLabel>
+                <DetailValue>{shop.phone}</DetailValue>
+              </DetailItem>
+            )}
+            {shop.email && (
+              <DetailItem>
+                <DetailLabel>Email:</DetailLabel>
+                <DetailValue>{shop.email}</DetailValue>
+              </DetailItem>
+            )}
+            {shop.website && (
+              <DetailItem>
+                <DetailLabel>Strona WWW:</DetailLabel>
+                <DetailValue>{shop.website}</DetailValue>
+              </DetailItem>
+            )}
+            {shop.location && (
+              <DetailItem>
+                <DetailLabel>Lokalizacja:</DetailLabel>
+                <DetailValue>{shop.location.name}</DetailValue>
+              </DetailItem>
+            )}
           </DetailSection>
 
           <DetailSection>
             <SectionTitle>🏢 Informacje o firmie</SectionTitle>
+            {shop.categories && shop.categories.length > 0 && (
+              <DetailItem>
+                <DetailLabel>Kategorie:</DetailLabel>
+                <DetailValue>{shop.categories.join(', ')}</DetailValue>
+              </DetailItem>
+            )}
             <DetailItem>
-              <DetailLabel>Kategoria:</DetailLabel>
-              <DetailValue>{shop.category}</DetailValue>
+              <DetailLabel>Właściciel:</DetailLabel>
+              <DetailValue>{shop.owner?.firstName} {shop.owner?.lastName} ({shop.owner?.username})</DetailValue>
             </DetailItem>
             <DetailItem>
-              <DetailLabel>Założony:</DetailLabel>
-              <DetailValue>{shop.founded}</DetailValue>
+              <DetailLabel>Utworzony:</DetailLabel>
+              <DetailValue>{new Date(shop.createdAt).toLocaleDateString('pl-PL')}</DetailValue>
             </DetailItem>
             <DetailItem>
-              <DetailLabel>Pracowników:</DetailLabel>
-              <DetailValue>{shop.employees}</DetailValue>
-            </DetailItem>
-            <DetailItem>
-              <DetailLabel>Przychód:</DetailLabel>
-              <DetailValue>{shop.revenue}</DetailValue>
+              <DetailLabel>Status:</DetailLabel>
+              <DetailValue>{shop.isActive ? 'Aktywny' : 'Nieaktywny'}</DetailValue>
             </DetailItem>
           </DetailSection>
 
@@ -596,7 +641,7 @@ export default function ShopDetails({ theme }) {
       )}
 
       {activeTab === 'products' && (
-        <ShopProducts shopId={shopId} theme={theme} />
+        <ShopProducts shopId={shopId} theme={theme} isOwner={isOwner} />
       )}
     </Container>
   );

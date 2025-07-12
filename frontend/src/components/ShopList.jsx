@@ -411,7 +411,7 @@ export default function ShopList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('all');
   const [status, setStatus] = useState('all');
-  const [showAllShops, setShowAllShops] = useState(false);
+  const [showAllShops, setShowAllShops] = useState(false); // Domyślnie false - tylko sklepy użytkownika
 
   useEffect(() => {
     fetchShops();
@@ -434,7 +434,7 @@ export default function ShopList() {
       const token = localStorage.getItem('token');
       
       // Wybierz endpoint w zależności od filtra
-      const endpoint = showAllShops ? '/api/shops/all' : '/api/shops';
+      const endpoint = showAllShops ? '/api/shops' : '/api/shops/user';
       
       const response = await fetch(`${apiUrl}${endpoint}`, {
         headers: {
@@ -539,7 +539,7 @@ export default function ShopList() {
             fontWeight: '600'
           }}
         >
-          {showAllShops ? '🔒 Tylko aktywne' : '🔓 Wszystkie sklepy'}
+          {showAllShops ? '🔒 Moje sklepy' : '🔓 Wszystkie sklepy'}
         </button>
       </Filters>
 
