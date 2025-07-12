@@ -73,8 +73,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// Enhanced middleware
+const { rateLimiter, logRequest } = require('./middleware/authMiddleware');
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Apply enhanced middleware
+app.use(rateLimiter);
+app.use(logRequest);
 
 // Middleware do usuwania restrykcyjnych nagłówków bezpieczeństwa
 app.use((req, res, next) => {
