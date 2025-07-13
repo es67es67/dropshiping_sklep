@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 exports.register = async (req, res) => {
   try {
-    const { username, email, password, firstName, lastName, location } = req.body;
+    const { username, email, password, firstName, lastName, location, dateOfBirth, phone, city } = req.body;
     
     // Sprawdź czy użytkownik już istnieje
     const existingUser = await User.findOne({ 
@@ -26,6 +26,11 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       firstName: firstName || '',
       lastName: lastName || '',
+      dateOfBirth: dateOfBirth || null, // Dodaję obsługę daty urodzenia
+      phone: phone || '',
+      address: {
+        city: city || ''
+      },
       // location: location || '', // Usuwamy to, bo location to ObjectId
       level: 1,
       points: 0,

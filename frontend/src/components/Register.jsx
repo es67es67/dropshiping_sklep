@@ -361,9 +361,10 @@ export default function Register() {
     password: '',
     confirmPassword: '',
     phone: '',
-    birthDate: '',
+    dateOfBirth: '', // Zmieniam z birthDate na dateOfBirth
     gender: '',
     city: '',
+    username: '', // Dodaję username
     acceptTerms: false,
     acceptNewsletter: false
   });
@@ -448,12 +449,16 @@ export default function Register() {
       newErrors.phone = 'Telefon jest wymagany';
     }
     
-    if (!formData.birthDate) {
-      newErrors.birthDate = 'Data urodzenia jest wymagana';
+    if (!formData.dateOfBirth) {
+      newErrors.dateOfBirth = 'Data urodzenia jest wymagana';
     }
     
     if (!formData.city.trim()) {
       newErrors.city = 'Miasto jest wymagane';
+    }
+    
+    if (!formData.username.trim()) {
+      newErrors.username = 'Nazwa użytkownika jest wymagana';
     }
     
     if (!formData.acceptTerms) {
@@ -607,13 +612,13 @@ export default function Register() {
             <Label>Data urodzenia *</Label>
             <Input
               type="date"
-              name="birthDate"
-              value={formData.birthDate}
+              name="dateOfBirth"
+              value={formData.dateOfBirth}
               onChange={handleInputChange}
               disabled={isLoading}
-              className={errors.birthDate ? 'error' : ''}
+              className={errors.dateOfBirth ? 'error' : ''}
             />
-            {errors.birthDate && <ErrorMessage>{errors.birthDate}</ErrorMessage>}
+            {errors.dateOfBirth && <ErrorMessage>{errors.dateOfBirth}</ErrorMessage>}
           </FormGroup>
         </FormGrid>
         
@@ -647,6 +652,20 @@ export default function Register() {
             {errors.city && <ErrorMessage>{errors.city}</ErrorMessage>}
           </FormGroup>
         </FormGrid>
+        
+        <FormGroup>
+          <Label>Nazwa użytkownika *</Label>
+          <Input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleInputChange}
+            placeholder="Wprowadź nazwę użytkownika"
+            disabled={isLoading}
+            className={errors.username ? 'error' : ''}
+          />
+          {errors.username && <ErrorMessage>{errors.username}</ErrorMessage>}
+        </FormGroup>
         
         <FormGroup className="full-width">
           <CheckboxContainer>

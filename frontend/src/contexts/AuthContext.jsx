@@ -40,22 +40,24 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
-  const login = async (loginData) => {
+  const login = async (credentials) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
-      const response = await fetch(`${apiUrl}/api/users/login`, {
+      console.log('Logowanie użytkownika:', credentials);
+      
+      // Wyślij dane do backendu
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(loginData),
+        body: JSON.stringify(credentials),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const data = await response.json();
+      
+      if (!response.ok) {
+        return { success: false, error: data.error || 'Wystąpił błąd podczas logowania' };
+      }
 
       const userData = {
         ...data.user,
@@ -82,33 +84,51 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      // Symulacja rejestracji
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Rejestracja użytkownika:', userData);
       
-      // Sprawdź czy email już istnieje
-      if (userData.email === 'test@example.com') {
-        return { success: false, error: 'Użytkownik z tym adresem email już istnieje' };
+      // Wyślij dane do backendu
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/users/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: userData.username,
+          email: userData.email,
+          password: userData.password,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          dateOfBirth: userData.dateOfBirth,
+          phone: userData.phone,
+          city: userData.city,
+          gender: userData.gender
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        return { success: false, error: data.error || 'Wystąpił błąd podczas rejestracji' };
       }
       
       const newUser = {
-        id: Date.now(),
-        ...userData,
-        role: 'user',
+        ...data.user,
         isLoggedIn: true,
         registrationTime: new Date().toISOString(),
-        avatar: '👤',
-        level: 1,
-        experience: 0
       };
+      
+      console.log('Rejestracja udana:', newUser);
       
       localStorage.setItem('user', JSON.stringify(newUser));
       localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('token', data.token);
       
       setUser(newUser);
       setIsAuthenticated(true);
       
       return { success: true, user: newUser };
     } catch (error) {
+      console.error('Błąd rejestracji:', error);
       return { success: false, error: 'Wystąpił błąd podczas rejestracji' };
     }
   };

@@ -114,7 +114,9 @@ async function testPortalComprehensive() {
             email: `test${timestamp}@example.com`,
             password: 'Test123!',
             phone: '+48 123 456 789',
-            city: 'Warszawa'
+            city: 'Warszawa',
+            dateOfBirth: '1990-01-01', // Dodaję datę urodzenia
+            username: `testuser${timestamp}` // Dodaję username
         };
         
         await page.goto(`${frontendUrl}/register`);
@@ -128,6 +130,8 @@ async function testPortalComprehensive() {
         await page.type('input[name="confirmPassword"]', testUser.password);
         await page.type('input[name="phone"]', testUser.phone);
         await page.type('input[name="city"]', testUser.city);
+        await page.type('input[name="username"]', testUser.username);
+        await page.type('input[name="dateOfBirth"]', testUser.dateOfBirth);
         await page.click('input[name="acceptTerms"]');
         await page.click('input[name="acceptNewsletter"]');
         
