@@ -38,32 +38,73 @@ const io = socketIo(server, {
   }
 });
 
+// Dynamic CORS configuration
 app.use(cors({
-  origin: [
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://portal-frontend.onrender.com',
+      'https://portal-frontend-igf9.onrender.com',
+      'https://portal-frontend-ysqz.onrender.com'
+    ];
+    
+    // Allow requests without origin (like mobile apps or Postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`🚨 CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Origin', 'Accept'],
+  optionsSuccessStatus: 200
+}));
+
+// Dodatkowe nagłówki CORS dla wszystkich żądań
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
     'http://localhost:3000',
     'https://portal-frontend.onrender.com',
     'https://portal-frontend-igf9.onrender.com',
     'https://portal-frontend-ysqz.onrender.com'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200
-}));
-
-// Middleware do logowania żądań
-app.use((req, res, next) => {
-  console.log(`🌐 ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
-  console.log('Headers:', req.headers);
+  ];
   
-  // Dodaj nagłówki CORS dla wszystkich żądań
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
+  next();
+});
+
+// Middleware do logowania żądań
+app.use((req, res, next) => {
+  console.log(`🌐 ${req.method} ${req.path} - Origin: ${req.headers.origin || 'No origin'} - IP: ${req.ip}`);
+  
+  // Dodaj nagłówki CORS dla wszystkich żądań
+  if (req.headers.origin) {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+  }
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
   // Obsłuż preflight requests
   if (req.method === 'OPTIONS') {
+    console.log(`✅ Preflight request handled for ${req.path}`);
     res.sendStatus(200);
     return;
   }
@@ -241,17 +282,110 @@ app.use('/api/products', (req, res, next) => {
   const search = req.query.search;
   if (search) {
     // Prosta detekcja XSS/NoSQL injection
-    const xssPattern = /<script|onerror=|javascript:|\$where|\$regex|\$ne|\$gt|\$lt|\$in|\$or|\$and|\$nor|\$not|\$exists|\$expr|\$function|\$accumulator/i;
+    const xssPattern = /<script|onerror=|javascript:|\\$where|\\$regex|\\$ne|\\$gt|\\$lt|\\$in|\\$or|\\$and|\\$nor|\\$not|\\$exists|\\$expr|\\$function|\\$accumulator/i;
     if (xssPattern.test(search)) {
+      console.warn(`🚨 Wykryto próbę ataku XSS/NoSQL: ${search}`);
       return res.status(403).json({ error: 'Wykryto próbę ataku XSS lub NoSQL injection w parametrze wyszukiwania.' });
     }
   }
   next();
 });
 
-// Health check
+// Dodatkowe nagłówki CORS dla preflight requests
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://portal-frontend.onrender.com',
+    'https://portal-frontend-igf9.onrender.com',
+    'https://portal-frontend-ysqz.onrender.com'
+  ];
+  
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.status(200).end();
+});
+
+// Endpoint dla sugestii wyszukiwania (brakujący endpoint)
+app.get('/api/search/suggestions', (req, res) => {
+  const query = req.query.q || '';
+  
+  // Prosta detekcja XSS/NoSQL injection
+  const xssPattern = /<script|onerror=|javascript:|\\$where|\\$regex|\\$ne|\\$gt|\\$lt|\\$in|\\$or|\\$and|\\$nor|\\$not|\\$exists|\\$expr|\\$function|\\$accumulator/i;
+  if (xssPattern.test(query)) {
+    console.warn(`🚨 Wykryto próbę ataku XSS/NoSQL w sugestiach: ${query}`);
+    return res.status(403).json({ error: 'Wykryto próbę ataku XSS lub NoSQL injection w parametrze wyszukiwania.' });
+  }
+  
+  // Zwróć puste sugestie (można rozszerzyć o prawdziwe sugestie)
+  res.json({
+    suggestions: [],
+    query: query,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Endpoint dla wyszukiwania produktów z sugestiami
+app.get('/api/search', (req, res) => {
+  const query = req.query.q || '';
+  
+  // Prosta detekcja XSS/NoSQL injection
+  const xssPattern = /<script|onerror=|javascript:|\\$where|\\$regex|\\$ne|\\$gt|\\$lt|\\$in|\\$or|\\$and|\\$nor|\\$not|\\$exists|\\$expr|\\$function|\\$accumulator/i;
+  if (xssPattern.test(query)) {
+    console.warn(`🚨 Wykryto próbę ataku XSS/NoSQL w wyszukiwaniu: ${query}`);
+    return res.status(403).json({ error: 'Wykryto próbę ataku XSS lub NoSQL injection w parametrze wyszukiwania.' });
+  }
+  
+  // Zwróć puste wyniki (można rozszerzyć o prawdziwe wyszukiwanie)
+  res.json({
+    results: [],
+    query: query,
+    total: 0,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// 404 handler for API routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ 
+    error: 'Endpoint not found', 
+    path: req.path,
+    method: req.method,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// 404 handler for all other routes
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    error: 'Route not found', 
+    path: req.path,
+    method: req.method,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Portal działa poprawnie!' });
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// API status endpoint
+app.get('/api/status', (req, res) => {
+  res.json({ 
+    status: 'running',
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Error handling middleware

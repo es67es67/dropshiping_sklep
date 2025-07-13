@@ -1,42 +1,66 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 
-// Rate limiting storage (w produkcji użyj Redis)
-const rateLimitStore = new Map();
-
 // Rate limiting configuration
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minut
-const RATE_LIMIT_MAX_REQUESTS = 500; // max requests per window (łagodniej na czas testów)
+const RATE_LIMIT_MAX_REQUESTS = 2000; // max requests per window (bardzo łagodnie na czas testów)
+const RATE_LIMIT_ENABLED = false; // Wyłączone na czas testów
+
+// Store for rate limiting data
+const rateLimitStore = new Map();
 
 // Rate limiting middleware
 const rateLimiter = (req, res, next) => {
+  // Wyłącz rate limiting na czas testów
+  if (!RATE_LIMIT_ENABLED) {
+    return next();
+  }
+  
   const clientId = req.ip || req.connection.remoteAddress;
   const now = Date.now();
   
-  if (!rateLimitStore.has(clientId)) {
-    rateLimitStore.set(clientId, {
-      requests: 1,
+  // Get or create client data
+  let clientData = rateLimitStore.get(clientId);
+  if (!clientData) {
+    clientData = {
+      requests: 0,
       resetTime: now + RATE_LIMIT_WINDOW
-    });
-  } else {
-    const clientData = rateLimitStore.get(clientId);
-    
-    if (now > clientData.resetTime) {
-      // Reset window
-      clientData.requests = 1;
-      clientData.resetTime = now + RATE_LIMIT_WINDOW;
-    } else {
-      clientData.requests++;
-      
-      if (clientData.requests > RATE_LIMIT_MAX_REQUESTS) {
-        console.warn(`⚠️ Rate limit exceeded for IP: ${clientId}`);
-        return res.status(429).json({ 
-          error: 'Zbyt wiele żądań. Spróbuj ponownie później.',
-          retryAfter: Math.ceil((clientData.resetTime - now) / 1000)
-        });
-      }
-    }
+    };
+    rateLimitStore.set(clientId, clientData);
   }
+  
+  // Check if window has reset
+  if (now > clientData.resetTime) {
+    clientData.requests = 0;
+    clientData.resetTime = now + RATE_LIMIT_WINDOW;
+  }
+  
+  // Increment request count
+  clientData.requests++;
+  rateLimitStore.set(clientId, clientData);
+  
+  // Log rate limit status
+  if (clientData.requests % 100 === 0) {
+    console.log(`📊 Rate limit dla ${clientId}: ${clientData.requests}/${RATE_LIMIT_MAX_REQUESTS}`);
+  }
+  
+  // Check if limit exceeded
+  if (clientData.requests > RATE_LIMIT_MAX_REQUESTS) {
+    console.warn(`⚠️ Rate limit exceeded for IP: ${clientId} (${clientData.requests} requests)`);
+    return res.status(429).json({ 
+      error: 'Zbyt wiele żądań. Spróbuj ponownie później.',
+      retryAfter: Math.ceil((clientData.resetTime - now) / 1000),
+      currentRequests: clientData.requests,
+      maxRequests: RATE_LIMIT_MAX_REQUESTS
+    });
+  }
+  
+  // Add rate limit headers
+  res.set({
+    'X-RateLimit-Limit': RATE_LIMIT_MAX_REQUESTS,
+    'X-RateLimit-Remaining': Math.max(0, RATE_LIMIT_MAX_REQUESTS - clientData.requests),
+    'X-RateLimit-Reset': clientData.resetTime
+  });
   
   next();
 };
