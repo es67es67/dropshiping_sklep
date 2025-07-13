@@ -10,18 +10,11 @@ require('dotenv').config();
 const eventSystem = require('./core/eventSystem');
 const moduleLoader = require('./core/moduleLoader');
 
-// Legacy routes (do migracji)
+// Import routes
 const userRoutes = require('./routes/userRoutes');
 const shopRoutes = require('./routes/shopRoutes');
 const productRoutes = require('./routes/productRoutes');
-const messageRoutes = require('./routes/messageRoutes');
-const groupRoutes = require('./routes/groupRoutes');
-const reviewRoutes = require('./routes/reviewRoutes');
-const notificationRoutes = require('./routes/notificationRoutes');
-const postRoutes = require('./routes/postRoutes');
 const locationRoutes = require('./routes/locationRoutes');
-const exportRoutes = require('./routes/exportRoutes');
-const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -264,18 +257,11 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://es67jw:xlnepf0D4JXZtG
   })
   .catch(err => console.error('❌ Błąd połączenia z MongoDB:', err));
 
-// Legacy routes (do migracji)
+// Register routes
 app.use('/api/users', userRoutes);
 app.use('/api/shops', shopRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/groups', groupRoutes);
-app.use('/api/reviews', reviewRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/posts', postRoutes);
 app.use('/api/locations', locationRoutes);
-app.use('/api/export', exportRoutes);
-app.use('/api/admin', adminRoutes);
 
 // Middleware anty-XSS/NoSQL injection dla wyszukiwania produktów
 app.use('/api/products', (req, res, next) => {
@@ -312,41 +298,44 @@ app.options('*', (req, res) => {
 
 // Endpoint dla sugestii wyszukiwania (brakujący endpoint)
 app.get('/api/search/suggestions', (req, res) => {
-  const query = req.query.q || '';
+  const { q } = req.query;
   
-  // Prosta detekcja XSS/NoSQL injection
-  const xssPattern = /<script|onerror=|javascript:|\\$where|\\$regex|\\$ne|\\$gt|\\$lt|\\$in|\\$or|\\$and|\\$nor|\\$not|\\$exists|\\$expr|\\$function|\\$accumulator/i;
-  if (xssPattern.test(query)) {
-    console.warn(`🚨 Wykryto próbę ataku XSS/NoSQL w sugestiach: ${query}`);
-    return res.status(403).json({ error: 'Wykryto próbę ataku XSS lub NoSQL injection w parametrze wyszukiwania.' });
+  if (!q) {
+    return res.json({ suggestions: [] });
   }
   
-  // Zwróć puste sugestie (można rozszerzyć o prawdziwe sugestie)
-  res.json({
-    suggestions: [],
-    query: query,
+  // Symulacja sugestii wyszukiwania
+  const suggestions = [
+    `${q} - produkty`,
+    `${q} - sklepy`,
+    `${q} - kategorie`,
+    `${q} - lokalne`,
+    `${q} - promocje`
+  ].filter(suggestion => suggestion.toLowerCase().includes(q.toLowerCase()));
+  
+  res.json({ 
+    suggestions: suggestions.slice(0, 5),
+    query: q,
     timestamp: new Date().toISOString()
   });
 });
 
 // Endpoint dla wyszukiwania produktów z sugestiami
-app.get('/api/search', (req, res) => {
-  const query = req.query.q || '';
+app.get('/api/search/products', (req, res) => {
+  const { q, category, price_min, price_max, sort } = req.query;
   
-  // Prosta detekcja XSS/NoSQL injection
-  const xssPattern = /<script|onerror=|javascript:|\\$where|\\$regex|\\$ne|\\$gt|\\$lt|\\$in|\\$or|\\$and|\\$nor|\\$not|\\$exists|\\$expr|\\$function|\\$accumulator/i;
-  if (xssPattern.test(query)) {
-    console.warn(`🚨 Wykryto próbę ataku XSS/NoSQL w wyszukiwaniu: ${query}`);
-    return res.status(403).json({ error: 'Wykryto próbę ataku XSS lub NoSQL injection w parametrze wyszukiwania.' });
-  }
-  
-  // Zwróć puste wyniki (można rozszerzyć o prawdziwe wyszukiwanie)
-  res.json({
-    results: [],
-    query: query,
+  // Symulacja wyników wyszukiwania
+  const results = {
+    products: [],
     total: 0,
+    page: 1,
+    limit: 12,
+    query: q,
+    filters: { category, price_min, price_max, sort },
     timestamp: new Date().toISOString()
-  });
+  };
+  
+  res.json(results);
 });
 
 // 404 handler for API routes

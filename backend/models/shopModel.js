@@ -2,218 +2,171 @@ const mongoose = require('mongoose');
 
 const shopSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  description: { type: String },
+  description: { type: String, required: true },
+  category: { type: String, required: true },
+  subcategory: { type: String },
+  
+  // Właściciel
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   
-  // Lokalizacja
-  location: { type: mongoose.Schema.Types.ObjectId, ref: 'Location' },
+  // Kontakt
+  email: { type: String, required: true },
+  phone: { type: String },
+  website: { type: String },
+  
+  // Adres
   address: {
     street: { type: String },
     houseNumber: { type: String },
     postalCode: { type: String },
-    city: { type: String }
+    city: { type: String, required: true },
+    voivodeship: { type: String },
+    county: { type: String },
+    municipality: { type: String }
   },
-  coordinates: {
-    lat: { type: Number },
-    lng: { type: Number }
+  
+  // Lokalizacja (koordynaty)
+  location: {
+    type: { type: String, default: 'Point' },
+    coordinates: {
+      lat: { type: Number },
+      lng: { type: Number }
+    }
   },
-  
-  // Kontakt
-  phone: { type: String },
-  email: { type: String },
-  website: { type: String },
-  
-  // Media
-  logo: { type: String }, // URL do logo sklepu
-  coverImage: { type: String }, // Zdjęcie okładki sklepu
-  images: [{ type: String }], // Galeria zdjęć sklepu
-  
-  // Kategorie i tagi
-  categories: [{ type: String }], // np. ['elektronika', 'moda', 'dom']
-  tags: [{ type: String }], // np. ['nowe', 'promocje', 'lokalne']
   
   // Godziny otwarcia
   openingHours: {
-    monday: { open: String, close: String, isOpen: { type: Boolean, default: true } },
-    tuesday: { open: String, close: String, isOpen: { type: Boolean, default: true } },
-    wednesday: { open: String, close: String, isOpen: { type: Boolean, default: true } },
-    thursday: { open: String, close: String, isOpen: { type: Boolean, default: true } },
-    friday: { open: String, close: String, isOpen: { type: Boolean, default: true } },
-    saturday: { open: String, close: String, isOpen: { type: Boolean, default: true } },
-    sunday: { open: String, close: String, isOpen: { type: Boolean, default: true } }
+    monday: { open: String, close: String, closed: { type: Boolean, default: false } },
+    tuesday: { open: String, close: String, closed: { type: Boolean, default: false } },
+    wednesday: { open: String, close: String, closed: { type: Boolean, default: false } },
+    thursday: { open: String, close: String, closed: { type: Boolean, default: false } },
+    friday: { open: String, close: String, closed: { type: Boolean, default: false } },
+    saturday: { open: String, close: String, closed: { type: Boolean, default: false } },
+    sunday: { open: String, close: String, closed: { type: Boolean, default: false } }
   },
   
+  // Media
+  logo: { type: String },
+  coverImage: { type: String },
+  images: [{ type: String }],
+  
   // Status i weryfikacja
-  isVerified: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
-  isOnline: { type: Boolean, default: false }, // Czy sklep prowadzi sprzedaż online
+  isVerified: { type: Boolean, default: false },
+  isFeatured: { type: Boolean, default: false },
+  status: { type: String, enum: ['active', 'inactive', 'suspended', 'pending'], default: 'pending' },
   
   // Oceny i recenzje
-  rating: { type: Number, default: 0 },
-  totalReviews: { type: Number, default: 0 },
-  reviews: [{
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    rating: { type: Number, required: true, min: 1, max: 5 },
-    comment: { type: String },
-    createdAt: { type: Date, default: Date.now }
-  }],
+  ratings: {
+    average: { type: Number, default: 0 },
+    count: { type: Number, default: 0 },
+    distribution: {
+      1: { type: Number, default: 0 },
+      2: { type: Number, default: 0 },
+      3: { type: Number, default: 0 },
+      4: { type: Number, default: 0 },
+      5: { type: Number, default: 0 }
+    }
+  },
   
   // Statystyki
   stats: {
     totalProducts: { type: Number, default: 0 },
     totalSales: { type: Number, default: 0 },
+    totalRevenue: { type: Number, default: 0 },
     totalViews: { type: Number, default: 0 },
-    totalFollowers: { type: Number, default: 0 },
-    totalLikes: { type: Number, default: 0 },
-    totalShares: { type: Number, default: 0 },
-    totalComments: { type: Number, default: 0 }
+    totalOrders: { type: Number, default: 0 },
+    averageOrderValue: { type: Number, default: 0 }
   },
   
-  // Followersi i obserwujący
-  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Sklepy które obserwuje
+  // Opcje dostawy
+  deliveryOptions: [{
+    name: { type: String },
+    description: { type: String },
+    cost: { type: Number, default: 0 },
+    freeFrom: { type: Number },
+    estimatedDays: { type: Number }
+  }],
   
-  // Live Shopping
-  liveStreams: [{
+  // Metody płatności
+  paymentMethods: [{
+    name: { type: String },
+    description: { type: String },
+    enabled: { type: Boolean, default: true }
+  }],
+  
+  // Polityka zwrotów
+  returnPolicy: {
+    period: { type: Number, default: 14 }, // dni
+    description: { type: String },
+    conditions: [{ type: String }]
+  },
+  
+  // SEO
+  seo: {
     title: { type: String },
     description: { type: String },
-    startTime: { type: Date },
-    endTime: { type: Date },
-    isActive: { type: Boolean, default: false },
-    viewers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
-  }],
-  
-  // Stories
-  stories: [{
-    content: { type: String },
-    media: { type: String }, // URL do zdjęcia/wideo
-    type: { type: String, enum: ['image', 'video'], default: 'image' },
-    duration: { type: Number, default: 24 }, // Godziny wyświetlania
-    views: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    createdAt: { type: Date, default: Date.now }
-  }],
-  
-  // Wydarzenia i promocje
-  events: [{
-    title: { type: String },
-    description: { type: String },
-    startDate: { type: Date },
-    endDate: { type: Date },
-    type: { type: String, enum: ['sale', 'event', 'promotion'], default: 'event' },
-    isActive: { type: Boolean, default: true }
-  }],
+    keywords: [{ type: String }],
+    slug: { type: String, unique: true }
+  },
   
   // Ustawienia
   settings: {
-    allowReviews: { type: Boolean, default: true },
-    allowMessages: { type: Boolean, default: true },
     autoAcceptOrders: { type: Boolean, default: false },
-    showInventory: { type: Boolean, default: true }
+    requireApproval: { type: Boolean, default: true },
+    notifications: {
+      email: { type: Boolean, default: true },
+      sms: { type: Boolean, default: false },
+      push: { type: Boolean, default: true }
+    }
   },
   
-  // Płatności i dostawa
-  paymentMethods: [{ type: String }], // ['cash', 'card', 'transfer', 'paypal']
-  deliveryOptions: [{
-    type: { type: String }, // 'pickup', 'delivery', 'shipping'
-    cost: { type: Number },
-    description: { type: String }
-  }],
+  // Tagi i kategorie
+  tags: [{ type: String }],
+  categories: [{ type: String }],
   
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
-});
+  // Powiązania
+  followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }]
+}, { timestamps: true });
 
-// Aktualizuj updatedAt przy każdej zmianie
-shopSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+// Indeksy
+shopSchema.index({ name: 'text', description: 'text', tags: 'text' });
+shopSchema.index({ 'location.coordinates': '2dsphere' });
+shopSchema.index({ category: 1, isActive: 1 });
+shopSchema.index({ owner: 1 });
+shopSchema.index({ 'address.city': 1 });
 
 // Metoda do obliczania średniej oceny
-shopSchema.methods.updateRating = function() {
-  if (this.reviews.length > 0) {
-    const totalRating = this.reviews.reduce((sum, review) => sum + review.rating, 0);
-    this.rating = totalRating / this.reviews.length;
-    this.totalReviews = this.reviews.length;
+shopSchema.methods.updateAverageRating = function() {
+  let total = 0;
+  let count = 0;
+  for (let i = 1; i <= 5; i++) {
+    total += i * this.ratings.distribution[i];
+    count += this.ratings.distribution[i];
   }
+  this.ratings.average = count > 0 ? total / count : 0;
+  this.ratings.count = count;
   return this.save();
 };
 
-// Metoda do dodawania recenzji
-shopSchema.methods.addReview = function(userId, rating, comment) {
-  // Sprawdź czy użytkownik już ocenił ten sklep
-  const existingReview = this.reviews.find(review => review.user.toString() === userId);
-  if (existingReview) {
-    existingReview.rating = rating;
-    existingReview.comment = comment;
-    existingReview.createdAt = Date.now();
-  } else {
-    this.reviews.push({ user: userId, rating, comment });
+// Metoda do dodawania oceny
+shopSchema.methods.addRating = function(rating) {
+  this.ratings.distribution[rating] += 1;
+  return this.updateAverageRating();
+};
+
+// Hook przed zapisem - generuj slug
+shopSchema.pre('save', function(next) {
+  if (this.isModified('name') && !this.seo.slug) {
+    this.seo.slug = this.name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim('-');
   }
-  
-  return this.updateRating();
-};
-
-// Metoda do obserwowania sklepu
-shopSchema.methods.toggleFollow = function(userId) {
-  const followerIndex = this.followers.indexOf(userId);
-  if (followerIndex > -1) {
-    this.followers.splice(followerIndex, 1);
-    this.stats.totalFollowers--;
-  } else {
-    this.followers.push(userId);
-    this.stats.totalFollowers++;
-  }
-  return this.save();
-};
-
-// Metoda do dodawania story
-shopSchema.methods.addStory = function(content, media, type = 'image') {
-  this.stories.push({ content, media, type });
-  return this.save();
-};
-
-// Metoda do usuwania starych stories (starszych niż 24h)
-shopSchema.methods.cleanOldStories = function() {
-  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  this.stories = this.stories.filter(story => story.createdAt > twentyFourHoursAgo);
-  return this.save();
-};
-
-// Metoda do rozpoczynania live stream
-shopSchema.methods.startLiveStream = function(title, description, products = []) {
-  this.liveStreams.push({
-    title,
-    description,
-    startTime: new Date(),
-    isActive: true,
-    products
-  });
-  return this.save();
-};
-
-// Metoda do kończenia live stream
-shopSchema.methods.endLiveStream = function(streamId) {
-  const stream = this.liveStreams.id(streamId);
-  if (stream) {
-    stream.isActive = false;
-    stream.endTime = new Date();
-  }
-  return this.save();
-};
-
-// Metoda do dodawania wydarzenia
-shopSchema.methods.addEvent = function(title, description, startDate, endDate, type = 'event') {
-  this.events.push({ title, description, startDate, endDate, type });
-  return this.save();
-};
-
-// Metoda do aktualizacji statystyk
-shopSchema.methods.updateStats = function() {
-  this.stats.totalProducts = 0; // Będzie aktualizowane przez Product model
-  this.stats.totalFollowers = this.followers.length;
-  return this.save();
-};
+  next();
+});
 
 module.exports = mongoose.model('Shop', shopSchema);

@@ -1,224 +1,343 @@
 const Product = require('../models/productModel');
-const Shop = require('../models/shopModel'); // Dodane import dla Shop
-const Location = require('../models/locationModel'); // Dodane import dla Location
+const Shop = require('../models/shopModel');
 
+// Pobieranie wszystkich produktów z filtrowaniem
+exports.getProducts = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 12,
+      category,
+      minPrice,
+      maxPrice,
+      search,
+      sort = 'createdAt',
+      order = 'desc',
+      shop,
+      isOnSale,
+      isFeatured
+    } = req.query;
+
+    const skip = (page - 1) * limit;
+    
+    // Buduj query
+    let query = { isActive: true };
+    
+    if (category) {
+      query.category = category;
+    }
+    
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseFloat(minPrice);
+      if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+    }
+    
+    if (search) {
+      query.$text = { $search: search };
+    }
+    
+    if (shop) {
+      query.shop = shop;
+    }
+    
+    if (isOnSale === 'true') {
+      query.isOnSale = true;
+    }
+    
+    if (isFeatured === 'true') {
+      query.isFeatured = true;
+    }
+    
+    // Sortowanie
+    const sortOptions = {};
+    sortOptions[sort] = order === 'desc' ? -1 : 1;
+    
+    const products = await Product.find(query)
+      .populate('shop', 'name logo')
+      .populate('seller', 'username firstName lastName')
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Product.countDocuments(query);
+    
+    res.json({
+      products,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobieranie pojedynczego produktu
+exports.getProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id)
+      .populate('shop', 'name logo description address')
+      .populate('seller', 'username firstName lastName avatar')
+      .populate('relatedProducts', 'name price mainImage ratings');
+    
+    if (!product) {
+      return res.status(404).json({ error: 'Produkt nie został znaleziony' });
+    }
+    
+    // Zwiększ licznik wyświetleń
+    product.stats.views += 1;
+    await product.save();
+    
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Tworzenie nowego produktu
 exports.createProduct = async (req, res) => {
   try {
-    const { 
-      name, 
-      price, 
-      description, 
-      category, 
-      location, 
-      shopId,
-      stock,
+    const {
+      name,
+      description,
+      price,
+      category,
       brand,
       sku,
-      weight,
-      dimensions,
+      stock,
+      images,
+      attributes,
+      variants,
       tags
     } = req.body;
     
-    // Sprawdź czy użytkownik podał shopId
-    if (!shopId) {
-      return res.status(400).json({ error: 'ID sklepu jest wymagane' });
-    }
-    
-    // Sprawdź czy sklep istnieje i czy użytkownik jest jego właścicielem
-    const shop = await Shop.findById(shopId);
+    // Sprawdź czy użytkownik ma sklep
+    const shop = await Shop.findOne({ owner: req.userId });
     if (!shop) {
-      return res.status(404).json({ error: 'Sklep nie został znaleziony' });
+      return res.status(400).json({ error: 'Musisz mieć sklep, aby dodawać produkty' });
     }
     
-    if (shop.owner.toString() !== req.userId) {
-      return res.status(403).json({ error: 'Nie masz uprawnień do dodawania produktów do tego sklepu' });
-    }
-    
-    // W praktyce: images to URL po uploadzie zdjęć na serwer
-    const images = req.files?.map(file => file.path) || [];
-    
-    // Użyj lokalizacji sklepu jeśli nie podano lokalizacji produktu
-    let productLocation = location;
-    if (!productLocation) {
-      if (shop.location) {
-        // Jeśli sklep ma przypisaną lokalizację, użyj jej nazwy
-        const locationDoc = await Location.findById(shop.location);
-        productLocation = locationDoc ? locationDoc.name : 'Nie określono';
-      } else {
-        productLocation = 'Nie określono';
-      }
-    }
-    
-    const product = new Product({ 
-      name, 
-      price, 
-      description, 
-      category, 
-      location: productLocation,
-      shop: shopId,
-      stock: stock || 0,
-      brand: brand || '',
-      sku: sku || '',
-      weight: weight || 0,
-      dimensions: dimensions || '',
+    const product = new Product({
+      name,
+      description,
+      price: parseFloat(price),
+      category,
+      brand,
+      sku,
+      stock: parseInt(stock) || 0,
+      images: images || [],
+      mainImage: images && images.length > 0 ? images[0] : null,
+      attributes: attributes || [],
+      variants: variants || [],
       tags: tags || [],
-      images 
+      shop: shop._id,
+      seller: req.userId
     });
-    await product.save();
     
-    // Aktualizuj statystyki sklepu
-    shop.stats.totalProducts++;
-    await shop.save();
+    await product.save();
     
     res.status(201).json(product);
   } catch (err) {
-    console.error('Błąd podczas tworzenia produktu:', err);
     res.status(500).json({ error: err.message });
   }
 };
 
-exports.getProducts = async (req, res) => {
-  try {
-    const products = await Product.find({});
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.getUserProducts = async (req, res) => {
-  try {
-    // Pobierz sklepy użytkownika
-    const userShops = await Shop.find({ owner: req.userId }).select('_id');
-    const shopIds = userShops.map(shop => shop._id);
-    
-    // Pobierz produkty z tych sklepów
-    const products = await Product.find({ shop: { $in: shopIds } })
-      .populate('shop', 'name location')
-      .sort({ createdAt: -1 });
-    res.json(products);
-  } catch (err) {
-    console.error('Błąd podczas pobierania produktów użytkownika:', err);
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.getShopProducts = async (req, res) => {
-  try {
-    const { shopId } = req.params;
-    const products = await Product.find({ shop: shopId }).sort({ createdAt: -1 });
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.searchProducts = async (req, res) => {
-  try {
-    const { query } = req.query;
-    const products = await Product.find({
-      $or: [
-        { name: { $regex: query, $options: 'i' } },
-        { description: { $regex: query, $options: 'i' } },
-        { category: { $regex: query, $options: 'i' } },
-        { location: { $regex: query, $options: 'i' } }
-      ]
-    });
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Pobieranie produktów lokalnych
-exports.getLocalProducts = async (req, res) => {
-  try {
-    const { location } = req.query;
-    
-    if (!location) {
-      return res.status(400).json({ error: 'Lokalizacja jest wymagana' });
-    }
-
-    // Znajdź sklepy w danej lokalizacji
-    const shops = await Shop.find({
-      'location.name': { $regex: location, $options: 'i' }
-    }).select('_id');
-
-    const shopIds = shops.map(shop => shop._id);
-
-    // Pobierz produkty z tych sklepów
-    const products = await Product.find({
-      shop: { $in: shopIds }
-    })
-    .populate('shop', 'name location address')
-    .populate('shop.location', 'name')
-    .sort({ createdAt: -1 })
-    .limit(50);
-
-    res.json(products);
-  } catch (err) {
-    console.error('Błąd podczas pobierania produktów lokalnych:', err);
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Aktualizacja produktu (tylko właściciel sklepu)
+// Aktualizacja produktu
 exports.updateProduct = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updateData = req.body;
+    const product = await Product.findById(req.params.id);
     
-    const product = await Product.findById(id).populate('shop');
     if (!product) {
       return res.status(404).json({ error: 'Produkt nie został znaleziony' });
     }
     
-    // Sprawdź czy użytkownik jest właścicielem sklepu
-    if (product.shop.owner.toString() !== req.userId) {
-      return res.status(403).json({ error: 'Nie masz uprawnień do edycji tego produktu' });
+    // Sprawdź czy użytkownik jest właścicielem produktu
+    if (product.seller.toString() !== req.userId) {
+      return res.status(403).json({ error: 'Brak uprawnień do edycji tego produktu' });
     }
     
-    // Aktualizuj produkt
-    Object.keys(updateData).forEach(key => {
-      if (key !== 'shop' && key !== '_id') {
-        product[key] = updateData[key];
-      }
-    });
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
     
-    await product.save();
-    res.json(product);
+    res.json(updatedProduct);
   } catch (err) {
-    console.error('Błąd podczas aktualizacji produktu:', err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// Usuwanie produktu (tylko właściciel sklepu)
+// Usuwanie produktu
 exports.deleteProduct = async (req, res) => {
   try {
-    const { id } = req.params;
+    const product = await Product.findById(req.params.id);
     
-    const product = await Product.findById(id).populate('shop');
     if (!product) {
       return res.status(404).json({ error: 'Produkt nie został znaleziony' });
     }
     
-    // Sprawdź czy użytkownik jest właścicielem sklepu
-    if (product.shop.owner.toString() !== req.userId) {
-      return res.status(403).json({ error: 'Nie masz uprawnień do usunięcia tego produktu' });
+    // Sprawdź czy użytkownik jest właścicielem produktu
+    if (product.seller.toString() !== req.userId) {
+      return res.status(403).json({ error: 'Brak uprawnień do usunięcia tego produktu' });
     }
     
-    // Aktualizuj statystyki sklepu
-    const shop = await Shop.findById(product.shop._id);
-    if (shop) {
-      shop.stats.totalProducts = Math.max(0, shop.stats.totalProducts - 1);
-      await shop.save();
-    }
+    await Product.findByIdAndDelete(req.params.id);
     
-    await Product.findByIdAndDelete(id);
     res.json({ message: 'Produkt został usunięty' });
   } catch (err) {
-    console.error('Błąd podczas usuwania produktu:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Dodawanie oceny do produktu
+exports.addRating = async (req, res) => {
+  try {
+    const { rating, review } = req.body;
+    
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Ocena musi być między 1 a 5' });
+    }
+    
+    const product = await Product.findById(req.params.id);
+    
+    if (!product) {
+      return res.status(404).json({ error: 'Produkt nie został znaleziony' });
+    }
+    
+    await product.addRating(rating);
+    
+    res.json({ message: 'Ocena została dodana', product });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Wyszukiwanie produktów
+exports.searchProducts = async (req, res) => {
+  try {
+    const { q, category, minPrice, maxPrice, sort = 'relevance' } = req.query;
+    
+    let query = { isActive: true };
+    
+    if (q) {
+      query.$text = { $search: q };
+    }
+    
+    if (category) {
+      query.category = category;
+    }
+    
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseFloat(minPrice);
+      if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+    }
+    
+    let sortOptions = {};
+    
+    switch (sort) {
+      case 'price_asc':
+        sortOptions.price = 1;
+        break;
+      case 'price_desc':
+        sortOptions.price = -1;
+        break;
+      case 'rating':
+        sortOptions['ratings.average'] = -1;
+        break;
+      case 'newest':
+        sortOptions.createdAt = -1;
+        break;
+      case 'relevance':
+      default:
+        if (q) {
+          sortOptions.score = { $meta: 'textScore' };
+        } else {
+          sortOptions.createdAt = -1;
+        }
+    }
+    
+    const products = await Product.find(query)
+      .populate('shop', 'name logo')
+      .sort(sortOptions)
+      .limit(20);
+    
+    res.json({ products, query: q });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobieranie produktów z kategorii
+exports.getProductsByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const { page = 1, limit = 12, sort = 'createdAt' } = req.query;
+    
+    const skip = (page - 1) * limit;
+    
+    const products = await Product.find({ 
+      category, 
+      isActive: true 
+    })
+      .populate('shop', 'name logo')
+      .sort({ [sort]: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Product.countDocuments({ category, isActive: true });
+    
+    res.json({
+      products,
+      category,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobieranie produktów ze sklepu
+exports.getProductsByShop = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+    const { page = 1, limit = 12, category } = req.query;
+    
+    const skip = (page - 1) * limit;
+    
+    let query = { shop: shopId, isActive: true };
+    if (category) {
+      query.category = category;
+    }
+    
+    const products = await Product.find(query)
+      .populate('seller', 'username firstName lastName')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Product.countDocuments(query);
+    
+    res.json({
+      products,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
