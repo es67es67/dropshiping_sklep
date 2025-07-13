@@ -17,6 +17,10 @@ const productRoutes = require('./routes/productRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const locationRoutes = require('./routes/locationRoutes');
+const recommendationRoutes = require('./routes/recommendationRoutes');
+const loyaltyRoutes = require('./routes/loyaltyRoutes');
+const abTestingRoutes = require('./routes/abTestingRoutes');
+const friendshipRoutes = require('./routes/friendshipRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -241,18 +245,33 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://es67jw:xlnepf0D4JXZtG
     const paymentsModule = moduleLoader.getModule('payments');
     
     if (messagingModule) {
-      app.use('/api/messaging', messagingModule.getRoutes());
-      console.log('✅ Routes modułu messaging zarejestrowane');
+      const messagingRoutes = messagingModule.getRoutes();
+      if (!messagingRoutes || typeof messagingRoutes !== 'function' || !messagingRoutes.use) {
+        console.error('\n❌ Błąd rejestracji tras: messagingModule.getRoutes() nie zwraca poprawnego routera Express!');
+      } else {
+        app.use('/api/messaging', messagingRoutes);
+        console.log('✅ Routes modułu messaging zarejestrowane');
+      }
     }
     
     if (gamificationModule) {
-      app.use('/api/gamification', gamificationModule.getRoutes());
-      console.log('✅ Routes modułu gamification zarejestrowane');
+      const gamificationRoutes = gamificationModule.getRoutes();
+      if (!gamificationRoutes || typeof gamificationRoutes !== 'function' || !gamificationRoutes.use) {
+        console.error('\n❌ Błąd rejestracji tras: gamificationModule.getRoutes() nie zwraca poprawnego routera Express!');
+      } else {
+        app.use('/api/gamification', gamificationRoutes);
+        console.log('✅ Routes modułu gamification zarejestrowane');
+      }
     }
     
     if (paymentsModule) {
-      app.use('/api/payments', paymentsModule.getRoutes());
-      console.log('✅ Routes modułu payments zarejestrowane');
+      const paymentsRoutes = paymentsModule.getRoutes();
+      if (!paymentsRoutes || typeof paymentsRoutes !== 'function' || !paymentsRoutes.use) {
+        console.error('\n❌ Błąd rejestracji tras: paymentsModule.getRoutes() nie zwraca poprawnego routera Express!');
+      } else {
+        app.use('/api/payments', paymentsRoutes);
+        console.log('✅ Routes modułu payments zarejestrowane');
+      }
     }
     
     console.log('✅ System modułowy zainicjalizowany');
@@ -260,12 +279,25 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://es67jw:xlnepf0D4JXZtG
   .catch(err => console.error('❌ Błąd połączenia z MongoDB:', err));
 
 // Register routes
-app.use('/api/users', userRoutes);
-app.use('/api/shops', shopRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/locations', locationRoutes);
+function safeUse(path, router, name) {
+  if (!router || typeof router !== 'function' || !router.use) {
+    console.error(`\n❌ Błąd rejestracji tras: ${name} nie jest poprawnym routerem Express! Sprawdź eksport w pliku.`);
+    return;
+  }
+  app.use(path, router);
+}
+
+safeUse('/api/users', userRoutes, 'userRoutes');
+safeUse('/api/shops', shopRoutes, 'shopRoutes');
+safeUse('/api/products', productRoutes, 'productRoutes');
+safeUse('/api/cart', cartRoutes, 'cartRoutes');
+safeUse('/api/orders', orderRoutes, 'orderRoutes');
+safeUse('/api/locations', locationRoutes, 'locationRoutes');
+safeUse('/api/recommendations', recommendationRoutes, 'recommendationRoutes');
+safeUse('/api/loyalty', loyaltyRoutes, 'loyaltyRoutes');
+safeUse('/api/ab-testing', abTestingRoutes, 'abTestingRoutes');
+safeUse('/api/friendships', friendshipRoutes, 'friendshipRoutes');
+safeUse('/api/company-profiles', require('./routes/companyProfileRoutes'), 'companyProfileRoutes');
 
 // Middleware anty-XSS/NoSQL injection dla wyszukiwania produktów
 app.use('/api/products', (req, res, next) => {

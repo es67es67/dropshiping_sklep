@@ -1,0 +1,29 @@
+{
+  "timestamp": "2025-07-13T10:54:08.795Z",
+  "features": {
+    "recommendationSystem": false,
+    "loyaltySystem": false,
+    "abTesting": false,
+    "themeSystem": false,
+    "advancedUI": false,
+    "responsiveDesign": true
+  },
+  "screenshots": [
+    {
+      "name": "08-responsive-desktop",
+      "filepath": "demo-advanced-screenshots\\08-responsive-desktop_2025-07-13T10-54-04-833Z.png"
+    },
+    {
+      "name": "08-responsive-tablet",
+      "filepath": "demo-advanced-screenshots\\08-responsive-tablet_2025-07-13T10-54-06-514Z.png"
+    },
+    {
+      "name": "08-responsive-mobile",
+      "filepath": "demo-advanced-screenshots\\08-responsive-mobile_2025-07-13T10-54-08-270Z.png"
+    }
+  ],
+  "summary": {
+    "totalScreenshots": 3,
+    "successRate": 30
+  }
+}

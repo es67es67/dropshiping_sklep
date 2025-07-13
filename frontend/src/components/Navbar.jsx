@@ -448,6 +448,9 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
         <NavLink to="/notifications" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🔔 Powiadomienia
         </NavLink>
+        <NavLink to="/company-profiles" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+          🏢 Firmy
+        </NavLink>
         
         {/* Zarządzanie sklepami - tylko dla właścicieli */}
         {user?.shops && user.shops.length > 0 && (
@@ -538,6 +541,14 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
               setIsMenuOpen(false);
             }}>
               🏘️ Produkty lokalne
+            </DropdownItem>
+            
+            <DropdownItem onClick={() => { 
+              window.location.href = '/friends'; 
+              closeUserDropdown(); 
+              setIsMenuOpen(false);
+            }}>
+              👥 Znajomi
             </DropdownItem>
             
             <DropdownItem onClick={() => { 

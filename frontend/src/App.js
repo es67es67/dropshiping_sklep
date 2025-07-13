@@ -34,6 +34,8 @@ import LocalProducts from './pages/LocalProducts';
 import MyProducts from './pages/MyProducts';
 import MyShops from './pages/MyShops';
 import LiveShopping from './components/LiveShopping';
+import LoyaltySystem from './components/LoyaltySystem';
+import FriendshipSystem from './components/FriendshipSystem';
 
 function App() {
   const [theme, setTheme] = useState('light');
@@ -188,6 +190,7 @@ function App() {
                 <Route path="/my-products" element={<MyProducts />} />
                 <Route path="/my-shops" element={<MyShops />} />
                 <Route path="/shop/:shopId/live" element={<LiveShopping />} />
+                <Route path="/friends" element={<FriendshipSystem userId={localStorage.getItem('userId')} />} />
               </Routes>
             </div>
           </div>
@@ -235,6 +238,7 @@ function App() {
                 <Route path="/my-products" element={<MyProducts />} />
                 <Route path="/my-shops" element={<MyShops />} />
                 <Route path="/shop/:shopId/live" element={<LiveShopping />} />
+                <Route path="/friends" element={<FriendshipSystem userId={localStorage.getItem('userId')} />} />
               </Routes>
             </div>
           </div>
@@ -282,6 +286,7 @@ function App() {
                 <Route path="/my-products" element={<MyProducts />} />
                 <Route path="/my-shops" element={<MyShops />} />
                 <Route path="/shop/:shopId/live" element={<LiveShopping />} />
+                <Route path="/friends" element={<FriendshipSystem userId={localStorage.getItem('userId')} />} />
               </Routes>
             </div>
           </div>

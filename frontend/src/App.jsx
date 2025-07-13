@@ -17,6 +17,9 @@ import Shops from './pages/Shops';
 import ShopDetail from './pages/ShopDetail';
 import AddProduct from './pages/AddProduct';
 import AddShop from './pages/AddShop';
+import CompanyProfiles from './pages/CompanyProfiles';
+import CompanyProfile from './components/CompanyProfile';
+import CreateCompanyProfile from './pages/CreateCompanyProfile';
 import './App.css';
 
 function App() {
@@ -41,6 +44,9 @@ function App() {
             <Route path="/shops/:id" element={<ShopDetail />} />
             <Route path="/add-product" element={<AddProduct />} />
             <Route path="/add-shop" element={<AddShop />} />
+            <Route path="/company-profiles" element={<CompanyProfiles />} />
+            <Route path="/company/:id" element={<CompanyProfile />} />
+            <Route path="/company/create" element={<CreateCompanyProfile />} />
           </Routes>
         </div>
       </Router>

@@ -54,7 +54,7 @@ async function monitorFirefox() {
                 console.log(`⚠️ Błąd HTTP ${response.status()}: ${response.url()}`);
             }
         });
-
+        
         // ===== TEST 1: STRONA GŁÓWNA =====
         console.log('\n🌐 TEST 1: Strona główna');
         await page.goto(frontendUrl, { waitUntil: 'networkidle2' });
