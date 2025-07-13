@@ -4,7 +4,8 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npm run build && npx serve -s build -l 3000",
+    "buildCommand": "npm ci --omit=dev && npm run build",
+    "startCommand": "npx serve -s build -l 3000",
     "healthcheckPath": "/",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",
