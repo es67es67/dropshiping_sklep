@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  root: '.',
+  publicDir: 'public',
   server: {
     port: 3000,
     proxy: {
@@ -16,9 +18,14 @@ export default defineConfig({
   build: {
     outDir: 'build',
     sourcemap: false,
+    emptyOutDir: true,
     rollupOptions: {
+      input: 'public/index.html',
       output: {
-        manualChunks: undefined
+        manualChunks: undefined,
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js'
       }
     }
   },

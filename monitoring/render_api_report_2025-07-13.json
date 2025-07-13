@@ -1,14 +1,14 @@
 {
-  "timestamp": "2025-07-13T11:53:03.762Z",
+  "timestamp": "2025-07-13T12:03:59.215Z",
   "services": [
     {
       "name": "Backend",
-      "lastDeploy": "2025-07-13T11:48:08.958564Z",
+      "lastDeploy": "2025-07-13T12:02:16.637637Z",
       "success": true
     },
     {
       "name": "Frontend",
-      "lastDeploy": "2025-07-13T11:48:10.672988Z",
+      "lastDeploy": "2025-07-13T12:02:15.175453Z",
       "success": true
     },
     {
@@ -26,6 +26,23 @@
     {
       "name": "Backend",
       "deployments": [
+        {
+          "deploy": {
+            "id": "dep-d1pq0hpr0fns73eued2g",
+            "commit": {
+              "id": "a5e027adef55321635f6d8ce2649cd65d80ea38f",
+              "message": "Naprawa build frontendu: konfiguracja Vite, usunicie duplikatów styled-components, poprawka ikon react-icons, kompatybilno z Render",
+              "createdAt": "2025-07-13T12:02:06Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T12:02:15.939473Z",
+            "updatedAt": "2025-07-13T12:03:52.791585Z",
+            "startedAt": "2025-07-13T12:02:15.913924Z",
+            "finishedAt": "2025-07-13T12:03:52.791135Z"
+          },
+          "cursor": "V_4PJuKovHUwaHByMGZuczczZXVlZDJn"
+        },
         {
           "deploy": {
             "id": "dep-d1ppptpr0fns73eudesg",
@@ -173,28 +190,11 @@
             "status": "live",
             "trigger": "new_commit",
             "createdAt": "2025-07-12T14:32:26.03245Z",
-            "updatedAt": "2025-07-13T11:49:37.236165Z",
+            "updatedAt": "2025-07-13T12:03:53.615471Z",
             "startedAt": "2025-07-12T14:32:26.009479Z",
             "finishedAt": "2025-07-12T14:34:06.074735Z"
           },
           "cursor": "a1Mp_g4Gp2kzdTlyMGZuczczZXJwbWUw"
-        },
-        {
-          "deploy": {
-            "id": "dep-d1p6lmumcj7s73aeld90",
-            "commit": {
-              "id": "da11144e2821d4301dec8b793d5dfc8bcc10d78b",
-              "message": "Portal: final e-commerce upgrades, testy, raporty, nowe komponenty, automatyzacja, bezpieczestwo, podsumowanie",
-              "createdAt": "2025-07-12T14:01:55Z"
-            },
-            "status": "deactivated",
-            "trigger": "new_commit",
-            "createdAt": "2025-07-12T14:02:04.578448Z",
-            "updatedAt": "2025-07-12T14:34:06.073374Z",
-            "startedAt": "2025-07-12T14:02:04.441941Z",
-            "finishedAt": "2025-07-12T14:02:59.613397Z"
-          },
-          "cursor": "yYEfgvOXX_psbXVtY2o3czczYWVsZDkw"
         }
       ],
       "success": true
@@ -204,17 +204,34 @@
       "deployments": [
         {
           "deploy": {
+            "id": "dep-d1pq0h9r0fns73euecs0",
+            "commit": {
+              "id": "a5e027adef55321635f6d8ce2649cd65d80ea38f",
+              "message": "Naprawa build frontendu: konfiguracja Vite, usunicie duplikatów styled-components, poprawka ikon react-icons, kompatybilno z Render",
+              "createdAt": "2025-07-13T12:02:06Z"
+            },
+            "status": "build_in_progress",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T12:02:13.969885Z",
+            "updatedAt": "2025-07-13T12:02:13.969885Z",
+            "startedAt": "2025-07-13T12:02:13.966456Z"
+          },
+          "cursor": "V_4PJuKovHUwaDlyMGZuczczZXVlY3Mw"
+        },
+        {
+          "deploy": {
             "id": "dep-d1pppu1r0fns73eudf30",
             "commit": {
               "id": "285ba75dc3e0ef4462be2e5bd825c5648ef03b37",
               "message": "Naprawa bdu path-to-regexp, pena walidacja tras, testy, nowe funkcje: profile firmowe, system postów, rekomendacje, lojalno, przyjanie, poprawki UI/UX, testy e2e, dokumentacja",
               "createdAt": "2025-07-13T11:47:42Z"
             },
-            "status": "build_in_progress",
+            "status": "canceled",
             "trigger": "new_commit",
             "createdAt": "2025-07-13T11:48:09.674683Z",
-            "updatedAt": "2025-07-13T11:48:09.674683Z",
-            "startedAt": "2025-07-13T11:48:09.67201Z"
+            "updatedAt": "2025-07-13T12:02:14.115532Z",
+            "startedAt": "2025-07-13T11:48:09.67201Z",
+            "finishedAt": "2025-07-13T12:02:14.114917Z"
           },
           "cursor": "LPcrEl1px39wdTFyMGZuczczZXVkZjMw"
         },
@@ -353,23 +370,6 @@
             "finishedAt": "2025-07-12T16:32:58.921755Z"
           },
           "cursor": "a1Mp_g4Gp2kzdWhyMGZuczczZXJwbWxn"
-        },
-        {
-          "deploy": {
-            "id": "dep-d1p6lnemcj7s73aeldjg",
-            "commit": {
-              "id": "da11144e2821d4301dec8b793d5dfc8bcc10d78b",
-              "message": "Portal: final e-commerce upgrades, testy, raporty, nowe komponenty, automatyzacja, bezpieczestwo, podsumowanie",
-              "createdAt": "2025-07-12T14:01:55Z"
-            },
-            "status": "canceled",
-            "trigger": "new_commit",
-            "createdAt": "2025-07-12T14:02:06.407365Z",
-            "updatedAt": "2025-07-12T14:32:27.770584Z",
-            "startedAt": "2025-07-12T14:02:06.404121Z",
-            "finishedAt": "2025-07-12T14:32:27.769989Z"
-          },
-          "cursor": "yYEfgvOXX_psbmVtY2o3czczYWVsZGpn"
         }
       ],
       "success": true
