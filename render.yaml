@@ -1,10 +1,10 @@
 services:
-  # Backend API
+  # Backend API - zoptymalizowany
   - type: web
     name: portal-backend
     env: node
     plan: free
-    buildCommand: cd backend && npm install
+    buildCommand: cd backend && npm ci --only=production --prefer-offline
     startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
@@ -16,13 +16,13 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: CORS_ORIGIN
-        value: https://portal-frontend-1234.onrender.com
+        value: https://portal-frontend.onrender.com
 
-  # Frontend React App
+  # Frontend React App - zoptymalizowany
   - type: web
     name: portal-frontend
     env: static
-    buildCommand: cd frontend && npm install && npm run build
+    buildCommand: cd frontend && npm ci --prefer-offline && npm run build
     staticPublishPath: ./frontend/build
     routes:
       - type: rewrite
@@ -30,6 +30,6 @@ services:
         destination: /index.html
     envVars:
       - key: REACT_APP_API_URL
-        value: https://portal-backend-1234.onrender.com
+        value: https://portal-backend.onrender.com
       - key: REACT_APP_GOOGLE_MAPS_API_KEY
         value: AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg 

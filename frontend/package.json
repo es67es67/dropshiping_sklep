@@ -23,12 +23,13 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "vite build",
+    "build": "vite build --mode production",
     "preview": "vite preview",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test:e2e": "cypress run --spec 'cypress/e2e/**/*.cy.js'",
-    "test:e2e:headed": "cypress run --headed --spec 'cypress/e2e/**/*.cy.js'"
+    "test:e2e:headed": "cypress run --headed --spec 'cypress/e2e/**/*.cy.js'",
+    "postinstall": "echo 'Frontend dependencies installed successfully'"
   },
   "proxy": "http://localhost:5000",
   "browserslist": {

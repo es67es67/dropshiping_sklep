@@ -19,10 +19,22 @@ export default defineConfig({
     outDir: 'build',
     sourcemap: false,
     emptyOutDir: true,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
     rollupOptions: {
       input: 'src/index.jsx',
       output: {
-        manualChunks: undefined,
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          icons: ['react-icons'],
+          styling: ['styled-components']
+        },
         assetFileNames: 'assets/[name]-[hash][extname]',
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js'
@@ -31,5 +43,8 @@ export default defineConfig({
   },
   preview: {
     port: 3000
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', 'styled-components']
   }
 }) 
