@@ -1,14 +1,14 @@
 {
-  "timestamp": "2025-07-13T12:03:59.215Z",
+  "timestamp": "2025-07-13T14:08:44.254Z",
   "services": [
     {
       "name": "Backend",
-      "lastDeploy": "2025-07-13T12:02:16.637637Z",
+      "lastDeploy": "2025-07-13T12:34:25.265544Z",
       "success": true
     },
     {
       "name": "Frontend",
-      "lastDeploy": "2025-07-13T12:02:15.175453Z",
+      "lastDeploy": "2025-07-13T12:34:23.84009Z",
       "success": true
     },
     {
@@ -26,6 +26,40 @@
     {
       "name": "Backend",
       "deployments": [
+        {
+          "deploy": {
+            "id": "dep-d1pqfjumcj7s73ahe5l0",
+            "commit": {
+              "id": "037a2626f4eb4ee3bad6937024b3fef3875c052f",
+              "message": "fix: poprawka konfiguracji Vite i build frontendu pod Render (cieki, entrypoint, build)",
+              "createdAt": "2025-07-13T12:34:14Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T12:34:24.586648Z",
+            "updatedAt": "2025-07-13T12:51:40.086152Z",
+            "startedAt": "2025-07-13T12:34:24.55987Z",
+            "finishedAt": "2025-07-13T12:51:40.085615Z"
+          },
+          "cursor": "V_4PJuKovHVmanVtY2o3czczYWhlNWww"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1pq99qdbo4c73aknadg",
+            "commit": {
+              "id": "f47a64f82bcce77ed0219f7dff713a826a925210",
+              "message": "Poprawka build frontendu: index.html w public, konfiguracja Vite, czysty build, pena kompatybilno z Render static",
+              "createdAt": "2025-07-13T12:20:50Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T12:20:56.908632Z",
+            "updatedAt": "2025-07-13T12:22:11.667827Z",
+            "startedAt": "2025-07-13T12:20:56.881056Z",
+            "finishedAt": "2025-07-13T12:22:11.667296Z"
+          },
+          "cursor": "V_4PJuKovHU5OXFkYm80YzczYWtuYWRn"
+        },
         {
           "deploy": {
             "id": "dep-d1pq0hpr0fns73eued2g",
@@ -161,40 +195,6 @@
             "finishedAt": "2025-07-13T08:02:29.891109Z"
           },
           "cursor": "ZRIPwF3PtSFlazE1cGR2czczOGtpb2Yw"
-        },
-        {
-          "deploy": {
-            "id": "dep-d1pm9fer433s738vvrkg",
-            "commit": {
-              "id": "40de894eb71a40b7aafd3006a87565973b4c1bb0",
-              "message": "Naprawa bdów testów: wyczenie rate limiting, dodanie endpointu /api/search/suggestions, poprawka CORS",
-              "createdAt": "2025-07-13T07:48:03Z"
-            },
-            "status": "update_failed",
-            "trigger": "new_commit",
-            "createdAt": "2025-07-13T07:48:13.98999Z",
-            "updatedAt": "2025-07-13T07:49:04.977007Z",
-            "startedAt": "2025-07-13T07:48:13.960565Z",
-            "finishedAt": "2025-07-13T07:49:04.976465Z"
-          },
-          "cursor": "ZRIPwF3PtSE5ZmVyNDMzczczOHZ2cmtn"
-        },
-        {
-          "deploy": {
-            "id": "dep-d1p73u9r0fns73erpme0",
-            "commit": {
-              "id": "e79b68627aae184e138d10e7aacdb4278946c818",
-              "message": "Naprawa CORS, agodniejszy rate limiting, ochrona XSS/NoSQL w wyszukiwaniu, poprawka aktywacji uytkowników",
-              "createdAt": "2025-07-12T14:32:18Z"
-            },
-            "status": "live",
-            "trigger": "new_commit",
-            "createdAt": "2025-07-12T14:32:26.03245Z",
-            "updatedAt": "2025-07-13T12:03:53.615471Z",
-            "startedAt": "2025-07-12T14:32:26.009479Z",
-            "finishedAt": "2025-07-12T14:34:06.074735Z"
-          },
-          "cursor": "a1Mp_g4Gp2kzdTlyMGZuczczZXJwbWUw"
         }
       ],
       "success": true
@@ -204,17 +204,51 @@
       "deployments": [
         {
           "deploy": {
+            "id": "dep-d1pqfjemcj7s73ahe5fg",
+            "commit": {
+              "id": "037a2626f4eb4ee3bad6937024b3fef3875c052f",
+              "message": "fix: poprawka konfiguracji Vite i build frontendu pod Render (cieki, entrypoint, build)",
+              "createdAt": "2025-07-13T12:34:14Z"
+            },
+            "status": "build_in_progress",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T12:34:22.750217Z",
+            "updatedAt": "2025-07-13T12:34:22.750217Z",
+            "startedAt": "2025-07-13T12:34:22.747222Z"
+          },
+          "cursor": "V_4PJuKovHVmamVtY2o3czczYWhlNWZn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1pq9aadbo4c73aknak0",
+            "commit": {
+              "id": "f47a64f82bcce77ed0219f7dff713a826a925210",
+              "message": "Poprawka build frontendu: index.html w public, konfiguracja Vite, czysty build, pena kompatybilno z Render static",
+              "createdAt": "2025-07-13T12:20:50Z"
+            },
+            "status": "canceled",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T12:20:58.349856Z",
+            "updatedAt": "2025-07-13T12:34:22.856087Z",
+            "startedAt": "2025-07-13T12:20:58.346525Z",
+            "finishedAt": "2025-07-13T12:34:22.855538Z"
+          },
+          "cursor": "V_4PJuKovHU5YWFkYm80YzczYWtuYWsw"
+        },
+        {
+          "deploy": {
             "id": "dep-d1pq0h9r0fns73euecs0",
             "commit": {
               "id": "a5e027adef55321635f6d8ce2649cd65d80ea38f",
               "message": "Naprawa build frontendu: konfiguracja Vite, usunicie duplikatów styled-components, poprawka ikon react-icons, kompatybilno z Render",
               "createdAt": "2025-07-13T12:02:06Z"
             },
-            "status": "build_in_progress",
+            "status": "canceled",
             "trigger": "new_commit",
             "createdAt": "2025-07-13T12:02:13.969885Z",
-            "updatedAt": "2025-07-13T12:02:13.969885Z",
-            "startedAt": "2025-07-13T12:02:13.966456Z"
+            "updatedAt": "2025-07-13T12:20:58.460834Z",
+            "startedAt": "2025-07-13T12:02:13.966456Z",
+            "finishedAt": "2025-07-13T12:20:58.460204Z"
           },
           "cursor": "V_4PJuKovHUwaDlyMGZuczczZXVlY3Mw"
         },
@@ -336,40 +370,6 @@
             "finishedAt": "2025-07-13T09:47:12.834026Z"
           },
           "cursor": "ZRIPwF3PtSFlazk1cGR2czczOGtpb2ww"
-        },
-        {
-          "deploy": {
-            "id": "dep-d1pm9fmr433s738vvrpg",
-            "commit": {
-              "id": "40de894eb71a40b7aafd3006a87565973b4c1bb0",
-              "message": "Naprawa bdów testów: wyczenie rate limiting, dodanie endpointu /api/search/suggestions, poprawka CORS",
-              "createdAt": "2025-07-13T07:48:03Z"
-            },
-            "status": "canceled",
-            "trigger": "new_commit",
-            "createdAt": "2025-07-13T07:48:15.337235Z",
-            "updatedAt": "2025-07-13T07:59:14.615475Z",
-            "startedAt": "2025-07-13T07:48:15.334439Z",
-            "finishedAt": "2025-07-13T07:59:14.614907Z"
-          },
-          "cursor": "ZRIPwF3PtSE5Zm1yNDMzczczOHZ2cnBn"
-        },
-        {
-          "deploy": {
-            "id": "dep-d1p73uhr0fns73erpmlg",
-            "commit": {
-              "id": "e79b68627aae184e138d10e7aacdb4278946c818",
-              "message": "Naprawa CORS, agodniejszy rate limiting, ochrona XSS/NoSQL w wyszukiwaniu, poprawka aktywacji uytkowników",
-              "createdAt": "2025-07-12T14:32:18Z"
-            },
-            "status": "build_failed",
-            "trigger": "new_commit",
-            "createdAt": "2025-07-12T14:32:27.549507Z",
-            "updatedAt": "2025-07-12T16:32:58.922377Z",
-            "startedAt": "2025-07-12T14:32:27.546791Z",
-            "finishedAt": "2025-07-12T16:32:58.921755Z"
-          },
-          "cursor": "a1Mp_g4Gp2kzdWhyMGZuczczZXJwbWxn"
         }
       ],
       "success": true

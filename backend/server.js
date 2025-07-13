@@ -226,57 +226,71 @@ io.on('connection', (socket) => {
   });
 });
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://es67jw:xlnepf0D4JXZtGwT@cluster0.hku8kvd.mongodb.net/portal?retryWrites=true&w=majority&appName=Cluster0')
-  .then(async () => {
-    console.log('✅ Połączono z MongoDB');
-    
-    // Inicjalizacja systemu modułowego
-    console.log('🔄 Inicjalizacja systemu modułowego...');
-    
-    // Ustaw event system dla module loader
-    moduleLoader.setEventEmitter(eventSystem);
-    
-    // Załaduj wszystkie moduły
-    await moduleLoader.loadAllModules();
-    
-    // Rejestruj modułowe routes po załadowaniu modułów
-    const messagingModule = moduleLoader.getModule('messaging');
-    const gamificationModule = moduleLoader.getModule('gamification');
-    const paymentsModule = moduleLoader.getModule('payments');
-    
-    if (messagingModule) {
-      const messagingRoutes = messagingModule.getRoutes();
-      if (!messagingRoutes || typeof messagingRoutes !== 'function' || !messagingRoutes.use) {
-        console.error('\n❌ Błąd rejestracji tras: messagingModule.getRoutes() nie zwraca poprawnego routera Express!');
-      } else {
-        app.use('/api/messaging', messagingRoutes);
-        console.log('✅ Routes modułu messaging zarejestrowane');
+// Uruchom serwer natychmiast, aby uniknąć timeoutu
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`🚀 Serwer działa na porcie ${PORT}`);
+  
+  // Połączenie z MongoDB i inicjalizacja modułów w tle
+  mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://es67jw:xlnepf0D4JXZtGwT@cluster0.hku8kvd.mongodb.net/portal?retryWrites=true&w=majority&appName=Cluster0')
+    .then(async () => {
+      console.log('✅ Połączono z MongoDB');
+      
+      // Inicjalizacja systemu modułowego
+      console.log('🔄 Inicjalizacja systemu modułowego...');
+      
+      try {
+        // Ustaw event system dla module loader
+        moduleLoader.setEventEmitter(eventSystem);
+        
+        // Załaduj wszystkie moduły
+        await moduleLoader.loadAllModules();
+        
+        // Rejestruj modułowe routes po załadowaniu modułów
+        const messagingModule = moduleLoader.getModule('messaging');
+        const gamificationModule = moduleLoader.getModule('gamification');
+        const paymentsModule = moduleLoader.getModule('payments');
+        
+        if (messagingModule) {
+          const messagingRoutes = messagingModule.getRoutes();
+          if (!messagingRoutes || typeof messagingRoutes !== 'function' || !messagingRoutes.use) {
+            console.error('\n❌ Błąd rejestracji tras: messagingModule.getRoutes() nie zwraca poprawnego routera Express!');
+          } else {
+            app.use('/api/messaging', messagingRoutes);
+            console.log('✅ Routes modułu messaging zarejestrowane');
+          }
+        }
+        
+        if (gamificationModule) {
+          const gamificationRoutes = gamificationModule.getRoutes();
+          if (!gamificationRoutes || typeof gamificationRoutes !== 'function' || !gamificationRoutes.use) {
+            console.error('\n❌ Błąd rejestracji tras: gamificationModule.getRoutes() nie zwraca poprawnego routera Express!');
+          } else {
+            app.use('/api/gamification', gamificationRoutes);
+            console.log('✅ Routes modułu gamification zarejestrowane');
+          }
+        }
+        
+        if (paymentsModule) {
+          const paymentsRoutes = paymentsModule.getRoutes();
+          if (!paymentsRoutes || typeof paymentsRoutes !== 'function' || !paymentsRoutes.use) {
+            console.error('\n❌ Błąd rejestracji tras: paymentsModule.getRoutes() nie zwraca poprawnego routera Express!');
+          } else {
+            app.use('/api/payments', paymentsRoutes);
+            console.log('✅ Routes modułu payments zarejestrowane');
+          }
+        }
+        
+        console.log('✅ System modułowy zainicjalizowany');
+      } catch (error) {
+        console.error('❌ Błąd podczas inicjalizacji modułów:', error);
       }
-    }
-    
-    if (gamificationModule) {
-      const gamificationRoutes = gamificationModule.getRoutes();
-      if (!gamificationRoutes || typeof gamificationRoutes !== 'function' || !gamificationRoutes.use) {
-        console.error('\n❌ Błąd rejestracji tras: gamificationModule.getRoutes() nie zwraca poprawnego routera Express!');
-      } else {
-        app.use('/api/gamification', gamificationRoutes);
-        console.log('✅ Routes modułu gamification zarejestrowane');
-      }
-    }
-    
-    if (paymentsModule) {
-      const paymentsRoutes = paymentsModule.getRoutes();
-      if (!paymentsRoutes || typeof paymentsRoutes !== 'function' || !paymentsRoutes.use) {
-        console.error('\n❌ Błąd rejestracji tras: paymentsModule.getRoutes() nie zwraca poprawnego routera Express!');
-      } else {
-        app.use('/api/payments', paymentsRoutes);
-        console.log('✅ Routes modułu payments zarejestrowane');
-      }
-    }
-    
-    console.log('✅ System modułowy zainicjalizowany');
-  })
-  .catch(err => console.error('❌ Błąd połączenia z MongoDB:', err));
+    })
+    .catch(err => {
+      console.error('❌ Błąd połączenia z MongoDB:', err);
+      console.log('⚠️ Serwer działa bez bazy danych - niektóre funkcje mogą być niedostępne');
+    });
+});
 
 // Register routes
 function safeUse(path, router, name) {
@@ -419,5 +433,4 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Coś poszło nie tak!' });
 });
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`🚀 Serwer działa na porcie ${PORT}`));
+// Serwer już uruchomiony wyżej

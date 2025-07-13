@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-07-13T12:24:52.234Z",
+  "totalTests": 1,
+  "passedTests": 0,
+  "failedTests": 1,
+  "results": [
+    {
+      "test": "Render Login",
+      "success": false,
+      "message": "Błąd: No element found for selector: a[href=\"/login\"]",
+      "timestamp": "2025-07-13T12:24:52.233Z",
+      "screenshot": "D:\\portal\\monitoring\\render-screenshots\\render-login-error_2025-07-13T12-24-51-961Z.png"
+    }
+  ]
+}
