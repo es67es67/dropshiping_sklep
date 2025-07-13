@@ -1,212 +1,158 @@
 const mongoose = require('mongoose');
 
-const attachmentSchema = new mongoose.Schema({
-  filename: {
-    type: String,
-    required: true
-  },
-  path: {
-    type: String,
-    required: true
-  },
-  mimetype: {
-    type: String,
-    required: true
-  },
-  size: {
-    type: Number,
-    required: true
-  },
-  uploadedAt: {
-    type: Date,
-    default: Date.now
-  }
-});
-
 const messageSchema = new mongoose.Schema({
+  // Nadawca i odbiorca
   sender: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  receiver: {
+  recipient: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
+  
+  // Typ konwersacji
+  conversationType: {
+    type: String,
+    enum: ['user_to_user', 'user_to_shop', 'user_to_support'],
+    default: 'user_to_user'
+  },
+  
+  // Powiązane dane
+  relatedData: {
+    orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+    shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop' }
+  },
+  
+  // Treść wiadomości
   content: {
     type: String,
     required: true,
-    trim: true
+    maxlength: 2000
   },
+  
+  // Typ wiadomości
   messageType: {
     type: String,
-    enum: ['text', 'file', 'image', 'audio', 'video', 'location'],
+    enum: ['text', 'image', 'file', 'order', 'product', 'system'],
     default: 'text'
   },
-  attachments: [attachmentSchema],
-  isRead: {
-    type: Boolean,
-    default: false
+  
+  // Załączniki
+  attachments: [{
+    type: { type: String, enum: ['image', 'file', 'document'] },
+    url: { type: String, required: true },
+    filename: { type: String },
+    size: { type: Number }, // w bajtach
+    mimeType: { type: String }
+  }],
+  
+  // Status wiadomości
+  status: {
+    type: String,
+    enum: ['sent', 'delivered', 'read', 'failed'],
+    default: 'sent'
   },
-  readAt: {
-    type: Date
+  
+  // Czas dostarczenia i przeczytania
+  deliveredAt: { type: Date },
+  readAt: { type: Date },
+  
+  // Edycja wiadomości
+  edited: {
+    isEdited: { type: Boolean, default: false },
+    editedAt: { type: Date },
+    originalContent: { type: String }
   },
-  isDeleted: {
-    type: Boolean,
-    default: false
+  
+  // Usunięcie wiadomości
+  deleted: {
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
   },
-  deletedAt: {
-    type: Date
-  },
-  deletedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
+  
+  // Reakcje
+  reactions: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    emoji: { type: String },
+    createdAt: { type: Date, default: Date.now }
+  }],
+  
+  // Odpowiedź na wiadomość
   replyTo: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Message'
   },
-  edited: {
-    type: Boolean,
-    default: false
+  
+  // Forwardowane wiadomości
+  forwardedFrom: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Message'
   },
-  editedAt: {
-    type: Date
-  },
-  editHistory: [{
-    content: String,
-    editedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }]
-}, {
-  timestamps: true
-});
-
-// Indeksy dla szybkiego wyszukiwania
-messageSchema.index({ sender: 1, receiver: 1 });
-messageSchema.index({ receiver: 1, isRead: 1 });
-messageSchema.index({ createdAt: -1 });
-messageSchema.index({ sender: 1, createdAt: -1 });
-messageSchema.index({ receiver: 1, createdAt: -1 });
-
-// Middleware pre-save
-messageSchema.pre('save', function(next) {
-  if (this.isModified('isRead') && this.isRead && !this.readAt) {
-    this.readAt = new Date();
+  
+  // Metadane
+  metadata: {
+    ip: { type: String },
+    userAgent: { type: String },
+    device: { type: String }
   }
-  
-  if (this.isModified('content') && this.editHistory && this.editHistory.length > 0) {
-    this.edited = true;
-    this.editedAt = new Date();
-  }
-  
-  next();
-});
+}, { timestamps: true });
 
-// Metody statyczne
-messageSchema.statics.getConversation = function(userId1, userId2, options = {}) {
-  const { page = 1, limit = 50 } = options;
-  const skip = (page - 1) * limit;
-  
-  return this.find({
-    $or: [
-      { sender: userId1, receiver: userId2 },
-      { sender: userId2, receiver: userId1 }
-    ],
-    isDeleted: false
-  })
-  .sort({ createdAt: -1 })
-  .limit(limit)
-  .skip(skip)
-  .populate('sender', 'username firstName lastName avatar')
-  .populate('receiver', 'username firstName lastName avatar')
-  .populate('replyTo', 'content sender');
+// Metody wiadomości
+messageSchema.methods.markAsDelivered = function() {
+  this.status = 'delivered';
+  this.deliveredAt = new Date();
+  return this.save();
 };
 
-messageSchema.statics.getUnreadCount = function(userId) {
-  return this.countDocuments({
-    receiver: userId,
-    isRead: false,
-    isDeleted: false
-  });
-};
-
-messageSchema.statics.markAsRead = function(messageIds, userId) {
-  return this.updateMany(
-    {
-      _id: { $in: messageIds },
-      receiver: userId,
-      isRead: false
-    },
-    {
-      isRead: true,
-      readAt: new Date()
-    }
-  );
-};
-
-// Metody instancji
 messageSchema.methods.markAsRead = function() {
-  this.isRead = true;
+  this.status = 'read';
   this.readAt = new Date();
   return this.save();
 };
 
-messageSchema.methods.softDelete = function(userId) {
-  this.isDeleted = true;
-  this.deletedAt = new Date();
-  this.deletedBy = userId;
-  return this.save();
-};
-
 messageSchema.methods.edit = function(newContent) {
-  // Zapisz historię edycji
-  if (!this.editHistory) {
-    this.editHistory = [];
+  if (!this.edited.isEdited) {
+    this.edited.originalContent = this.content;
   }
-  
-  this.editHistory.push({
-    content: this.content,
-    editedAt: new Date()
-  });
-  
   this.content = newContent;
-  this.edited = true;
-  this.editedAt = new Date();
-  
+  this.edited.isEdited = true;
+  this.edited.editedAt = new Date();
   return this.save();
 };
 
-// Wirtualne pola
-messageSchema.virtual('isFileMessage').get(function() {
-  return this.messageType === 'file' && this.attachments && this.attachments.length > 0;
-});
+messageSchema.methods.delete = function(deletedBy) {
+  this.deleted.isDeleted = true;
+  this.deleted.deletedAt = new Date();
+  this.deleted.deletedBy = deletedBy;
+  return this.save();
+};
 
-messageSchema.virtual('isImageMessage').get(function() {
-  return this.messageType === 'image' || 
-         (this.attachments && this.attachments.some(att => att.mimetype.startsWith('image/')));
-});
-
-messageSchema.virtual('isAudioMessage').get(function() {
-  return this.messageType === 'audio' || 
-         (this.attachments && this.attachments.some(att => att.mimetype.startsWith('audio/')));
-});
-
-messageSchema.virtual('isVideoMessage').get(function() {
-  return this.messageType === 'video' || 
-         (this.attachments && this.attachments.some(att => att.mimetype.startsWith('video/')));
-});
-
-// Konfiguracja toJSON
-messageSchema.set('toJSON', {
-  virtuals: true,
-  transform: function(doc, ret) {
-    delete ret.__v;
-    return ret;
+messageSchema.methods.addReaction = function(userId, emoji) {
+  const existingReaction = this.reactions.find(r => r.user.toString() === userId.toString());
+  if (existingReaction) {
+    existingReaction.emoji = emoji;
+    existingReaction.createdAt = new Date();
+  } else {
+    this.reactions.push({ user: userId, emoji });
   }
-});
+  return this.save();
+};
+
+messageSchema.methods.removeReaction = function(userId) {
+  this.reactions = this.reactions.filter(r => r.user.toString() !== userId.toString());
+  return this.save();
+};
+
+// Indeksy
+messageSchema.index({ sender: 1, recipient: 1, createdAt: -1 });
+messageSchema.index({ recipient: 1, status: 1 });
+messageSchema.index({ 'relatedData.orderId': 1 });
+messageSchema.index({ 'relatedData.shopId': 1 });
+messageSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('Message', messageSchema);

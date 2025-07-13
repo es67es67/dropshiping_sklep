@@ -14,6 +14,8 @@ const moduleLoader = require('./core/moduleLoader');
 const userRoutes = require('./routes/userRoutes');
 const shopRoutes = require('./routes/shopRoutes');
 const productRoutes = require('./routes/productRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 
 const app = express();
@@ -261,6 +263,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://es67jw:xlnepf0D4JXZtG
 app.use('/api/users', userRoutes);
 app.use('/api/shops', shopRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
 app.use('/api/locations', locationRoutes);
 
 // Middleware anty-XSS/NoSQL injection dla wyszukiwania produktów
