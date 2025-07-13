@@ -1,0 +1,378 @@
+{
+  "timestamp": "2025-07-13T11:53:03.762Z",
+  "services": [
+    {
+      "name": "Backend",
+      "lastDeploy": "2025-07-13T11:48:08.958564Z",
+      "success": true
+    },
+    {
+      "name": "Frontend",
+      "lastDeploy": "2025-07-13T11:48:10.672988Z",
+      "success": true
+    },
+    {
+      "name": "Backend",
+      "logs": [],
+      "error": "404 page not found\n",
+      "success": false
+    },
+    {
+      "name": "Frontend",
+      "logs": [],
+      "error": "404 page not found\n",
+      "success": false
+    },
+    {
+      "name": "Backend",
+      "deployments": [
+        {
+          "deploy": {
+            "id": "dep-d1ppptpr0fns73eudesg",
+            "commit": {
+              "id": "285ba75dc3e0ef4462be2e5bd825c5648ef03b37",
+              "message": "Naprawa bdu path-to-regexp, pena walidacja tras, testy, nowe funkcje: profile firmowe, system postów, rekomendacje, lojalno, przyjanie, poprawki UI/UX, testy e2e, dokumentacja",
+              "createdAt": "2025-07-13T11:47:42Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T11:48:08.316415Z",
+            "updatedAt": "2025-07-13T11:49:36.166482Z",
+            "startedAt": "2025-07-13T11:48:08.289433Z",
+            "finishedAt": "2025-07-13T11:49:36.165941Z"
+          },
+          "cursor": "LPcrEl1px39wdHByMGZuczczZXVkZXNn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1pon1emcj7s73ah65e0",
+            "commit": {
+              "id": "db3de209f2b6e83954f5b5596367995d3ead4dc2",
+              "message": "Dodanie kompletnego systemu e-commerce: recenzje, kupony, panel admin, analytics, kategorie, tagi, wishlist",
+              "createdAt": "2025-07-13T10:33:33Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T10:33:41.795311Z",
+            "updatedAt": "2025-07-13T10:34:45.145377Z",
+            "startedAt": "2025-07-13T10:33:41.773327Z",
+            "finishedAt": "2025-07-13T10:34:45.144834Z"
+          },
+          "cursor": "DkGQm9GADsFuMWVtY2o3czczYWg2NWUw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1pojoadbo4c73akenh0",
+            "commit": {
+              "id": "b8622e45cff241e12d74bd142dcd5fa3107ee904",
+              "message": "Dodanie kompletnego frontendu e-commerce: koszyk, kasa, zamówienia, chat, powiadomienia",
+              "createdAt": "2025-07-13T10:26:34Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T10:26:42.424162Z",
+            "updatedAt": "2025-07-13T10:27:39.185857Z",
+            "startedAt": "2025-07-13T10:26:42.399437Z",
+            "finishedAt": "2025-07-13T10:27:39.185367Z"
+          },
+          "cursor": "DkGQm9GADsFqb2FkYm80YzczYWtlbmgw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1pogvk9c44c739batv0",
+            "commit": {
+              "id": "83df1d09c110cc224fafa9622e54007c441d6485",
+              "message": "Dodanie kompletnego systemu e-commerce: koszyk, zamówienia, patnoci, powiadomienia, chat",
+              "createdAt": "2025-07-13T10:20:41Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T10:20:47.666019Z",
+            "updatedAt": "2025-07-13T10:22:06.056365Z",
+            "startedAt": "2025-07-13T10:20:47.624269Z",
+            "finishedAt": "2025-07-13T10:22:06.055759Z"
+          },
+          "cursor": "DkGQm9GADsFndms5YzQ0YzczOWJhdHYw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1po2rje5dus739b73eg",
+            "commit": {
+              "id": "0d08916e316112ca807b18af6d52e060d08ada80",
+              "message": "Dodanie kompletnego frontendu produktów - karty produktów, lista z filtrami, strona produktów",
+              "createdAt": "2025-07-13T09:50:31Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T09:50:39.264328Z",
+            "updatedAt": "2025-07-13T09:52:41.912659Z",
+            "startedAt": "2025-07-13T09:50:39.239835Z",
+            "finishedAt": "2025-07-13T09:52:41.912063Z"
+          },
+          "cursor": "DkGQm9GADsEycmplNWR1czczOWI3M2Vn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1po17c9c44c739b8i70",
+            "commit": {
+              "id": "405d92bcca6643303cc758daafc75015ddca5495",
+              "message": "Dodanie kompletnego systemu produktów i sklepów - modele, kontrolery, trasy, wyszukiwanie, oceny",
+              "createdAt": "2025-07-13T09:47:03Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T09:47:11.070437Z",
+            "updatedAt": "2025-07-13T09:48:46.565423Z",
+            "startedAt": "2025-07-13T09:47:11.040179Z",
+            "finishedAt": "2025-07-13T09:48:46.564892Z"
+          },
+          "cursor": "DkGQm9GADsExN2M5YzQ0YzczOWI4aTcw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1pmek15pdvs738kiof0",
+            "commit": {
+              "id": "1bd521deebe93ccb10e629696e5dafe4ea7e989e",
+              "message": "Naprawa rejestracji uytkowników: dodanie dateOfBirth, username, poczenie z backendem",
+              "createdAt": "2025-07-13T07:59:07Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T07:59:13.2009Z",
+            "updatedAt": "2025-07-13T08:02:29.891803Z",
+            "startedAt": "2025-07-13T07:59:13.175063Z",
+            "finishedAt": "2025-07-13T08:02:29.891109Z"
+          },
+          "cursor": "ZRIPwF3PtSFlazE1cGR2czczOGtpb2Yw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1pm9fer433s738vvrkg",
+            "commit": {
+              "id": "40de894eb71a40b7aafd3006a87565973b4c1bb0",
+              "message": "Naprawa bdów testów: wyczenie rate limiting, dodanie endpointu /api/search/suggestions, poprawka CORS",
+              "createdAt": "2025-07-13T07:48:03Z"
+            },
+            "status": "update_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T07:48:13.98999Z",
+            "updatedAt": "2025-07-13T07:49:04.977007Z",
+            "startedAt": "2025-07-13T07:48:13.960565Z",
+            "finishedAt": "2025-07-13T07:49:04.976465Z"
+          },
+          "cursor": "ZRIPwF3PtSE5ZmVyNDMzczczOHZ2cmtn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1p73u9r0fns73erpme0",
+            "commit": {
+              "id": "e79b68627aae184e138d10e7aacdb4278946c818",
+              "message": "Naprawa CORS, agodniejszy rate limiting, ochrona XSS/NoSQL w wyszukiwaniu, poprawka aktywacji uytkowników",
+              "createdAt": "2025-07-12T14:32:18Z"
+            },
+            "status": "live",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T14:32:26.03245Z",
+            "updatedAt": "2025-07-13T11:49:37.236165Z",
+            "startedAt": "2025-07-12T14:32:26.009479Z",
+            "finishedAt": "2025-07-12T14:34:06.074735Z"
+          },
+          "cursor": "a1Mp_g4Gp2kzdTlyMGZuczczZXJwbWUw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1p6lmumcj7s73aeld90",
+            "commit": {
+              "id": "da11144e2821d4301dec8b793d5dfc8bcc10d78b",
+              "message": "Portal: final e-commerce upgrades, testy, raporty, nowe komponenty, automatyzacja, bezpieczestwo, podsumowanie",
+              "createdAt": "2025-07-12T14:01:55Z"
+            },
+            "status": "deactivated",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T14:02:04.578448Z",
+            "updatedAt": "2025-07-12T14:34:06.073374Z",
+            "startedAt": "2025-07-12T14:02:04.441941Z",
+            "finishedAt": "2025-07-12T14:02:59.613397Z"
+          },
+          "cursor": "yYEfgvOXX_psbXVtY2o3czczYWVsZDkw"
+        }
+      ],
+      "success": true
+    },
+    {
+      "name": "Frontend",
+      "deployments": [
+        {
+          "deploy": {
+            "id": "dep-d1pppu1r0fns73eudf30",
+            "commit": {
+              "id": "285ba75dc3e0ef4462be2e5bd825c5648ef03b37",
+              "message": "Naprawa bdu path-to-regexp, pena walidacja tras, testy, nowe funkcje: profile firmowe, system postów, rekomendacje, lojalno, przyjanie, poprawki UI/UX, testy e2e, dokumentacja",
+              "createdAt": "2025-07-13T11:47:42Z"
+            },
+            "status": "build_in_progress",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T11:48:09.674683Z",
+            "updatedAt": "2025-07-13T11:48:09.674683Z",
+            "startedAt": "2025-07-13T11:48:09.67201Z"
+          },
+          "cursor": "LPcrEl1px39wdTFyMGZuczczZXVkZjMw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1pon0umcj7s73ah659g",
+            "commit": {
+              "id": "db3de209f2b6e83954f5b5596367995d3ead4dc2",
+              "message": "Dodanie kompletnego systemu e-commerce: recenzje, kupony, panel admin, analytics, kategorie, tagi, wishlist",
+              "createdAt": "2025-07-13T10:33:33Z"
+            },
+            "status": "canceled",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T10:33:39.973158Z",
+            "updatedAt": "2025-07-13T11:48:09.784024Z",
+            "startedAt": "2025-07-13T10:33:39.970744Z",
+            "finishedAt": "2025-07-13T11:48:09.783378Z"
+          },
+          "cursor": "DkGQm9GADsFuMHVtY2o3czczYWg2NTln"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1pojoqdbo4c73akenpg",
+            "commit": {
+              "id": "b8622e45cff241e12d74bd142dcd5fa3107ee904",
+              "message": "Dodanie kompletnego frontendu e-commerce: koszyk, kasa, zamówienia, chat, powiadomienia",
+              "createdAt": "2025-07-13T10:26:34Z"
+            },
+            "status": "canceled",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T10:26:43.710585Z",
+            "updatedAt": "2025-07-13T10:33:40.092699Z",
+            "startedAt": "2025-07-13T10:26:43.707806Z",
+            "finishedAt": "2025-07-13T10:33:40.092178Z"
+          },
+          "cursor": "DkGQm9GADsFqb3FkYm80YzczYWtlbnBn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1poh049c44c739bau40",
+            "commit": {
+              "id": "83df1d09c110cc224fafa9622e54007c441d6485",
+              "message": "Dodanie kompletnego systemu e-commerce: koszyk, zamówienia, patnoci, powiadomienia, chat",
+              "createdAt": "2025-07-13T10:20:41Z"
+            },
+            "status": "canceled",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T10:20:49.354811Z",
+            "updatedAt": "2025-07-13T10:26:43.814125Z",
+            "startedAt": "2025-07-13T10:20:49.352147Z",
+            "finishedAt": "2025-07-13T10:26:43.813688Z"
+          },
+          "cursor": "DkGQm9GADsFoMDQ5YzQ0YzczOWJhdTQw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1po2rre5dus739b73jg",
+            "commit": {
+              "id": "0d08916e316112ca807b18af6d52e060d08ada80",
+              "message": "Dodanie kompletnego frontendu produktów - karty produktów, lista z filtrami, strona produktów",
+              "createdAt": "2025-07-13T09:50:31Z"
+            },
+            "status": "canceled",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T09:50:40.634622Z",
+            "updatedAt": "2025-07-13T10:20:49.481193Z",
+            "startedAt": "2025-07-13T09:50:40.631643Z",
+            "finishedAt": "2025-07-13T10:20:49.480529Z"
+          },
+          "cursor": "DkGQm9GADsEycnJlNWR1czczOWI3M2pn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1po17s9c44c739b8ie0",
+            "commit": {
+              "id": "405d92bcca6643303cc758daafc75015ddca5495",
+              "message": "Dodanie kompletnego systemu produktów i sklepów - modele, kontrolery, trasy, wyszukiwanie, oceny",
+              "createdAt": "2025-07-13T09:47:03Z"
+            },
+            "status": "canceled",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T09:47:12.612763Z",
+            "updatedAt": "2025-07-13T09:50:40.751941Z",
+            "startedAt": "2025-07-13T09:47:12.609435Z",
+            "finishedAt": "2025-07-13T09:50:40.751408Z"
+          },
+          "cursor": "DkGQm9GADsExN3M5YzQ0YzczOWI4aWUw"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1pmek95pdvs738kiol0",
+            "commit": {
+              "id": "1bd521deebe93ccb10e629696e5dafe4ea7e989e",
+              "message": "Naprawa rejestracji uytkowników: dodanie dateOfBirth, username, poczenie z backendem",
+              "createdAt": "2025-07-13T07:59:07Z"
+            },
+            "status": "canceled",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T07:59:14.48655Z",
+            "updatedAt": "2025-07-13T09:47:12.834503Z",
+            "startedAt": "2025-07-13T07:59:14.484078Z",
+            "finishedAt": "2025-07-13T09:47:12.834026Z"
+          },
+          "cursor": "ZRIPwF3PtSFlazk1cGR2czczOGtpb2ww"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1pm9fmr433s738vvrpg",
+            "commit": {
+              "id": "40de894eb71a40b7aafd3006a87565973b4c1bb0",
+              "message": "Naprawa bdów testów: wyczenie rate limiting, dodanie endpointu /api/search/suggestions, poprawka CORS",
+              "createdAt": "2025-07-13T07:48:03Z"
+            },
+            "status": "canceled",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-13T07:48:15.337235Z",
+            "updatedAt": "2025-07-13T07:59:14.615475Z",
+            "startedAt": "2025-07-13T07:48:15.334439Z",
+            "finishedAt": "2025-07-13T07:59:14.614907Z"
+          },
+          "cursor": "ZRIPwF3PtSE5Zm1yNDMzczczOHZ2cnBn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1p73uhr0fns73erpmlg",
+            "commit": {
+              "id": "e79b68627aae184e138d10e7aacdb4278946c818",
+              "message": "Naprawa CORS, agodniejszy rate limiting, ochrona XSS/NoSQL w wyszukiwaniu, poprawka aktywacji uytkowników",
+              "createdAt": "2025-07-12T14:32:18Z"
+            },
+            "status": "build_failed",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T14:32:27.549507Z",
+            "updatedAt": "2025-07-12T16:32:58.922377Z",
+            "startedAt": "2025-07-12T14:32:27.546791Z",
+            "finishedAt": "2025-07-12T16:32:58.921755Z"
+          },
+          "cursor": "a1Mp_g4Gp2kzdWhyMGZuczczZXJwbWxn"
+        },
+        {
+          "deploy": {
+            "id": "dep-d1p6lnemcj7s73aeldjg",
+            "commit": {
+              "id": "da11144e2821d4301dec8b793d5dfc8bcc10d78b",
+              "message": "Portal: final e-commerce upgrades, testy, raporty, nowe komponenty, automatyzacja, bezpieczestwo, podsumowanie",
+              "createdAt": "2025-07-12T14:01:55Z"
+            },
+            "status": "canceled",
+            "trigger": "new_commit",
+            "createdAt": "2025-07-12T14:02:06.407365Z",
+            "updatedAt": "2025-07-12T14:32:27.770584Z",
+            "startedAt": "2025-07-12T14:02:06.404121Z",
+            "finishedAt": "2025-07-12T14:32:27.769989Z"
+          },
+          "cursor": "yYEfgvOXX_psbmVtY2o3czczYWVsZGpn"
+        }
+      ],
+      "success": true
+    }
+  ]
+}

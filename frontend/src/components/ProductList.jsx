@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
-import { FaFilter, FaSort, FaGrid, FaList, FaSearch } from 'react-icons/fa';
+import { FaFilter, FaSort, FaTh, FaList, FaSearch } from 'react-icons/fa';
 
 const ProductList = ({ 
   products = [], 
@@ -104,7 +104,7 @@ const ProductList = ({
               }`}
               title="Widok siatki"
             >
-              <FaGrid />
+              <FaTh />
             </button>
             <button
               onClick={() => setViewMode('list')}

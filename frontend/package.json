@@ -16,8 +16,8 @@
     "http-proxy-middleware": "^2.0.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^6.20.1",
-    "react-scripts": "^5.0.1",
     "styled-components": "^6.1.1",
     "web-vitals": "^2.1.4"
   },
@@ -25,18 +25,10 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test:e2e": "cypress run --spec 'cypress/e2e/**/*.cy.js'",
     "test:e2e:headed": "cypress run --headed --spec 'cypress/e2e/**/*.cy.js'"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "proxy": "http://localhost:5000",
   "browserslist": {
