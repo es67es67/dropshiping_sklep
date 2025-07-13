@@ -4,8 +4,9 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npm start",
-    "healthcheckPath": "/api/health",
+    "buildCommand": "cd frontend && npm ci --omit=dev && npm run build",
+    "startCommand": "cd frontend && npx serve -s build -l 3000",
+    "healthcheckPath": "/",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
