@@ -20,7 +20,7 @@ export default defineConfig({
     sourcemap: false,
     emptyOutDir: true,
     rollupOptions: {
-      input: 'public/index.html',
+      input: 'src/index.jsx',
       output: {
         manualChunks: undefined,
         assetFileNames: 'assets/[name]-[hash][extname]',
