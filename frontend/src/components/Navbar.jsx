@@ -309,7 +309,9 @@ const UserDetails = styled.div`
   }
 `;
 
-const DropdownArrow = styled.div`
+const DropdownArrow = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['isOpen', 'theme'].includes(prop)
+})`
   font-size: 0.75rem;
   color: ${props => props.theme.textSecondary};
   transition: transform 0.2s ease;
