@@ -46,18 +46,6 @@ const MapWrapper = styled.div`
   position: relative;
 `;
 
-const PlacePickerContainer = styled.div`
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1000;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 10px;
-  min-width: 300px;
-`;
-
 const MapPlaceholder = styled.div`
   width: 100%;
   height: 100%;
@@ -97,29 +85,6 @@ const LocationSelect = styled.select`
   
   &:hover {
     border-color: ${props => props.theme.primary};
-  }
-`;
-
-const LocationButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  background: ${props => props.theme.primary};
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background: ${props => props.theme.primary}dd;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  }
-  
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
   }
 `;
 
@@ -689,7 +654,7 @@ export default function LocationMap({ theme }) {
                 <>
                   <p>🗺️ Google Maps</p>
                   <p>Inicjalizacja mapy...</p>
-                  <div style="margin-top: 1rem; font-size: 0.9rem; color: #888;">
+                  <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#888' }}>
                     Google Maps API: {import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? '✅ Skonfigurowane' : '❌ Brak klucza'}
                   </div>
                 </>
