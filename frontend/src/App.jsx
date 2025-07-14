@@ -26,6 +26,8 @@ import Settings from './components/Settings';
 import Voivodeships from './pages/Voivodeships';
 import Counties from './pages/Counties';
 import Municipalities from './pages/Municipalities';
+import Cities from './pages/Cities';
+import Country from './pages/Country';
 import LocationAnalytics from './pages/LocationAnalytics';
 import LocationImport from './pages/LocationImport';
 import LocationExport from './pages/LocationExport';
@@ -36,6 +38,12 @@ import MyShops from './pages/MyShops';
 import LiveShopping from './components/LiveShopping';
 import LoyaltySystem from './components/LoyaltySystem';
 import FriendshipSystem from './components/FriendshipSystem';
+import Friends from './components/Friends';
+import PostCreate from './components/PostCreate';
+import Messages from './components/Messages';
+import TestShopsPage from './components/TestShopsPage';
+import TestComponent from './components/TestComponent';
+import LocationMap from './pages/LocationMap';
 
 function App() {
   const [theme, setTheme] = useState('light');
@@ -55,8 +63,7 @@ function App() {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
-      const response = await fetch(`${apiUrl}/api/users/layout-settings/portal`, {
+      const response = await fetch(`/api/users/layout-settings/portal`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -139,6 +146,54 @@ function App() {
 
   // Funkcja do renderowania layoutu
   const renderLayout = () => {
+    const routes = (
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/products" element={<ProductList />} />
+        <Route path="/shops" element={<ShopList />} />
+        <Route path="/shop/:shopId" element={<ShopDetails theme={currentTheme} />} />
+        <Route path="/messages" element={<MessagingSystem />} />
+        <Route path="/payment" element={<PaymentSystem />} />
+        <Route path="/location" element={<LocationSelector />} />
+        <Route path="/gamification" element={<GamificationPanel />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/product-create" element={<ProductCreate />} />
+        <Route path="/products/create" element={<ProductCreate />} />
+        <Route path="/shop-create" element={<ShopCreate theme={currentTheme} />} />
+        <Route path="/shops/create" element={<ShopCreate theme={currentTheme} />} />
+        <Route path="/shop-management" element={<ShopManagement />} />
+        <Route path="/product-management" element={<ProductManagement />} />
+        <Route path="/layout-customization" element={<LayoutCustomization theme={currentTheme} onSettingsSaved={handleSettingsSaved} />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/settings" element={<Settings />} />
+        
+        {/* Lokalizacje */}
+        <Route path="/country" element={<Country theme={currentTheme} />} />
+        <Route path="/voivodeships" element={<Voivodeships theme={currentTheme} />} />
+        <Route path="/counties" element={<Counties theme={currentTheme} />} />
+        <Route path="/municipalities" element={<Municipalities theme={currentTheme} />} />
+        <Route path="/cities" element={<Cities theme={currentTheme} />} />
+        <Route path="/location-analytics" element={<LocationAnalytics />} />
+        <Route path="/location-import" element={<LocationImport />} />
+        <Route path="/location-export" element={<LocationExport />} />
+        <Route path="/admin-panel" element={<AdminPanel />} />
+        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/local-products" element={<LocalProducts />} />
+        <Route path="/my-products" element={<MyProducts />} />
+        <Route path="/my-shops" element={<MyShops />} />
+        <Route path="/shop/:shopId/live" element={<LiveShopping />} />
+        <Route path="/friends" element={<Friends />} />
+        <Route path="/friendship" element={<FriendshipSystem userId={localStorage.getItem('userId')} />} />
+        <Route path="/posts/create" element={<PostCreate />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/test" element={<TestComponent />} />
+        <Route path="/location-map" element={<LocationMap theme={currentTheme} />} />
+      </Routes>
+    );
+
     switch (userLayout) {
       case 'classic':
         return (
@@ -157,41 +212,7 @@ function App() {
               <Navbar theme={currentTheme} toggleTheme={toggleTheme} layout={userLayout} />
             </div>
             <div style={{ flex: 1, padding: '20px' }}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/products" element={<ProductList />} />
-                <Route path="/shops" element={<ShopList />} />
-                <Route path="/shop/:shopId" element={<ShopDetails theme={currentTheme} />} />
-                <Route path="/messages" element={<MessagingSystem />} />
-                <Route path="/payment" element={<PaymentSystem />} />
-                <Route path="/location" element={<LocationSelector />} />
-                <Route path="/gamification" element={<GamificationPanel />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/product-create" element={<ProductCreate />} />
-                <Route path="/shop-create" element={<ShopCreate theme={currentTheme} />} />
-                <Route path="/shop-management" element={<ShopManagement />} />
-                <Route path="/product-management" element={<ProductManagement />} />
-                <Route path="/layout-customization" element={<LayoutCustomization theme={currentTheme} onSettingsSaved={handleSettingsSaved} />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/settings" element={<Settings />} />
-                
-                {/* Lokalizacje */}
-                <Route path="/voivodeships" element={<Voivodeships />} />
-                <Route path="/counties/:voivodeshipCode" element={<Counties />} />
-                <Route path="/municipalities/:countyCode" element={<Municipalities />} />
-                <Route path="/location-analytics" element={<LocationAnalytics />} />
-                <Route path="/location-import" element={<LocationImport />} />
-                <Route path="/location-export" element={<LocationExport />} />
-                <Route path="/admin-panel" element={<AdminPanel />} />
-                <Route path="/local-products" element={<LocalProducts />} />
-                <Route path="/my-products" element={<MyProducts />} />
-                <Route path="/my-shops" element={<MyShops />} />
-                <Route path="/shop/:shopId/live" element={<LiveShopping />} />
-                <Route path="/friends" element={<FriendshipSystem userId={localStorage.getItem('userId')} />} />
-              </Routes>
+              {routes}
             </div>
           </div>
         );
@@ -205,41 +226,7 @@ function App() {
           }}>
             <Navbar theme={currentTheme} toggleTheme={toggleTheme} layout={userLayout} />
             <div style={{ padding: '10px' }}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/products" element={<ProductList />} />
-                <Route path="/shops" element={<ShopList />} />
-                <Route path="/shop/:shopId" element={<ShopDetails theme={currentTheme} />} />
-                <Route path="/messages" element={<MessagingSystem />} />
-                <Route path="/payment" element={<PaymentSystem />} />
-                <Route path="/location" element={<LocationSelector />} />
-                <Route path="/gamification" element={<GamificationPanel />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/product-create" element={<ProductCreate />} />
-                <Route path="/shop-create" element={<ShopCreate theme={currentTheme} />} />
-                <Route path="/shop-management" element={<ShopManagement />} />
-                <Route path="/product-management" element={<ProductManagement />} />
-                <Route path="/layout-customization" element={<LayoutCustomization theme={currentTheme} onSettingsSaved={handleSettingsSaved} />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/settings" element={<Settings />} />
-                
-                {/* Lokalizacje */}
-                <Route path="/voivodeships" element={<Voivodeships />} />
-                <Route path="/counties/:voivodeshipCode" element={<Counties />} />
-                <Route path="/municipalities/:countyCode" element={<Municipalities />} />
-                <Route path="/location-analytics" element={<LocationAnalytics />} />
-                <Route path="/location-import" element={<LocationImport />} />
-                <Route path="/location-export" element={<LocationExport />} />
-                <Route path="/admin-panel" element={<AdminPanel />} />
-                <Route path="/local-products" element={<LocalProducts />} />
-                <Route path="/my-products" element={<MyProducts />} />
-                <Route path="/my-shops" element={<MyShops />} />
-                <Route path="/shop/:shopId/live" element={<LiveShopping />} />
-                <Route path="/friends" element={<FriendshipSystem userId={localStorage.getItem('userId')} />} />
-              </Routes>
+              {routes}
             </div>
           </div>
         );
@@ -253,41 +240,7 @@ function App() {
           }}>
             <Navbar theme={currentTheme} toggleTheme={toggleTheme} layout={userLayout} />
             <div style={{ padding: '20px' }}>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/products" element={<ProductList />} />
-                <Route path="/shops" element={<ShopList />} />
-                <Route path="/shop/:shopId" element={<ShopDetails theme={currentTheme} />} />
-                <Route path="/messages" element={<MessagingSystem />} />
-                <Route path="/payment" element={<PaymentSystem />} />
-                <Route path="/location" element={<LocationSelector />} />
-                <Route path="/gamification" element={<GamificationPanel />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/product-create" element={<ProductCreate />} />
-                <Route path="/shop-create" element={<ShopCreate theme={currentTheme} />} />
-                <Route path="/shop-management" element={<ShopManagement />} />
-                <Route path="/product-management" element={<ProductManagement />} />
-                <Route path="/layout-customization" element={<LayoutCustomization theme={currentTheme} onSettingsSaved={handleSettingsSaved} />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/settings" element={<Settings />} />
-                
-                {/* Lokalizacje */}
-                <Route path="/voivodeships" element={<Voivodeships />} />
-                <Route path="/counties/:voivodeshipCode" element={<Counties />} />
-                <Route path="/municipalities/:countyCode" element={<Municipalities />} />
-                <Route path="/location-analytics" element={<LocationAnalytics />} />
-                <Route path="/location-import" element={<LocationImport />} />
-                <Route path="/location-export" element={<LocationExport />} />
-                <Route path="/admin-panel" element={<AdminPanel />} />
-                <Route path="/local-products" element={<LocalProducts />} />
-                <Route path="/my-products" element={<MyProducts />} />
-                <Route path="/my-shops" element={<MyShops />} />
-                <Route path="/shop/:shopId/live" element={<LiveShopping />} />
-                <Route path="/friends" element={<FriendshipSystem userId={localStorage.getItem('userId')} />} />
-              </Routes>
+              {routes}
             </div>
           </div>
         );

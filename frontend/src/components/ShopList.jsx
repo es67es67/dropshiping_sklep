@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
@@ -413,6 +414,44 @@ export default function ShopList() {
   const [status, setStatus] = useState('all');
   const [showAllShops, setShowAllShops] = useState(false); // Domyślnie false - tylko sklepy użytkownika
 
+  const fetchShops = async () => {
+    try {
+      setLoading(true);
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const token = localStorage.getItem('token');
+      
+      // Wybierz endpoint w zależności od filtra
+      const endpoint = showAllShops ? '/api/shops' : '/api/shops/user';
+      
+      console.log('[DEBUG] Fetchuję sklepy z endpointu:', `${apiUrl}${endpoint}`);
+      
+      const response = await fetch(`${apiUrl}${endpoint}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('[DEBUG] Status odpowiedzi:', response.status);
+      
+      if (!response.ok) {
+        throw new Error('Nie udało się pobrać sklepów');
+      }
+
+      const data = await response.json();
+      console.log('[DEBUG] Odpowiedź JSON:', data);
+      
+      // Obsługa nowego formatu odpowiedzi z backendu
+      const shopsArray = data.shops || data; // Jeśli data.shops istnieje, użyj tego, w przeciwnym razie użyj data
+      setShops(shopsArray);
+    } catch (err) {
+      console.error('[DEBUG] Błąd podczas pobierania sklepów:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchShops();
   }, [showAllShops]);
@@ -427,43 +466,14 @@ export default function ShopList() {
     return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
-  const fetchShops = async () => {
-    try {
-      setLoading(true);
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
-      const token = localStorage.getItem('token');
-      
-      // Wybierz endpoint w zależności od filtra
-      const endpoint = showAllShops ? '/api/shops' : '/api/shops/user';
-      
-      const response = await fetch(`${apiUrl}${endpoint}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Nie udało się pobrać sklepów');
-      }
-
-      const data = await response.json();
-      // Obsługa nowego formatu odpowiedzi z backendu
-      const shopsArray = data.shops || data; // Jeśli data.shops istnieje, użyj tego, w przeciwnym razie użyj data
-      setShops(shopsArray);
-    } catch (err) {
-      console.error('Błąd podczas pobierania sklepów:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const filteredShops = shops.filter(shop => {
-    const matchesSearch = shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         shop.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = category === 'all' || shop.categories?.includes(category);
-    const matchesStatus = status === 'all' || (shop.isActive ? 'open' : 'closed') === status;
+    // Sprawdź czy shop jest obiektem
+    if (!shop || typeof shop !== 'object') return false;
+    
+    const matchesSearch = (shop.name && typeof shop.name === 'string' && shop.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                         (shop.description && typeof shop.description === 'string' && shop.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategory = category === 'all' || (shop.categories && Array.isArray(shop.categories) && shop.categories.some(cat => typeof cat === 'string' && cat === category));
+    const matchesStatus = status === 'all' || (Boolean(shop.isActive) ? 'open' : 'closed') === status;
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -495,12 +505,25 @@ export default function ShopList() {
 
   return (
     <Container>
+      <div style={{background: 'yellow', color: 'red', fontSize: '2rem', textAlign: 'center', padding: '1rem', marginBottom: '2rem'}}>
+        TEST: ShopList.jsx renderuje się! Liczba sklepów: {Array.isArray(shops) ? shops.length : 'BŁĄD: shops nie jest tablicą'}
+      </div>
       <Header>
         <Title>Sklepy</Title>
         <AddButton to="/shop-create">
           🏪 Dodaj sklep
         </AddButton>
       </Header>
+
+      {/* Przycisk testowy */}
+      <div style={{ margin: '1rem 0', textAlign: 'center' }}>
+        <button
+          style={{ padding: '0.5rem 1rem', fontSize: '1rem', borderRadius: '8px', background: '#4CAF50', color: 'white', border: 'none', cursor: 'pointer' }}
+          onClick={() => alert('Testowy komunikat działa!')}
+        >
+          Pokaż testowy komunikat
+        </button>
+      </div>
 
       <Filters>
         <FilterInput
@@ -554,43 +577,44 @@ export default function ShopList() {
         </EmptyState>
       ) : (
         <Grid>
-          {filteredShops.map(shop => (
-            <ShopCard key={shop._id}>
+          {filteredShops.map((shop, index) => (
+            <ShopCard key={typeof shop._id === 'string' ? shop._id : typeof shop.id === 'string' ? shop.id : `shop-${index}`}>
               <ShopHeader>
-                <ShopStatus status={shop.isActive ? 'open' : 'closed'}>
-                  {shop.isActive ? 'Otwarte' : 'Zamknięte'}
+                <ShopStatus status={Boolean(shop.isActive) ? 'open' : 'closed'}>
+                  {Boolean(shop.isActive) ? 'Otwarte' : 'Zamknięte'}
                 </ShopStatus>
                 <div style={{ fontSize: '2rem' }}>🏪</div>
               </ShopHeader>
               <ShopInfo>
-                <ShopName>{shop.name}</ShopName>
-                <ShopDescription>{shop.description}</ShopDescription>
+                <ShopName>{typeof shop.name === 'string' ? shop.name : 'Brak nazwy'}</ShopName>
+                <ShopDescription>{typeof shop.description === 'string' ? shop.description : 'Brak opisu'}</ShopDescription>
                 
                 <ShopDetails>
                   <ShopLocation>
-                    📍 {shop.location || shop.address?.city || 'Brak lokalizacji'}
+                    📍 {typeof shop.location?.name === 'string' ? shop.location.name : 
+                        typeof shop.address?.city === 'string' ? shop.address.city : 'Brak lokalizacji'}
                   </ShopLocation>
                   <ShopRating>
-                    ⭐ {shop.rating || 'Brak ocen'}
+                    ⭐ {typeof shop.rating === 'number' ? shop.rating : 'Brak ocen'}
                   </ShopRating>
                 </ShopDetails>
                 
                 <ShopStats>
                   <Stat>
-                    <StatValue>{shop.stats?.totalProducts || 0}</StatValue>
+                    <StatValue>{typeof shop.stats?.totalProducts === 'number' ? shop.stats.totalProducts : 0}</StatValue>
                     <StatLabel>Produktów</StatLabel>
                   </Stat>
                   <Stat>
-                    <StatValue>{shop.stats?.totalOrders || 0}</StatValue>
+                    <StatValue>{typeof shop.stats?.totalOrders === 'number' ? shop.stats.totalOrders : 0}</StatValue>
                     <StatLabel>Zamówień</StatLabel>
                   </Stat>
                 </ShopStats>
                 
                 <ShopActions>
-                  <ActionButton className="primary" as={Link} to={`/shop/${shop._id}`}>
+                  <ActionButton className="primary" as={Link} to={`/shop/${typeof shop._id === 'string' ? shop._id : typeof shop.id === 'string' ? shop.id : 'unknown'}`}>
                     🛒 Przejdź do sklepu
                   </ActionButton>
-                  <ActionButton className="secondary" as={Link} to={`/shop/${shop._id}`}>
+                  <ActionButton className="secondary" as={Link} to={`/shop/${typeof shop._id === 'string' ? shop._id : typeof shop.id === 'string' ? shop.id : 'unknown'}`}>
                     👁️ Szczegóły
                   </ActionButton>
                 </ShopActions>

@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
-import { FaBell, FaComments, FaShoppingCart, FaChevronDown } from 'react-icons/fa';
+import { FaBell, FaComments, FaShoppingCart, FaChevronDown, FaGlobeEurope, FaCity, FaMapMarkedAlt, FaMapSigns, FaMap } from 'react-icons/fa';
 
-const Nav = styled.nav`
+const Nav = styled.nav.withConfig({
+  shouldForwardProp: (prop) => !['layout', 'theme'].includes(prop)
+})`
   background: ${props => {
     if (props.layout === 'classic') {
       return props.theme.surface;
@@ -351,6 +353,52 @@ const LogoutButton = styled.button`
   }
 `;
 
+// Dodajemy styl dla rozwijanego menu lokalizacji
+const LocationDropdown = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+const LocationDropdownContent = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['isOpen', 'theme'].includes(prop)
+})`
+  display: ${props => props.isOpen ? 'block' : 'none'};
+  position: absolute;
+  background: ${props => props.theme.surface};
+  min-width: 220px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  border-radius: 12px;
+  z-index: 1000;
+  margin-top: 0.5rem;
+  overflow: hidden;
+`;
+
+const LocationDropdownItem = styled(Link)`
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: ${props => props.theme.text};
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+  background: none;
+  border: none;
+  width: 100%;
+  &:hover {
+    background: ${props => props.theme.primary}10;
+    color: ${props => props.theme.primary};
+  }
+`;
+
+const LocationDropdownLabel = styled.div`
+  padding: 0.75rem 1rem;
+  color: ${props => props.theme.textSecondary};
+  font-weight: 600;
+  background: ${props => props.theme.surface};
+  cursor: default;
+`;
+
 export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
   const { user, isAuthenticated, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -358,6 +406,10 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
   const userMenuRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
+  const locationDropdownRef = useRef(null);
+  // Dodajemy ref do timeoutu zamykania dropdowna lokalizacji
+  const locationDropdownCloseTimeout = useRef(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -367,7 +419,7 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications?limit=5`, {
+      const response = await fetch(`/api/notifications?limit=5`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -425,6 +477,36 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
     };
   }, [isUserDropdownOpen]);
 
+  // Zamykanie dropdown lokalizacji po kliknięciu poza nim
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target)) {
+        setIsLocationDropdownOpen(false);
+      }
+    };
+    if (isLocationDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isLocationDropdownOpen]);
+
+  // Funkcje do obsługi opóźnionego zamykania dropdowna lokalizacji
+  const handleLocationDropdownMouseEnter = () => {
+    if (locationDropdownCloseTimeout.current) {
+      clearTimeout(locationDropdownCloseTimeout.current);
+      locationDropdownCloseTimeout.current = null;
+    }
+    setIsLocationDropdownOpen(true);
+  };
+
+  const handleLocationDropdownMouseLeave = () => {
+    locationDropdownCloseTimeout.current = setTimeout(() => {
+      setIsLocationDropdownOpen(false);
+    }, 200); // 200ms opóźnienia
+  };
+
   return (
     <Nav theme={theme} layout={layout}>
       <Logo to="/" theme={theme}>
@@ -470,16 +552,24 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
           </>
         )}
         
-        {/* Lokalizacje */}
-        <NavLink to="/voivodeships" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
-          🏛️ Województwa
-        </NavLink>
-        <NavLink to="/counties" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
-          🏘️ Powiaty
-        </NavLink>
-        <NavLink to="/municipalities" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
-          🏙️ Gminy
-        </NavLink>
+        {/* Rozwijane menu Lokalizacje */}
+        <LocationDropdown
+          ref={locationDropdownRef}
+          onMouseEnter={handleLocationDropdownMouseEnter}
+          onMouseLeave={handleLocationDropdownMouseLeave}
+        >
+          <NavLink as="div" theme={theme} layout={layout} style={{ cursor: 'pointer', userSelect: 'none' }}>
+            <FaGlobeEurope style={{ marginRight: 6 }} /> Lokalizacje <FaChevronDown style={{ marginLeft: 4, fontSize: 12, transition: 'transform 0.2s', transform: isLocationDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+          </NavLink>
+          <LocationDropdownContent isOpen={isLocationDropdownOpen} theme={theme}>
+            <LocationDropdownItem to="/location-map" theme={theme} onClick={() => setIsMenuOpen(false)}><FaMap /> Mapa Lokalizacji</LocationDropdownItem>
+            <LocationDropdownItem to="/country" theme={theme} onClick={() => setIsMenuOpen(false)}><FaGlobeEurope /> Kraj</LocationDropdownItem>
+            <LocationDropdownItem to="/voivodeships" theme={theme} onClick={() => setIsMenuOpen(false)}><FaMapMarkedAlt /> Województwa</LocationDropdownItem>
+            <LocationDropdownItem to="/counties" theme={theme} onClick={() => setIsMenuOpen(false)}><FaMapSigns /> Powiaty</LocationDropdownItem>
+            <LocationDropdownItem to="/municipalities" theme={theme} onClick={() => setIsMenuOpen(false)}><FaCity /> Gminy</LocationDropdownItem>
+            <LocationDropdownItem to="/cities" theme={theme} onClick={() => setIsMenuOpen(false)}><FaCity /> Miasta</LocationDropdownItem>
+          </LocationDropdownContent>
+        </LocationDropdown>
         
         {/* Admin Panel */}
         {user?.roles && user.roles.includes('admin') && (

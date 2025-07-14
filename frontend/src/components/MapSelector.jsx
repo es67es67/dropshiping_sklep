@@ -147,7 +147,7 @@ export default function MapSelector({
     } else if (!window.google) {
       // Fallback - załaduj Google Maps API dynamicznie
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg'}&libraries=places&async=true&defer=true`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCwtl6-7ZwOqKa2rd967GHyp4JyCMgX2MI'}&libraries=places&async=true&defer=true`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
@@ -349,7 +349,7 @@ export default function MapSelector({
         </div>
       )}
 
-      <form onSubmit={handleAddressSubmit}>
+      <div>
         <AddressInput
           type="text"
           value={address}
@@ -359,7 +359,8 @@ export default function MapSelector({
         />
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
           <SearchButton 
-            type="submit" 
+            type="button" 
+            onClick={geocodeAddress}
             disabled={isLoading}
             theme={theme}
           >
@@ -374,7 +375,7 @@ export default function MapSelector({
             📍 Moja lokalizacja
           </SearchButton>
         </div>
-      </form>
+      </div>
 
       <MapContainer theme={theme}>
         {window.google && window.google.maps ? (

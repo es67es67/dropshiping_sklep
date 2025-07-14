@@ -810,7 +810,7 @@ const AdminPanel = () => {
         {tabs.map(tab => (
           <TabButton
             key={tab.key}
-            active={activeTab === tab.key}
+            $active={activeTab === tab.key}
             onClick={() => setActiveTab(tab.key)}
           >
             {tab.label}

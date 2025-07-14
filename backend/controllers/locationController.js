@@ -7,6 +7,26 @@ const HybridLocationService = require('../services/hybridLocationService');
 
 const hybridService = new HybridLocationService();
 
+// Pobierz szczegóły konkretnej lokalizacji
+const getLocation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const location = await Location.findById(id)
+      .populate('hierarchy.wojewodztwo', 'name code')
+      .populate('hierarchy.powiat', 'name code')
+      .populate('hierarchy.gmina', 'name code');
+    
+    if (!location) {
+      return res.status(404).json({ error: 'Lokalizacja nie została znaleziona' });
+    }
+    
+    res.json(location);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // Pobierz wszystkie lokalizacje
 const getLocations = async (req, res) => {
   try {
@@ -806,6 +826,63 @@ const getCountiesForVoivodeship = async (req, res) => {
   }
 };
 
+// Pobierz miejscowości dla gminy
+const getTownsForMunicipality = async (req, res) => {
+  try {
+    const { municipalityCode } = req.params;
+    const { search, active } = req.query;
+    
+    // Znajdź gminę
+    const municipality = await Location.findOne({
+      type: { $in: ['gmina miejska', 'gmina wiejska', 'gmina miejsko-wiejska'] },
+      code: municipalityCode,
+      isActive: true
+    });
+    
+    if (!municipality) {
+      return res.status(404).json({ error: 'Gmina nie znaleziona' });
+    }
+    
+    let query = {
+      type: { $in: ['miejscowość', 'miasto', 'wieś'] },
+      'hierarchy.gmina': municipality._id,
+      isActive: true
+    };
+    
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
+    }
+    if (active !== undefined) {
+      query.isActive = active === 'true';
+    }
+    
+    const towns = await Location.find(query)
+      .select('name code type isActive population coordinates')
+      .sort({ name: 1 });
+    
+    res.json({
+      municipality: {
+        id: municipality._id,
+        name: municipality.name,
+        code: municipality.code,
+        type: municipality.type
+      },
+      towns: towns.map(t => ({
+        id: t._id,
+        name: t.name,
+        code: t.code,
+        type: t.type,
+        active: t.isActive,
+        population: t.population,
+        coordinates: t.coordinates
+      }))
+    });
+  } catch (error) {
+    console.error('Błąd pobierania miejscowości:', error);
+    res.status(500).json({ error: 'Błąd serwera' });
+  }
+};
+
 // Pobierz gminy dla powiatu
 const getMunicipalitiesForCounty = async (req, res) => {
   try {
@@ -942,6 +1019,7 @@ const getLocationAnalytics = async (req, res) => {
 // Pobierz lokalizacje wg typu (duplikat - usunięty)
 
 module.exports = {
+  getLocation,
   getLocations,
   getLocationsByType,
   geocodeAddress,
@@ -955,5 +1033,6 @@ module.exports = {
   getVoivodeships,
   getCountiesForVoivodeship,
   getMunicipalitiesForCounty,
+  getTownsForMunicipality,
   getLocationAnalytics
 }; 

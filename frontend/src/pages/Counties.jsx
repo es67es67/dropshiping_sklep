@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
 import styled from 'styled-components';
-import LocationSearch from '../components/LocationSearch';
-import LocationDetails from '../components/LocationDetails';
-import LocationAnalytics from '../components/LocationAnalytics';
+import { FaStore, FaComments, FaBuilding, FaBox, FaUsers, FaMapMarkedAlt, FaChevronDown, FaStar, FaCalendar, FaMapMarkerAlt } from 'react-icons/fa';
+import SearchInput from '../components/SearchInput';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -12,77 +10,143 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  text-align: center;
   margin-bottom: 2rem;
 `;
 
 const Title = styled.h1`
   font-size: 2.5rem;
-  font-weight: 800;
-  background: ${props => props.theme.gradient};
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: ${props => props.theme.text};
+  margin-bottom: 0.5rem;
 `;
 
-const Breadcrumb = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+const Subtitle = styled.p`
+  font-size: 1.1rem;
   color: ${props => props.theme.textSecondary};
 `;
 
-const BreadcrumbLink = styled(Link)`
-  color: ${props => props.theme.primary};
-  text-decoration: none;
-  
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const SearchContainer = styled.div`
+const LocationSelector = styled.div`
   display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 1rem;
   margin-bottom: 2rem;
+  padding: 1rem;
+  background: ${props => props.theme.surface};
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 `;
 
-const SearchInput = styled.input`
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border: 2px solid ${props => props.theme.border};
-  border-radius: 8px;
-  font-size: 1rem;
-  background: ${props => props.theme.surface};
+const LocationLabel = styled.span`
+  font-weight: 500;
   color: ${props => props.theme.text};
-  
-  &:focus {
-    outline: none;
-    border-color: ${props => props.theme.primary};
+`;
+
+const LocationDropdown = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+const LocationButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: ${props => props.theme.primary};
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.theme.primary}dd;
   }
 `;
 
-const FilterSelect = styled.select`
-  padding: 0.75rem 1rem;
-  border: 2px solid ${props => props.theme.border};
-  border-radius: 8px;
-  font-size: 1rem;
+const LocationDropdownContent = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['isOpen', 'theme'].includes(prop)
+})`
+  display: ${props => props.isOpen ? 'block' : 'none'};
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
   background: ${props => props.theme.surface};
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+`;
+
+const LocationOption = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['isSelected', 'theme'].includes(prop)
+})`
+  padding: 0.75rem 1rem;
+  cursor: pointer;
   color: ${props => props.theme.text};
-  
-  &:focus {
-    outline: none;
-    border-color: ${props => props.theme.primary};
+  transition: all 0.2s ease;
+  border-bottom: 1px solid ${props => props.theme.border};
+
+  &:last-child {
+    border-bottom: none;
   }
+
+  &:hover {
+    background: ${props => props.theme.primary}10;
+    color: ${props => props.theme.primary};
+  }
+
+  ${props => props.isSelected && `
+    background: ${props.theme.primary}20;
+    color: ${props.theme.primary};
+    font-weight: 500;
+  `}
+`;
+
+const TabContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid ${props => props.theme.border};
+`;
+
+const Tab = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['active', 'theme'].includes(prop)
+})`
+  padding: 1rem 2rem;
+  margin: 0 0.5rem;
+  border: none;
+  background: ${props => props.active ? props.theme.primary : 'transparent'};
+  color: ${props => props.active ? 'white' : props.theme.text};
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+
+  &:hover {
+    background: ${props => props.active ? props.theme.primary : props.theme.primary}20;
+  }
+`;
+
+const TabContent = styled.div`
+  min-height: 400px;
+  padding: 2rem;
+  background: ${props => props.theme.surface};
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 `;
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
   margin-bottom: 2rem;
 `;
 
@@ -90,454 +154,497 @@ const StatCard = styled.div`
   background: ${props => props.theme.surface};
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: ${props => props.theme.shadow};
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
+  border: 1px solid ${props => props.theme.border};
 `;
 
 const StatNumber = styled.div`
   font-size: 2rem;
-  font-weight: 800;
+  font-weight: bold;
   color: ${props => props.theme.primary};
   margin-bottom: 0.5rem;
 `;
 
 const StatLabel = styled.div`
   color: ${props => props.theme.textSecondary};
-  font-size: 0.875rem;
-`;
-
-const CountiesGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-`;
-
-const CountyCard = styled(Link)`
-  background: ${props => props.theme.surface};
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: ${props => props.theme.shadow};
-  text-decoration: none;
-  color: ${props => props.theme.text};
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: ${props => props.theme.shadowHover};
-  }
-`;
-
-const CountyHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-`;
-
-const CountyIcon = styled.div`
-  font-size: 2rem;
-`;
-
-const CountyInfo = styled.div`
-  flex: 1;
-`;
-
-const CountyName = styled.h3`
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-`;
-
-const CountyCode = styled.div`
-  color: ${props => props.theme.textSecondary};
-  font-size: 0.875rem;
-`;
-
-const CountyType = styled.div`
-  background: ${props => props.theme.primary}20;
-  color: ${props => props.theme.primary};
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  display: inline-block;
-  margin-top: 0.5rem;
-`;
-
-const CountyStats = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid ${props => props.theme.border};
-`;
-
-const Stat = styled.div`
-  text-align: center;
-`;
-
-const StatValue = styled.div`
-  font-weight: 600;
-  color: ${props => props.theme.primary};
-`;
-
-const StatText = styled.div`
-  font-size: 0.75rem;
-  color: ${props => props.theme.textSecondary};
+  font-size: 0.9rem;
 `;
 
 const LoadingSpinner = styled.div`
-  text-align: center;
-  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
   font-size: 1.2rem;
   color: ${props => props.theme.textSecondary};
 `;
 
 const ErrorMessage = styled.div`
-  background: ${props => props.theme.error}20;
   color: ${props => props.theme.error};
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+`;
+
+const DataTable = styled.div`
+  margin-top: 2rem;
+`;
+
+const TableHeader = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 1rem;
   padding: 1rem;
+  background: ${props => props.theme.primary}10;
   border-radius: 8px;
+  font-weight: 600;
+  color: ${props => props.theme.primary};
   margin-bottom: 1rem;
 `;
 
-const ActionButton = styled.button`
-  background: ${props => props.theme.primary};
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
+const TableRow = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid ${props => props.theme.border};
+  transition: background 0.2s ease;
+
   &:hover {
-    background: ${props => props.theme.primaryDark};
-    transform: translateY(-2px);
+    background: ${props => props.theme.primary}05;
+  }
+
+  &:last-child {
+    border-bottom: none;
   }
 `;
 
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+const TableCell = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
+  gap: 0.5rem;
+  color: ${props => props.theme.text};
 `;
 
-const TabContainer = styled.div`
+const Rating = styled.div`
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  align-items: center;
+  gap: 0.25rem;
+  color: #ffd700;
 `;
 
-const Tab = styled.button`
-  background: ${props => props.active ? props.theme.primary : 'transparent'};
-  color: ${props => props.active ? 'white' : props.theme.text};
-  border: 2px solid ${props => props.theme.primary};
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: ${props => props.active ? props.theme.primaryDark : props.theme.primary}20;
-  }
+const Location = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: ${props => props.theme.textSecondary};
+  font-size: 0.9rem;
 `;
 
-/**
- * Strona zarządzania powiatami dla wybranego województwa
- * Wyświetla listę powiatów z możliwością wyszukiwania i filtrowania
- * oraz nawigacji do szczegółów gmin
- */
-export default function Counties() {
-  const { voivodeshipCode } = useParams();
-  const [counties, setCounties] = useState([]);
-  const [filteredCounties, setFilteredCounties] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
+export default function Counties({ theme }) {
+  const [activeTab, setActiveTab] = useState('shops');
+  const [selectedCounty, setSelectedCounty] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [filteredCounties, setFilteredCounties] = useState(counties);
+  const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [voivodeship, setVoivodeship] = useState(null);
-  const [stats, setStats] = useState({
-    total: 0,
-    active: 0,
-    municipalities: 0
-  });
-  
-  // Nowe stany dla zaawansowanych funkcji
-  const [showSearch, setShowSearch] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [showDetails, setShowDetails] = useState(false);
-  const [showAnalytics, setShowAnalytics] = useState(false);
-  const [activeTab, setActiveTab] = useState('list');
+
+  // Lista powiatów (przykładowe dla Mazowieckiego)
+  const counties = [
+    { id: '0201', name: 'Warszawa', type: 'miasto na prawach powiatu', voivodeship: 'Mazowieckie' },
+    { id: '0202', name: 'powiat grodziski', type: 'powiat', voivodeship: 'Mazowieckie' },
+    { id: '0203', name: 'powiat legionowski', type: 'powiat', voivodeship: 'Mazowieckie' },
+    { id: '0204', name: 'powiat nowodworski', type: 'powiat', voivodeship: 'Mazowieckie' },
+    { id: '0205', name: 'powiat otwocki', type: 'powiat', voivodeship: 'Mazowieckie' },
+    { id: '0206', name: 'powiat piaseczyński', type: 'powiat', voivodeship: 'Mazowieckie' },
+    { id: '0207', name: 'powiat pruszkowski', type: 'powiat', voivodeship: 'Mazowieckie' },
+    { id: '0208', name: 'powiat warszawski zachodni', type: 'powiat', voivodeship: 'Mazowieckie' },
+    { id: '0209', name: 'powiat wołomiński', type: 'powiat', voivodeship: 'Mazowieckie' },
+    { id: '0210', name: 'powiat żyrardowski', type: 'powiat', voivodeship: 'Mazowieckie' }
+  ];
+
+  // Przykładowe dane dla każdej kategorii
+  const sampleData = {
+    shops: [
+      { id: 1, name: 'Sklep Elektroniczny TechMax', location: 'Warszawa', rating: 4.8, products: 156, created: '2024-01-15' },
+      { id: 2, name: 'Butik Mody Elegance', location: 'Warszawa', rating: 4.6, products: 89, created: '2024-01-10' },
+      { id: 3, name: 'Sklep Sportowy ActiveLife', location: 'Warszawa', rating: 4.9, products: 234, created: '2024-01-08' },
+      { id: 4, name: 'Księgarnia Literacka', location: 'Warszawa', rating: 4.7, products: 567, created: '2024-01-12' },
+      { id: 5, name: 'Sklep Ogrodniczy Zielony', location: 'Warszawa', rating: 4.5, products: 123, created: '2024-01-05' }
+    ],
+    posts: [
+      { id: 1, title: 'Nowe trendy w modzie 2024', author: 'Anna Kowalska', location: 'Warszawa', likes: 156, created: '2024-01-15' },
+      { id: 2, title: 'Recenzja nowego smartfona', author: 'Piotr Nowak', location: 'Warszawa', likes: 89, created: '2024-01-14' },
+      { id: 3, title: 'Przepis na domowe ciasto', author: 'Maria Wiśniewska', location: 'Warszawa', likes: 234, created: '2024-01-13' },
+      { id: 4, title: 'Porady ogrodnicze', author: 'Jan Kowalczyk', location: 'Warszawa', likes: 67, created: '2024-01-12' },
+      { id: 5, title: 'Recenzja restauracji', author: 'Katarzyna Zielińska', location: 'Warszawa', likes: 123, created: '2024-01-11' }
+    ],
+    companies: [
+      { id: 1, name: 'TechCorp Sp. z o.o.', industry: 'Technologia', location: 'Warszawa', employees: 150, rating: 4.8 },
+      { id: 2, name: 'Fashion House', industry: 'Moda', location: 'Warszawa', employees: 45, rating: 4.6 },
+      { id: 3, name: 'Green Solutions', industry: 'Ekologia', location: 'Warszawa', employees: 78, rating: 4.9 },
+      { id: 4, name: 'Digital Agency', industry: 'Marketing', location: 'Warszawa', employees: 32, rating: 4.7 },
+      { id: 5, name: 'Food & Beverage Co.', industry: 'Gastronomia', location: 'Warszawa', employees: 120, rating: 4.5 }
+    ],
+    products: [
+      { id: 1, name: 'iPhone 15 Pro', category: 'Elektronika', price: '4999 zł', rating: 4.9, location: 'Warszawa' },
+      { id: 2, name: 'Sukienka wieczorowa', category: 'Moda', price: '299 zł', rating: 4.7, location: 'Warszawa' },
+      { id: 3, name: 'Nike Air Max', category: 'Sport', price: '599 zł', rating: 4.8, location: 'Warszawa' },
+      { id: 4, name: 'Książka "Władca Pierścieni"', category: 'Książki', price: '89 zł', rating: 4.9, location: 'Warszawa' },
+      { id: 5, name: 'Roślina doniczkowa', category: 'Ogród', price: '45 zł', rating: 4.6, location: 'Warszawa' }
+    ],
+    users: [
+      { id: 1, name: 'Anna Kowalska', location: 'Warszawa', posts: 23, followers: 156, joined: '2023-03-15' },
+      { id: 2, name: 'Piotr Nowak', location: 'Warszawa', posts: 15, followers: 89, joined: '2023-05-20' },
+      { id: 3, name: 'Maria Wiśniewska', location: 'Warszawa', posts: 34, followers: 234, joined: '2023-02-10' },
+      { id: 4, name: 'Jan Kowalczyk', location: 'Warszawa', posts: 8, followers: 67, joined: '2023-07-05' },
+      { id: 5, name: 'Katarzyna Zielińska', location: 'Warszawa', posts: 19, followers: 123, joined: '2023-04-12' }
+    ]
+  };
+
+  const tabs = [
+    { id: 'shops', label: 'Sklepy', icon: <FaStore /> },
+    { id: 'posts', label: 'Posty', icon: <FaComments /> },
+    { id: 'companies', label: 'Firmy', icon: <FaBuilding /> },
+    { id: 'products', label: 'Produkty', icon: <FaBox /> },
+    { id: 'users', label: 'Użytkownicy', icon: <FaUsers /> }
+  ];
 
   useEffect(() => {
-    fetchCounties();
-  }, [voivodeshipCode]);
+    // Pobierz lokalizację użytkownika i ustaw jako domyślną
+    fetchUserLocation();
+  }, []);
 
-  useEffect(() => {
-    let filtered = counties.filter(county =>
-      county.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      county.code.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const fetchUserLocation = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // Jeśli użytkownik nie jest zalogowany, ustaw domyślny powiat
+        const defaultCounty = counties.find(c => c.id === '0201') || counties[0];
+        setSelectedCounty(defaultCounty);
+        fetchCountyData(defaultCounty.id);
+        return;
+      }
 
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(county => county.type === typeFilter);
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const response = await fetch(`${apiUrl}/api/users/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData.location) {
+          // Pobierz szczegóły lokalizacji użytkownika
+          const locationResponse = await fetch(`${apiUrl}/api/locations/${userData.location}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (locationResponse.ok) {
+            const locationData = await locationResponse.json();
+            // Znajdź powiat na podstawie lokalizacji użytkownika
+            const userCounty = counties.find(c => 
+              locationData.name?.includes(c.name) || locationData.hierarchy?.powiat?.name?.includes(c.name)
+            );
+            
+            if (userCounty) {
+              setSelectedCounty(userCounty);
+              fetchCountyData(userCounty.id);
+              return;
+            }
+          }
+        }
+      }
+
+      // Fallback do domyślnego powiatu
+      const defaultCounty = counties.find(c => c.id === '0201') || counties[0];
+      setSelectedCounty(defaultCounty);
+      fetchCountyData(defaultCounty.id);
+    } catch (error) {
+      console.error('Błąd pobierania lokalizacji użytkownika:', error);
+      // Fallback do domyślnego powiatu
+      const defaultCounty = counties.find(c => c.id === '0201') || counties[0];
+      setSelectedCounty(defaultCounty);
+      fetchCountyData(defaultCounty.id);
     }
+  };
 
-    setFilteredCounties(filtered);
-  }, [searchTerm, typeFilter, counties]);
-
-  /**
-   * Pobiera listę powiatów dla wybranego województwa
-   */
-  const fetchCounties = async () => {
+  const fetchCountyData = async (countyId) => {
     try {
       setLoading(true);
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
-      const response = await fetch(`${apiUrl}/api/locations/voivodeships/${voivodeshipCode}/counties`);
-      if (!response.ok) {
-        throw new Error('Błąd podczas pobierania powiatów');
-      }
-      const data = await response.json();
-      setCounties(data.counties || []);
-      setVoivodeship(data.voivodeship);
-      
-      // Oblicz statystyki
-      setStats({
-        total: data.counties?.length || 0,
-        active: data.counties?.filter(c => c.active).length || 0,
-        municipalities: data.counties?.reduce((sum, c) => sum + (c.municipalitiesCount || 0), 0) || 0
-      });
+      setError(null);
+
+      // Symulacja pobierania danych z API
+      const mockData = {
+        shops: { count: Math.floor(Math.random() * 100) + 20, items: sampleData.shops },
+        posts: { count: Math.floor(Math.random() * 300) + 50, items: sampleData.posts },
+        companies: { count: Math.floor(Math.random() * 80) + 15, items: sampleData.companies },
+        products: { count: Math.floor(Math.random() * 1000) + 200, items: sampleData.products },
+        users: { count: Math.floor(Math.random() * 500) + 100, items: sampleData.users }
+      };
+
+      setData(mockData);
     } catch (err) {
-      setError(err.message);
-      // Fallback do danych mockowych
-      const mockCounties = [
-        { id: 1, name: 'Wrocław', code: '0261', type: 'miasto na prawach powiatu', municipalitiesCount: 1, active: true },
-        { id: 2, name: 'Wałbrzych', code: '0262', type: 'miasto na prawach powiatu', municipalitiesCount: 1, active: true },
-        { id: 3, name: 'Legnica', code: '0263', type: 'miasto na prawach powiatu', municipalitiesCount: 1, active: true },
-        { id: 4, name: 'Jelenia Góra', code: '0264', type: 'miasto na prawach powiatu', municipalitiesCount: 1, active: true },
-        { id: 5, name: 'bolesławiecki', code: '0201', type: 'powiat', municipalitiesCount: 6, active: true },
-        { id: 6, name: 'dzierżoniowski', code: '0202', type: 'powiat', municipalitiesCount: 7, active: true },
-        { id: 7, name: 'głogowski', code: '0203', type: 'powiat', municipalitiesCount: 6, active: true },
-        { id: 8, name: 'górowski', code: '0204', type: 'powiat', municipalitiesCount: 4, active: true },
-        { id: 9, name: 'jaworski', code: '0205', type: 'powiat', municipalitiesCount: 6, active: true },
-        { id: 10, name: 'jeleniogórski', code: '0206', type: 'powiat', municipalitiesCount: 9, active: true },
-        { id: 11, name: 'kamiennogórski', code: '0207', type: 'powiat', municipalitiesCount: 4, active: true },
-        { id: 12, name: 'kłodzki', code: '0208', type: 'powiat', municipalitiesCount: 14, active: true },
-        { id: 13, name: 'legnicki', code: '0209', type: 'powiat', municipalitiesCount: 8, active: true },
-        { id: 14, name: 'lubański', code: '0210', type: 'powiat', municipalitiesCount: 7, active: true },
-        { id: 15, name: 'lubiński', code: '0211', type: 'powiat', municipalitiesCount: 4, active: true },
-        { id: 16, name: 'lwówecki', code: '0212', type: 'powiat', municipalitiesCount: 5, active: true },
-        { id: 17, name: 'milicki', code: '0213', type: 'powiat', municipalitiesCount: 3, active: true },
-        { id: 18, name: 'oleśnicki', code: '0214', type: 'powiat', municipalitiesCount: 8, active: true },
-        { id: 19, name: 'oławski', code: '0215', type: 'powiat', municipalitiesCount: 4, active: true },
-        { id: 20, name: 'polkowicki', code: '0216', type: 'powiat', municipalitiesCount: 6, active: true },
-        { id: 21, name: 'strzeliński', code: '0217', type: 'powiat', municipalitiesCount: 5, active: true },
-        { id: 22, name: 'średzki', code: '0218', type: 'powiat', municipalitiesCount: 5, active: true },
-        { id: 23, name: 'świdnicki', code: '0219', type: 'powiat', municipalitiesCount: 8, active: true },
-        { id: 24, name: 'trzebnicki', code: '0220', type: 'powiat', municipalitiesCount: 6, active: true },
-        { id: 25, name: 'wałbrzyski', code: '0221', type: 'powiat', municipalitiesCount: 9, active: true },
-        { id: 26, name: 'wołowski', code: '0222', type: 'powiat', municipalitiesCount: 3, active: true },
-        { id: 27, name: 'wrocławski', code: '0223', type: 'powiat', municipalitiesCount: 9, active: true },
-        { id: 28, name: 'ząbkowicki', code: '0224', type: 'powiat', municipalitiesCount: 7, active: true },
-        { id: 29, name: 'zgorzelecki', code: '0225', type: 'powiat', municipalitiesCount: 7, active: true },
-        { id: 30, name: 'złotoryjski', code: '0226', type: 'powiat', municipalitiesCount: 6, active: true }
-      ];
-      setCounties(mockCounties);
-      setVoivodeship({ name: 'Dolnośląskie', code: voivodeshipCode });
-      setStats({
-        total: mockCounties.length,
-        active: mockCounties.filter(c => c.active).length,
-        municipalities: mockCounties.reduce((sum, c) => sum + (c.municipalitiesCount || 0), 0)
-      });
+      setError('Błąd podczas pobierania danych powiatu');
+      console.error('Błąd pobierania danych powiatu:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
+  const handleCountySelect = (county) => {
+    setSelectedCounty(county);
+    setIsDropdownOpen(false);
+    fetchCountyData(county.id);
+  };
+
+  const handleSearch = (searchTerm) => {
+    if (!searchTerm || searchTerm.length < 2) {
+      setFilteredCounties(counties);
+    } else {
+      const filtered = counties.filter(county =>
+        county.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        county.voivodeship.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredCounties(filtered);
+    }
+  };
+
+  const handleCountySearchSelect = (county) => {
+    setSelectedCounty(county);
+    fetchCountyData(county.id);
+  };
+
+  const renderTableHeaders = () => {
+    switch (activeTab) {
+      case 'shops':
+        return ['Nazwa sklepu', 'Lokalizacja', 'Ocena', 'Produkty', 'Utworzono'];
+      case 'posts':
+        return ['Tytuł postu', 'Autor', 'Lokalizacja', 'Polubienia', 'Data'];
+      case 'companies':
+        return ['Nazwa firmy', 'Branża', 'Lokalizacja', 'Pracownicy', 'Ocena'];
+      case 'products':
+        return ['Nazwa produktu', 'Kategoria', 'Cena', 'Ocena', 'Lokalizacja'];
+      case 'users':
+        return ['Nazwa użytkownika', 'Lokalizacja', 'Posty', 'Obserwujący', 'Dołączył'];
+      default:
+        return [];
+    }
+  };
+
+  const renderTableRow = (item) => {
+    switch (activeTab) {
+      case 'shops':
+        return (
+          <>
+            <TableCell theme={theme}>{item.name}</TableCell>
+            <TableCell theme={theme}>
+              <Location theme={theme}>
+                <FaMapMarkerAlt /> {item.location}
+              </Location>
+            </TableCell>
+            <TableCell theme={theme}>
+              <Rating>
+                <FaStar /> {item.rating}
+              </Rating>
+            </TableCell>
+            <TableCell theme={theme}>{item.products}</TableCell>
+            <TableCell theme={theme}>
+              <Location theme={theme}>
+                <FaCalendar /> {item.created}
+              </Location>
+            </TableCell>
+          </>
+        );
+      case 'posts':
+        return (
+          <>
+            <TableCell theme={theme}>{item.title}</TableCell>
+            <TableCell theme={theme}>{item.author}</TableCell>
+            <TableCell theme={theme}>
+              <Location theme={theme}>
+                <FaMapMarkerAlt /> {item.location}
+              </Location>
+            </TableCell>
+            <TableCell theme={theme}>{item.likes}</TableCell>
+            <TableCell theme={theme}>
+              <Location theme={theme}>
+                <FaCalendar /> {item.created}
+              </Location>
+            </TableCell>
+          </>
+        );
+      case 'companies':
+        return (
+          <>
+            <TableCell theme={theme}>{item.name}</TableCell>
+            <TableCell theme={theme}>{item.industry}</TableCell>
+            <TableCell theme={theme}>
+              <Location theme={theme}>
+                <FaMapMarkerAlt /> {item.location}
+              </Location>
+            </TableCell>
+            <TableCell theme={theme}>{item.employees}</TableCell>
+            <TableCell theme={theme}>
+              <Rating>
+                <FaStar /> {item.rating}
+              </Rating>
+            </TableCell>
+          </>
+        );
+      case 'products':
+        return (
+          <>
+            <TableCell theme={theme}>{item.name}</TableCell>
+            <TableCell theme={theme}>{item.category}</TableCell>
+            <TableCell theme={theme}>{item.price}</TableCell>
+            <TableCell theme={theme}>
+              <Rating>
+                <FaStar /> {item.rating}
+              </Rating>
+            </TableCell>
+            <TableCell theme={theme}>
+              <Location theme={theme}>
+                <FaMapMarkerAlt /> {item.location}
+              </Location>
+            </TableCell>
+          </>
+        );
+      case 'users':
+        return (
+          <>
+            <TableCell theme={theme}>{item.name}</TableCell>
+            <TableCell theme={theme}>
+              <Location theme={theme}>
+                <FaMapMarkerAlt /> {item.location}
+              </Location>
+            </TableCell>
+            <TableCell theme={theme}>{item.posts}</TableCell>
+            <TableCell theme={theme}>{item.followers}</TableCell>
+            <TableCell theme={theme}>
+              <Location theme={theme}>
+                <FaCalendar /> {item.joined}
+              </Location>
+            </TableCell>
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const renderTabContent = () => {
+    if (loading) {
+      return <LoadingSpinner theme={theme}>Ładowanie danych...</LoadingSpinner>;
+    }
+
+    if (error) {
+      return <ErrorMessage theme={theme}>{error}</ErrorMessage>;
+    }
+
+    const currentData = data[activeTab];
+
     return (
-      <Container>
-        <LoadingSpinner>Ładowanie powiatów...</LoadingSpinner>
-      </Container>
+      <div>
+        <StatsGrid>
+          <StatCard theme={theme}>
+            <StatNumber theme={theme}>{currentData?.count || 0}</StatNumber>
+            <StatLabel theme={theme}>Łącznie {tabs.find(t => t.id === activeTab)?.label.toLowerCase()}</StatLabel>
+          </StatCard>
+          <StatCard theme={theme}>
+            <StatNumber theme={theme}>{(currentData?.count * 0.15).toFixed(0)}</StatNumber>
+            <StatLabel theme={theme}>Aktywne dzisiaj</StatLabel>
+          </StatCard>
+          <StatCard theme={theme}>
+            <StatNumber theme={theme}>{(currentData?.count * 0.08).toFixed(0)}</StatNumber>
+            <StatLabel theme={theme}>Nowe w tym tygodniu</StatLabel>
+          </StatCard>
+        </StatsGrid>
+
+        <DataTable>
+          <TableHeader theme={theme}>
+            {renderTableHeaders().map((header, index) => (
+              <div key={index}>{header}</div>
+            ))}
+          </TableHeader>
+          
+          {currentData?.items?.map((item, index) => (
+            <TableRow key={item.id || index} theme={theme}>
+              {renderTableRow(item)}
+            </TableRow>
+          ))}
+        </DataTable>
+      </div>
     );
-  }
+  };
 
   return (
     <Container>
-      <Breadcrumb>
-        <BreadcrumbLink to="/voivodeships">🏛️ Województwa</BreadcrumbLink>
-        <span>→</span>
-        <span>{voivodeship?.name || 'Województwo'}</span>
-      </Breadcrumb>
-
       <Header>
-        <Title>🏘️ Powiaty - {voivodeship?.name}</Title>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <ActionButton onClick={() => setShowSearch(true)}>
-            🔍 Zaawansowane wyszukiwanie
-          </ActionButton>
-          <ActionButton onClick={() => setShowAnalytics(true)}>
-            📊 Analityka
-          </ActionButton>
-        </div>
+        <Title theme={theme}>🏛️ Powiaty</Title>
+        <Subtitle theme={theme}>Dane z powiatów Polski</Subtitle>
       </Header>
 
-      {error && <ErrorMessage>{error}</ErrorMessage>}
+      <LocationSelector theme={theme}>
+        <LocationLabel theme={theme}>Wybrany powiat:</LocationLabel>
+        <LocationDropdown>
+          <LocationButton
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            theme={theme}
+          >
+            <FaMapMarkedAlt />
+            {selectedCounty ? selectedCounty.name : 'Wybierz powiat'}
+            <FaChevronDown />
+          </LocationButton>
+          <LocationDropdownContent isOpen={isDropdownOpen} theme={theme}>
+            {filteredCounties.map(county => (
+              <LocationOption
+                key={county.id}
+                isSelected={selectedCounty?.id === county.id}
+                onClick={() => handleCountySelect(county)}
+                theme={theme}
+              >
+                {county.name} ({county.type})
+              </LocationOption>
+            ))}
+          </LocationDropdownContent>
+        </LocationDropdown>
+      </LocationSelector>
 
-      <TabContainer>
-        <Tab 
-          active={activeTab === 'list'} 
-          onClick={() => setActiveTab('list')}
-        >
-          📋 Lista powiatów
-        </Tab>
-        <Tab 
-          active={activeTab === 'search'} 
-          onClick={() => setActiveTab('search')}
-        >
-          🔍 Wyszukiwanie
-        </Tab>
-        <Tab 
-          active={activeTab === 'analytics'} 
-          onClick={() => setActiveTab('analytics')}
-        >
-          📊 Analityka
-        </Tab>
+      <SearchInput
+        placeholder="Wyszukaj powiat..."
+        data={counties}
+        onSearch={handleSearch}
+        onSelect={handleCountySearchSelect}
+        searchKey="name"
+        theme={theme}
+        minChars={2}
+        maxSuggestions={20}
+      />
+
+      <TabContainer theme={theme}>
+        {tabs.map(tab => (
+          <Tab
+            key={tab.id}
+            active={activeTab === tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            theme={theme}
+          >
+            {tab.icon} {tab.label}
+          </Tab>
+        ))}
       </TabContainer>
 
-      {activeTab === 'list' && (
-        <>
-          <StatsGrid>
-        <StatCard>
-          <StatNumber>{stats.total}</StatNumber>
-          <StatLabel>Wszystkie powiaty</StatLabel>
-        </StatCard>
-        <StatCard>
-          <StatNumber>{stats.active}</StatNumber>
-          <StatLabel>Aktywne powiaty</StatLabel>
-        </StatCard>
-        <StatCard>
-          <StatNumber>{stats.municipalities}</StatNumber>
-          <StatLabel>Łącznie gmin</StatLabel>
-        </StatCard>
-      </StatsGrid>
-
-      <SearchContainer>
-        <SearchInput
-          type="text"
-          placeholder="Wyszukaj powiat..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <FilterSelect
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-        >
-          <option value="all">Wszystkie typy</option>
-          <option value="powiat">Powiat</option>
-          <option value="miasto na prawach powiatu">Miasto na prawach powiatu</option>
-        </FilterSelect>
-      </SearchContainer>
-
-      <CountiesGrid>
-        {filteredCounties.map(county => (
-          <CountyCard 
-            key={county.id} 
-            to={`/municipalities/${county.code}`}
-            onClick={(e) => {
-              e.preventDefault();
-              setSelectedLocation(county);
-              setShowDetails(true);
-            }}
-          >
-            <CountyHeader>
-              <CountyIcon>🏘️</CountyIcon>
-              <CountyInfo>
-                <CountyName>{county.name}</CountyName>
-                <CountyCode>Kod: {county.code}</CountyCode>
-                <CountyType>{county.type}</CountyType>
-              </CountyInfo>
-            </CountyHeader>
-            
-            <CountyStats>
-              <Stat>
-                <StatValue>{county.municipalitiesCount || 0}</StatValue>
-                <StatText>Gmin</StatText>
-              </Stat>
-              <Stat>
-                <StatValue>{county.active ? '✅' : '❌'}</StatValue>
-                <StatText>Status</StatText>
-              </Stat>
-            </CountyStats>
-          </CountyCard>
-        ))}
-      </CountiesGrid>
-      </>
-      )}
-
-      {activeTab === 'search' && (
-        <LocationSearch 
-          onLocationSelect={(location) => {
-            setSelectedLocation(location);
-            setShowDetails(true);
-            setActiveTab('list');
-          }}
-          onClose={() => setActiveTab('list')}
-        />
-      )}
-
-      {activeTab === 'analytics' && (
-        <LocationAnalytics locationId={voivodeshipCode} />
-      )}
-
-      {/* Modal szczegółów lokalizacji */}
-      {showDetails && selectedLocation && (
-        <ModalOverlay onClick={() => setShowDetails(false)}>
-          <div onClick={(e) => e.stopPropagation()}>
-            <LocationDetails 
-              locationId={selectedLocation.id} 
-              onClose={() => setShowDetails(false)}
-            />
-          </div>
-        </ModalOverlay>
-      )}
-
-      {/* Modal zaawansowanego wyszukiwania */}
-      {showSearch && (
-        <ModalOverlay onClick={() => setShowSearch(false)}>
-          <div onClick={(e) => e.stopPropagation()}>
-            <LocationSearch 
-              onLocationSelect={(location) => {
-                setSelectedLocation(location);
-                setShowDetails(true);
-                setShowSearch(false);
-              }}
-              onClose={() => setShowSearch(false)}
-            />
-          </div>
-        </ModalOverlay>
-      )}
-
-      {/* Modal analityki */}
-      {showAnalytics && (
-        <ModalOverlay onClick={() => setShowAnalytics(false)}>
-          <div onClick={(e) => e.stopPropagation()}>
-            <LocationAnalytics locationId={voivodeshipCode} />
-          </div>
-        </ModalOverlay>
-      )}
+      <TabContent theme={theme}>
+        {renderTabContent()}
+      </TabContent>
     </Container>
   );
 } 

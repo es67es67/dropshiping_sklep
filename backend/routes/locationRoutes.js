@@ -130,6 +130,12 @@ router.get('/voivodeships/:voivodeshipCode/counties', locationController.getCoun
 // Pobierz gminy dla powiatu
 router.get('/counties/:countyCode/municipalities', locationController.getMunicipalitiesForCounty);
 
+// Pobierz miejscowości dla gminy
+router.get('/municipalities/:municipalityCode/towns', locationController.getTownsForMunicipality);
+
+// Pobierz szczegóły konkretnej lokalizacji
+router.get('/:id', locationController.getLocation);
+
 // Pobierz analitykę lokalizacji
 router.get('/analytics', locationController.getLocationAnalytics);
 

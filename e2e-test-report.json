@@ -1,0 +1,130 @@
+{
+  "timestamp": "2025-07-14T11:01:19.882Z",
+  "totalTests": 11,
+  "passed": 2,
+  "failed": 6,
+  "errors": 3,
+  "results": [
+    {
+      "test": "Home Page",
+      "status": "FAIL"
+    },
+    {
+      "test": "Registration",
+      "status": "FAIL"
+    },
+    {
+      "test": "Login",
+      "status": "ERROR",
+      "error": "No element found for selector: input[name=\"email\"]"
+    },
+    {
+      "test": "Shop Creation",
+      "status": "ERROR",
+      "error": "No element found for selector: input[name=\"name\"]"
+    },
+    {
+      "test": "Product Creation",
+      "status": "ERROR",
+      "error": "No element found for selector: input[name=\"name\"]"
+    },
+    {
+      "test": "Shop Listing",
+      "status": "FAIL"
+    },
+    {
+      "test": "Product Listing",
+      "status": "FAIL"
+    },
+    {
+      "test": "User Profile",
+      "status": "FAIL"
+    },
+    {
+      "test": "Admin Panel",
+      "status": "FAIL"
+    },
+    {
+      "test": "Navigation",
+      "status": "PASS"
+    },
+    {
+      "test": "Responsive Design",
+      "status": "PASS"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "01_home_page",
+      "filepath": "D:\\portal\\e2e-screenshots\\01_home_page_2025-07-14T11-00-21-856Z.png"
+    },
+    {
+      "name": "02_register_form",
+      "filepath": "D:\\portal\\e2e-screenshots\\02_register_form_2025-07-14T11-00-34-463Z.png"
+    },
+    {
+      "name": "03_register_filled",
+      "filepath": "D:\\portal\\e2e-screenshots\\03_register_filled_2025-07-14T11-00-35-967Z.png"
+    },
+    {
+      "name": "04_after_register",
+      "filepath": "D:\\portal\\e2e-screenshots\\04_after_register_2025-07-14T11-00-46-498Z.png"
+    },
+    {
+      "name": "05_login_form",
+      "filepath": "D:\\portal\\e2e-screenshots\\05_login_form_2025-07-14T11-00-48-945Z.png"
+    },
+    {
+      "name": "08_shop_create_form",
+      "filepath": "D:\\portal\\e2e-screenshots\\08_shop_create_form_2025-07-14T11-00-50-890Z.png"
+    },
+    {
+      "name": "11_product_create_form",
+      "filepath": "D:\\portal\\e2e-screenshots\\11_product_create_form_2025-07-14T11-00-52-545Z.png"
+    },
+    {
+      "name": "14_shops_list",
+      "filepath": "D:\\portal\\e2e-screenshots\\14_shops_list_2025-07-14T11-00-54-381Z.png"
+    },
+    {
+      "name": "15_products_list",
+      "filepath": "D:\\portal\\e2e-screenshots\\15_products_list_2025-07-14T11-00-59-187Z.png"
+    },
+    {
+      "name": "16_user_profile",
+      "filepath": "D:\\portal\\e2e-screenshots\\16_user_profile_2025-07-14T11-01-03-953Z.png"
+    },
+    {
+      "name": "17_admin_panel",
+      "filepath": "D:\\portal\\e2e-screenshots\\17_admin_panel_2025-07-14T11-01-05-899Z.png"
+    },
+    {
+      "name": "18_nav_home",
+      "filepath": "D:\\portal\\e2e-screenshots\\18_nav_home_2025-07-14T11-01-07-686Z.png"
+    },
+    {
+      "name": "18_nav_shops",
+      "filepath": "D:\\portal\\e2e-screenshots\\18_nav_shops_2025-07-14T11-01-09-930Z.png"
+    },
+    {
+      "name": "18_nav_products",
+      "filepath": "D:\\portal\\e2e-screenshots\\18_nav_products_2025-07-14T11-01-11-781Z.png"
+    },
+    {
+      "name": "18_nav_profile",
+      "filepath": "D:\\portal\\e2e-screenshots\\18_nav_profile_2025-07-14T11-01-13-579Z.png"
+    },
+    {
+      "name": "19_responsive_desktop",
+      "filepath": "D:\\portal\\e2e-screenshots\\19_responsive_desktop_2025-07-14T11-01-15-778Z.png"
+    },
+    {
+      "name": "19_responsive_tablet",
+      "filepath": "D:\\portal\\e2e-screenshots\\19_responsive_tablet_2025-07-14T11-01-17-750Z.png"
+    },
+    {
+      "name": "19_responsive_mobile",
+      "filepath": "D:\\portal\\e2e-screenshots\\19_responsive_mobile_2025-07-14T11-01-19-556Z.png"
+    }
+  ]
+}

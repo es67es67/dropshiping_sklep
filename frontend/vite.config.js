@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   root: '.',
   publicDir: 'public',
+  define: {
+    'process.env': {}
+  },
   server: {
     port: 3000,
     proxy: {

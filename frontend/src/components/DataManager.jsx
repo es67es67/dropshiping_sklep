@@ -16,14 +16,14 @@ const CollectionSelector = styled.div`
 const CollectionButton = styled.button`
   padding: 10px 20px;
   border: 1px solid #ddd;
-  background: ${props => props.active ? '#1976d2' : 'white'};
-  color: ${props => props.active ? 'white' : '#333'};
+  background: ${props => props.$active ? '#1976d2' : 'white'};
+  color: ${props => props.$active ? 'white' : '#333'};
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
   
   &:hover {
-    background: ${props => props.active ? '#1565c0' : '#f5f5f5'};
+    background: ${props => props.$active ? '#1565c0' : '#f5f5f5'};
   }
 `;
 
@@ -229,7 +229,7 @@ const DataManager = () => {
         {collections.map(collection => (
           <CollectionButton
             key={collection.key}
-            active={selectedCollection === collection.key}
+            $active={selectedCollection === collection.key}
             onClick={() => setSelectedCollection(collection.key)}
           >
             {collection.icon} {collection.label}

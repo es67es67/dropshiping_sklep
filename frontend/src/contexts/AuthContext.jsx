@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       console.log('Logowanie użytkownika:', credentials);
       
       // Wyślij dane do backendu
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/users/login`, {
+      const response = await fetch(`/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
       console.log('Rejestracja użytkownika:', userData);
       
       // Wyślij dane do backendu
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/users/register`, {
+      const response = await fetch(`/api/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
