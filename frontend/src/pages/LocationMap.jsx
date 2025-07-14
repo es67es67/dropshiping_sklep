@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
-const MapPageContainer = styled.div`
+const MapPageContainer = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   min-height: 100vh;
   background: ${props => props.theme.background};
   color: ${props => props.theme.text};
@@ -300,14 +302,17 @@ export default function LocationMap({ theme }) {
   }, []);
 
   const initMap = () => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !window.google || !window.google.maps) {
+      console.log('Google Maps API nie jest jeszcze załadowane');
+      return;
+    }
 
     try {
       // Wyczyść kontener mapy
       mapRef.current.innerHTML = '';
 
       // Inicjalizuj klasyczną mapę Google Maps
-      const map = new google.maps.Map(mapRef.current, {
+      const map = new window.google.maps.Map(mapRef.current, {
         center: { lat: 52.2297, lng: 21.0122 }, // Centrum Polski
         zoom: 6,
         mapTypeControl: false,
@@ -322,16 +327,21 @@ export default function LocationMap({ theme }) {
         ]
       });
 
+      // Zapisz referencje
+      mapInstance.current = map;
+
       // Dodaj marker
-      const marker = new google.maps.Marker({
+      const marker = new window.google.maps.Marker({
         position: { lat: 52.2297, lng: 21.0122 },
         map: map,
         title: 'Centrum Polski',
         draggable: false
       });
 
+      markerRef.current = marker;
+
       // Inicjalizuj InfoWindow
-      infowindowRef.current = new google.maps.InfoWindow();
+      infowindowRef.current = new window.google.maps.InfoWindow();
 
       // Dodaj kontrolkę wyszukiwania
       const searchBox = document.createElement('div');
@@ -368,64 +378,70 @@ export default function LocationMap({ theme }) {
 
       // Inicjalizuj Places Autocomplete
       const input = document.getElementById('search-input');
-      const autocomplete = new google.maps.places.Autocomplete(input, {
-        componentRestrictions: { country: 'pl' },
-        types: ['geocode', 'establishment']
-      });
-
-      // Obsługa wyboru miejsca
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-
-        if (!place.geometry) {
-          console.log("Brak szczegółów dla: '" + place.name + "'");
-          infowindowRef.current.close();
-          marker.setMap(null);
-          return;
-        }
-
-        // Przesuń mapę do wybranego miejsca
-        if (place.geometry.viewport) {
-          map.fitBounds(place.geometry.viewport);
-        } else {
-          map.setCenter(place.geometry.location);
-          map.setZoom(15);
-        }
-
-        // Ustaw marker
-        marker.setPosition(place.geometry.location);
-        marker.setMap(map);
-
-        // Pokaż InfoWindow
-        infowindowRef.current.setContent(`
-          <div style="padding: 10px; max-width: 200px;">
-            <strong>${place.name}</strong><br>
-            <span style="color: #666; font-size: 0.9em;">${place.formatted_address}</span>
-          </div>
-        `);
-        infowindowRef.current.open(map, marker);
-
-        // Zaktualizuj wybraną lokalizację
-        setSelectedLocation({
-          name: place.name,
-          address: place.formatted_address,
-          coordinates: {
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng()
-          },
-          type: 'wyszukane miejsce'
+      if (input && window.google.maps.places) {
+        const autocomplete = new window.google.maps.places.Autocomplete(input, {
+          componentRestrictions: { country: 'pl' },
+          types: ['geocode', 'establishment']
         });
-      });
 
-      // Zapisz referencje
-      mapInstance.current = map;
-      markerRef.current = marker;
+        // Obsługa wyboru miejsca
+        autocomplete.addListener('place_changed', () => {
+          const place = autocomplete.getPlace();
+
+          if (!place.geometry) {
+            console.log("Brak szczegółów dla: '" + place.name + "'");
+            if (infowindowRef.current) {
+              infowindowRef.current.close();
+            }
+            if (markerRef.current) {
+              markerRef.current.setMap(null);
+            }
+            return;
+          }
+
+          // Przesuń mapę do wybranego miejsca
+          if (place.geometry.viewport) {
+            map.fitBounds(place.geometry.viewport);
+          } else {
+            map.setCenter(place.geometry.location);
+            map.setZoom(15);
+          }
+
+          // Ustaw marker
+          if (markerRef.current) {
+            markerRef.current.setPosition(place.geometry.location);
+            markerRef.current.setMap(map);
+          }
+
+          // Pokaż InfoWindow
+          if (infowindowRef.current) {
+            infowindowRef.current.setContent(`
+              <div style="padding: 10px; max-width: 200px;">
+                <strong>${place.name}</strong><br>
+                <span style="color: #666; font-size: 0.9em;">${place.formatted_address}</span>
+              </div>
+            `);
+            infowindowRef.current.open(map, markerRef.current);
+          }
+
+          // Zaktualizuj wybraną lokalizację
+          setSelectedLocation({
+            name: place.name,
+            address: place.formatted_address,
+            coordinates: {
+              lat: place.geometry.location.lat(),
+              lng: place.geometry.location.lng()
+            },
+            type: 'wyszukane miejsce'
+          });
+        });
+      }
 
       setMapLoaded(true);
-      console.log('Google Maps zainicjalizowane pomyślnie');
+      console.log('Mapa Google Maps została zainicjalizowana');
     } catch (error) {
       console.error('Błąd inicjalizacji mapy:', error);
-      setError('Błąd inicjalizacji mapy Google Maps');
+      setError('Nie udało się załadować mapy');
     }
   };
 
