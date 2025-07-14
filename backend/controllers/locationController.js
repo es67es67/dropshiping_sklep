@@ -1018,6 +1018,104 @@ const getLocationAnalytics = async (req, res) => {
 
 // Pobierz lokalizacje wg typu (duplikat - usunięty)
 
+// 🗺️ Pobierz granice administracyjne dla mapy
+const getAdministrativeBoundaries = async (req, res) => {
+  try {
+    const { type, parentCode } = req.query;
+    
+    let query = { isActive: true };
+    
+    if (type) {
+      query.type = type;
+    }
+    
+    if (parentCode) {
+      // Dla powiatów w województwie
+      if (type === 'powiat' || type === 'miasto na prawach powiatu') {
+        query.code = { $regex: `^${parentCode}` };
+      }
+      // Dla gmin w powiecie
+      else if (type === 'gmina') {
+        query.code = { $regex: `^${parentCode}` };
+      }
+      // Dla miejscowości w gminie
+      else if (type === 'miejscowość') {
+        query.code = { $regex: `^${parentCode}` };
+      }
+    }
+    
+    const locations = await Location.find(query)
+      .select('name code type coordinates population')
+      .sort({ name: 1 });
+    
+    // Przygotuj dane dla mapy
+    const boundaries = locations.map(location => ({
+      id: location._id,
+      name: location.name,
+      code: location.code,
+      type: location.type,
+      coordinates: location.coordinates || { lat: 52.2297, lng: 21.0122 }, // Domyślne dla Warszawy
+      population: location.population || 0,
+      // Symulowane granice (w rzeczywistości pobierałoby się z GeoJSON)
+      bounds: {
+        north: (location.coordinates?.lat || 52.2297) + 0.1,
+        south: (location.coordinates?.lat || 52.2297) - 0.1,
+        east: (location.coordinates?.lng || 21.0122) + 0.1,
+        west: (location.coordinates?.lng || 21.0122) - 0.1
+      }
+    }));
+    
+    res.json({
+      success: true,
+      boundaries,
+      count: boundaries.length
+    });
+  } catch (error) {
+    console.error('Błąd pobierania granic administracyjnych:', error);
+    res.status(500).json({ 
+      error: 'Błąd pobierania granic administracyjnych',
+      details: error.message 
+    });
+  }
+};
+
+// 🗺️ Pobierz szczegóły lokalizacji po współrzędnych
+const getLocationByCoordinates = async (req, res) => {
+  try {
+    const { lat, lng } = req.query;
+    
+    if (!lat || !lng) {
+      return res.status(400).json({ error: 'Współrzędne są wymagane' });
+    }
+    
+    // W rzeczywistości używałoby się geospatial queries
+    // Na razie symulujemy znalezienie lokalizacji
+    const mockLocation = {
+      id: 'mock_location',
+      name: 'Warszawa',
+      type: 'miejscowość',
+      code: '146501',
+      coordinates: { lat: parseFloat(lat), lng: parseFloat(lng) },
+      hierarchy: {
+        wojewodztwo: { name: 'Mazowieckie', code: '14' },
+        powiat: { name: 'Warszawa', code: '1465' },
+        gmina: { name: 'Warszawa', code: '146501' }
+      }
+    };
+    
+    res.json({
+      success: true,
+      location: mockLocation
+    });
+  } catch (error) {
+    console.error('Błąd pobierania lokalizacji po współrzędnych:', error);
+    res.status(500).json({ 
+      error: 'Błąd pobierania lokalizacji',
+      details: error.message 
+    });
+  }
+};
+
 module.exports = {
   getLocation,
   getLocations,
@@ -1034,5 +1132,7 @@ module.exports = {
   getCountiesForVoivodeship,
   getMunicipalitiesForCounty,
   getTownsForMunicipality,
-  getLocationAnalytics
+  getLocationAnalytics,
+  getAdministrativeBoundaries,
+  getLocationByCoordinates
 }; 

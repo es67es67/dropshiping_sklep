@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaStore, FaComments, FaBuilding, FaBox, FaUsers, FaMapMarkedAlt, FaChevronDown, FaStar, FaCalendar, FaMapMarkerAlt } from 'react-icons/fa';
 import SearchInput from '../components/SearchInput';
@@ -242,16 +243,22 @@ const Location = styled.div`
   font-size: 0.9rem;
 `;
 
-export default function Voivodeships({ theme }) {
-  const [activeTab, setActiveTab] = useState('shops');
-  const [selectedVoivodeship, setSelectedVoivodeship] = useState(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [filteredVoivodeships, setFilteredVoivodeships] = useState(voivodeships);
-  const [data, setData] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const LinkCell = styled.span`
+  color: ${props => props.theme.primary};
+  text-decoration: underline;
+  cursor: pointer;
+  &:hover {
+    color: ${props => props.theme.primary}cc;
+    text-decoration: underline;
+  }
+`;
 
-  // Lista województw Polski
+export default function Voivodeships({ theme }) {
+  const location = useLocation();
+  const { voivodeshipCode } = useParams();
+  const navigate = useNavigate();
+  
+  // Lista województw Polski - przeniesiona przed useState
   const voivodeships = [
     { id: '02', name: 'Dolnośląskie', code: 'DS' },
     { id: '04', name: 'Kujawsko-pomorskie', code: 'KP' },
@@ -270,6 +277,14 @@ export default function Voivodeships({ theme }) {
     { id: '30', name: 'Wielkopolskie', code: 'WP' },
     { id: '32', name: 'Zachodniopomorskie', code: 'ZP' }
   ];
+
+  const [activeTab, setActiveTab] = useState('shops');
+  const [selectedVoivodeship, setSelectedVoivodeship] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [filteredVoivodeships, setFilteredVoivodeships] = useState(voivodeships);
+  const [data, setData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Przykładowe dane dla każdej kategorii
   const sampleData = {
@@ -319,9 +334,29 @@ export default function Voivodeships({ theme }) {
   ];
 
   useEffect(() => {
-    // Pobierz lokalizację użytkownika i ustaw jako domyślną
-    fetchUserLocation();
-  }, []);
+    // Jeśli jest voivodeshipCode w URL, ustaw wybrane województwo na podstawie kodu
+    if (voivodeshipCode) {
+      const voivodeshipFromUrl = voivodeships.find(v => v.id === voivodeshipCode || v.code.toLowerCase() === voivodeshipCode.toLowerCase());
+      if (voivodeshipFromUrl) {
+        setSelectedVoivodeship(voivodeshipFromUrl);
+        fetchVoivodeshipData(voivodeshipFromUrl.id);
+        return;
+      }
+    }
+    // Sprawdź czy jest state z nawigacji
+    if (location.state?.selectedVoivodeship) {
+      const voivodeshipFromState = voivodeships.find(v => v.id === location.state.selectedVoivodeship.code);
+      if (voivodeshipFromState) {
+        setSelectedVoivodeship(voivodeshipFromState);
+        fetchVoivodeshipData(voivodeshipFromState.id);
+        return;
+      }
+    }
+    // Fallback do domyślnego województwa
+    const defaultVoivodeship = voivodeships.find(v => v.id === '14') || voivodeships[0];
+    setSelectedVoivodeship(defaultVoivodeship);
+    fetchVoivodeshipData(defaultVoivodeship.id);
+  }, [location.state, voivodeshipCode]);
 
   const fetchUserLocation = async () => {
     try {
@@ -449,12 +484,10 @@ export default function Voivodeships({ theme }) {
       case 'shops':
         return (
           <>
-            <TableCell theme={theme}>{item.name}</TableCell>
             <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaMapMarkerAlt /> {item.location}
-              </Location>
+              <LinkCell theme={theme} onClick={() => navigate(`/shops/${item.id}`)}>{item.name}</LinkCell>
             </TableCell>
+            <TableCell theme={theme}>{item.location}</TableCell>
             <TableCell theme={theme}>
               <Rating>
                 <FaStar /> {item.rating}
@@ -471,8 +504,12 @@ export default function Voivodeships({ theme }) {
       case 'posts':
         return (
           <>
-            <TableCell theme={theme}>{item.title}</TableCell>
-            <TableCell theme={theme}>{item.author}</TableCell>
+            <TableCell theme={theme}>
+              <LinkCell theme={theme} onClick={() => navigate(`/posts/${item.id}`)}>{item.title}</LinkCell>
+            </TableCell>
+            <TableCell theme={theme}>
+              <LinkCell theme={theme} onClick={() => navigate(`/users/${item.authorId || 1}`)}>{item.author}</LinkCell>
+            </TableCell>
             <TableCell theme={theme}>
               <Location theme={theme}>
                 <FaMapMarkerAlt /> {item.location}
@@ -489,7 +526,9 @@ export default function Voivodeships({ theme }) {
       case 'companies':
         return (
           <>
-            <TableCell theme={theme}>{item.name}</TableCell>
+            <TableCell theme={theme}>
+              <LinkCell theme={theme} onClick={() => navigate(`/company-profiles/${item.id}`)}>{item.name}</LinkCell>
+            </TableCell>
             <TableCell theme={theme}>{item.industry}</TableCell>
             <TableCell theme={theme}>
               <Location theme={theme}>
@@ -507,7 +546,9 @@ export default function Voivodeships({ theme }) {
       case 'products':
         return (
           <>
-            <TableCell theme={theme}>{item.name}</TableCell>
+            <TableCell theme={theme}>
+              <LinkCell theme={theme} onClick={() => navigate(`/products/${item.id}`)}>{item.name}</LinkCell>
+            </TableCell>
             <TableCell theme={theme}>{item.category}</TableCell>
             <TableCell theme={theme}>{item.price}</TableCell>
             <TableCell theme={theme}>
@@ -525,7 +566,9 @@ export default function Voivodeships({ theme }) {
       case 'users':
         return (
           <>
-            <TableCell theme={theme}>{item.name}</TableCell>
+            <TableCell theme={theme}>
+              <LinkCell theme={theme} onClick={() => navigate(`/users/${item.id}`)}>{item.name}</LinkCell>
+            </TableCell>
             <TableCell theme={theme}>
               <Location theme={theme}>
                 <FaMapMarkerAlt /> {item.location}

@@ -121,6 +121,17 @@ router.delete('/cache/clear', locationController.clearCache);
 
 // 🏛️ Nowe endpointy dla hierarchii administracyjnej
 
+// Pobierz analitykę lokalizacji (musi być przed parametrycznymi)
+router.get('/analytics', locationController.getLocationAnalytics);
+
+// 🗺️ Nowe endpointy dla interaktywnej mapy (muszą być przed parametrycznymi)
+
+// Pobierz granice administracyjne
+router.get('/boundaries', locationController.getAdministrativeBoundaries);
+
+// Pobierz lokalizację po współrzędnych
+router.get('/by-coordinates', locationController.getLocationByCoordinates);
+
 // Pobierz wszystkie województwa
 router.get('/voivodeships', locationController.getVoivodeships);
 
@@ -135,9 +146,6 @@ router.get('/municipalities/:municipalityCode/towns', locationController.getTown
 
 // Pobierz szczegóły konkretnej lokalizacji
 router.get('/:id', locationController.getLocation);
-
-// Pobierz analitykę lokalizacji
-router.get('/analytics', locationController.getLocationAnalytics);
 
 // Import danych lokalizacji
 router.post('/import', authMiddleware.authenticateToken, (req, res) => {

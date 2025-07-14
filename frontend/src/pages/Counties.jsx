@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaStore, FaComments, FaBuilding, FaBox, FaUsers, FaMapMarkedAlt, FaChevronDown, FaStar, FaCalendar, FaMapMarkerAlt } from 'react-icons/fa';
 import SearchInput from '../components/SearchInput';
@@ -243,6 +244,8 @@ const Location = styled.div`
 `;
 
 export default function Counties({ theme }) {
+  const { countyCode } = useParams();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('shops');
   const [selectedCounty, setSelectedCounty] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -313,9 +316,30 @@ export default function Counties({ theme }) {
   ];
 
   useEffect(() => {
-    // Pobierz lokalizację użytkownika i ustaw jako domyślną
-    fetchUserLocation();
-  }, []);
+    // Sprawdź czy jest parametr URL lub state z nawigacji
+    if (countyCode) {
+      const countyFromUrl = counties.find(c => c.id === countyCode);
+      if (countyFromUrl) {
+        setSelectedCounty(countyFromUrl);
+        fetchCountyData(countyFromUrl.id);
+        return;
+      }
+    }
+
+    if (location.state?.selectedCounty) {
+      const countyFromState = counties.find(c => c.id === location.state.selectedCounty.code);
+      if (countyFromState) {
+        setSelectedCounty(countyFromState);
+        fetchCountyData(countyFromState.id);
+        return;
+      }
+    }
+
+    // Fallback do domyślnego powiatu
+    const defaultCounty = counties.find(c => c.id === '0201') || counties[0];
+    setSelectedCounty(defaultCounty);
+    fetchCountyData(defaultCounty.id);
+  }, [countyCode, location.state]);
 
   const fetchUserLocation = async () => {
     try {

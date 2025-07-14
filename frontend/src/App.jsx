@@ -44,6 +44,12 @@ import Messages from './components/Messages';
 import TestShopsPage from './components/TestShopsPage';
 import TestComponent from './components/TestComponent';
 import LocationMap from './pages/LocationMap';
+import CompanyProfile from './pages/CompanyProfile';
+import Shop from './pages/Shop';
+import Product from './pages/Product';
+import User from './pages/User';
+import Post from './pages/Post';
+import AdvancedFeatures from './pages/AdvancedFeatures';
 
 function App() {
   const [theme, setTheme] = useState('light');
@@ -173,9 +179,13 @@ function App() {
         {/* Lokalizacje */}
         <Route path="/country" element={<Country theme={currentTheme} />} />
         <Route path="/voivodeships" element={<Voivodeships theme={currentTheme} />} />
+        <Route path="/voivodeships/:voivodeshipCode" element={<Voivodeships theme={currentTheme} />} />
         <Route path="/counties" element={<Counties theme={currentTheme} />} />
+        <Route path="/counties/:countyCode" element={<Counties theme={currentTheme} />} />
         <Route path="/municipalities" element={<Municipalities theme={currentTheme} />} />
+        <Route path="/municipalities/:municipalityCode" element={<Municipalities theme={currentTheme} />} />
         <Route path="/cities" element={<Cities theme={currentTheme} />} />
+        <Route path="/cities/:cityCode" element={<Cities theme={currentTheme} />} />
         <Route path="/location-analytics" element={<LocationAnalytics />} />
         <Route path="/location-import" element={<LocationImport />} />
         <Route path="/location-export" element={<LocationExport />} />
@@ -191,6 +201,12 @@ function App() {
         <Route path="/messages" element={<Messages />} />
         <Route path="/test" element={<TestComponent />} />
         <Route path="/location-map" element={<LocationMap theme={currentTheme} />} />
+        <Route path="/company-profiles/:id" element={<CompanyProfile theme={currentTheme} />} />
+        <Route path="/shops/:id" element={<Shop theme={currentTheme} />} />
+        <Route path="/products/:id" element={<Product theme={currentTheme} />} />
+        <Route path="/users/:id" element={<User theme={currentTheme} />} />
+        <Route path="/posts/:id" element={<Post theme={currentTheme} />} />
+        <Route path="/advanced-features" element={<AdvancedFeatures theme={currentTheme} />} />
       </Routes>
     );
 

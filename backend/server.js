@@ -390,6 +390,25 @@ app.get('/api/search/products', (req, res) => {
   res.json(results);
 });
 
+// Health check endpoint (musi być przed 404 handlerem)
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// API status endpoint (musi być przed 404 handlerem)
+app.get('/api/status', (req, res) => {
+  res.json({ 
+    status: 'running',
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // 404 handler for API routes
 app.use('/api/*', (req, res) => {
   res.status(404).json({ 
@@ -406,25 +425,6 @@ app.use('*', (req, res) => {
     error: 'Route not found', 
     path: req.path,
     method: req.method,
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
-
-// API status endpoint
-app.get('/api/status', (req, res) => {
-  res.json({ 
-    status: 'running',
-    version: '1.0.0',
     timestamp: new Date().toISOString()
   });
 });

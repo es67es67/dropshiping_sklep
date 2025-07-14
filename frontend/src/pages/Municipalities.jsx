@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaStore, FaComments, FaBuilding, FaBox, FaUsers, FaMapMarkedAlt, FaChevronDown, FaStar, FaCalendar, FaMapMarkerAlt } from 'react-icons/fa';
 import SearchInput from '../components/SearchInput';
@@ -243,6 +244,8 @@ const Location = styled.div`
 `;
 
 export default function Municipalities({ theme }) {
+  const { municipalityCode } = useParams();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('shops');
   const [selectedMunicipality, setSelectedMunicipality] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -313,9 +316,30 @@ export default function Municipalities({ theme }) {
   ];
 
   useEffect(() => {
-    // Pobierz lokalizację użytkownika i ustaw jako domyślną
-    fetchUserLocation();
-  }, []);
+    // Sprawdź czy jest parametr URL lub state z nawigacji
+    if (municipalityCode) {
+      const municipalityFromUrl = municipalities.find(m => m.id === municipalityCode);
+      if (municipalityFromUrl) {
+        setSelectedMunicipality(municipalityFromUrl);
+        fetchMunicipalityData(municipalityFromUrl.id);
+        return;
+      }
+    }
+
+    if (location.state?.selectedMunicipality) {
+      const municipalityFromState = municipalities.find(m => m.id === location.state.selectedMunicipality.code);
+      if (municipalityFromState) {
+        setSelectedMunicipality(municipalityFromState);
+        fetchMunicipalityData(municipalityFromState.id);
+        return;
+      }
+    }
+
+    // Fallback do domyślnej gminy
+    const defaultMunicipality = municipalities.find(m => m.id === '020101') || municipalities[0];
+    setSelectedMunicipality(defaultMunicipality);
+    fetchMunicipalityData(defaultMunicipality.id);
+  }, [municipalityCode, location.state]);
 
   const fetchUserLocation = async () => {
     try {

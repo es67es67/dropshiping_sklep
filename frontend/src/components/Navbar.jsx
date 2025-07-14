@@ -539,6 +539,9 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
         <NavLink to="/company-profiles" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🏢 Firmy
         </NavLink>
+        <NavLink to="/advanced-features" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+          🚀 Zaawansowane
+        </NavLink>
         
         {/* Zarządzanie sklepami - tylko dla właścicieli */}
         {user?.shops && user.shops.length > 0 && (
