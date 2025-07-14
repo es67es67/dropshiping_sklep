@@ -38,6 +38,24 @@ const MapContainer = styled.div`
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 `;
 
+const MapWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  position: relative;
+`;
+
+const PlacePickerContainer = styled.div`
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  min-width: 300px;
+`;
+
 const MapPlaceholder = styled.div`
   width: 100%;
   height: 100%;
@@ -212,10 +230,12 @@ export default function LocationMap({ theme }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mapLoaded, setMapLoaded] = useState(false);
   
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const markerRef = useRef(null);
+  const infowindowRef = useRef(null);
 
   // Pobierz województwa przy pierwszym renderowaniu
   useEffect(() => {
@@ -249,56 +269,163 @@ export default function LocationMap({ theme }) {
     }
   }, [selectedMunicipality]);
 
-  // Inicjalizacja mapy
+  // Inicjalizacja mapy Google Maps
   useEffect(() => {
-    if (window.google && window.google.maps && !mapInstance.current) {
-      initMap();
-    } else if (!window.google) {
-      loadGoogleMapsAPI();
-    }
-  }, []);
+    const initGoogleMaps = async () => {
+      try {
+        // Czekaj na załadowanie Google Maps API
+        await new Promise((resolve) => {
+          if (window.google && window.google.maps) {
+            resolve();
+          } else {
+            const checkGoogleMaps = () => {
+              if (window.google && window.google.maps) {
+                resolve();
+              } else {
+                setTimeout(checkGoogleMaps, 100);
+              }
+            };
+            checkGoogleMaps();
+          }
+        });
 
-  const loadGoogleMapsAPI = () => {
-    // Tymczasowo używamy prostego placeholder zamiast Google Maps
-    console.log('Ładowanie mapy...');
-    setTimeout(() => {
-      initMap();
-    }, 1000);
-  };
+        initMap();
+      } catch (error) {
+        console.error('Błąd inicjalizacji Google Maps:', error);
+        setError('Nie udało się załadować Google Maps');
+      }
+    };
+
+    initGoogleMaps();
+  }, []);
 
   const initMap = () => {
     if (!mapRef.current) return;
 
     try {
-      // Prosty placeholder mapy
-      mapRef.current.innerHTML = `
-        <div style="
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          color: #666;
-          font-size: 1.2rem;
-          border-radius: 8px;
-        ">
-          <div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div>
-          <div style="text-align: center;">
-            <div style="font-weight: bold; margin-bottom: 0.5rem;">Mapa Polski</div>
-            <div>Wybierz lokalizację z dropdownów poniżej</div>
-            <div style="margin-top: 1rem; font-size: 0.9rem; color: #888;">
-              Google Maps API: ${import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? '✅ Skonfigurowane' : '❌ Brak klucza'}
-            </div>
-          </div>
-        </div>
+      // Wyczyść kontener mapy
+      mapRef.current.innerHTML = '';
+
+      // Inicjalizuj klasyczną mapę Google Maps
+      const map = new google.maps.Map(mapRef.current, {
+        center: { lat: 52.2297, lng: 21.0122 }, // Centrum Polski
+        zoom: 6,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      });
+
+      // Dodaj marker
+      const marker = new google.maps.Marker({
+        position: { lat: 52.2297, lng: 21.0122 },
+        map: map,
+        title: 'Centrum Polski',
+        draggable: false
+      });
+
+      // Inicjalizuj InfoWindow
+      infowindowRef.current = new google.maps.InfoWindow();
+
+      // Dodaj kontrolkę wyszukiwania
+      const searchBox = document.createElement('div');
+      searchBox.style.cssText = `
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 10px;
+        min-width: 300px;
       `;
       
-      console.log('Mapa zainicjalizowana (placeholder)');
+      searchBox.innerHTML = `
+        <input 
+          type="text" 
+          placeholder="Wyszukaj miejsce w Polsce..." 
+          style="
+            width: 100%;
+            height: 40px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 0 10px;
+            font-size: 14px;
+            outline: none;
+          "
+          id="search-input"
+        />
+      `;
+      
+      mapRef.current.appendChild(searchBox);
+
+      // Inicjalizuj Places Autocomplete
+      const input = document.getElementById('search-input');
+      const autocomplete = new google.maps.places.Autocomplete(input, {
+        componentRestrictions: { country: 'pl' },
+        types: ['geocode', 'establishment']
+      });
+
+      // Obsługa wyboru miejsca
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+
+        if (!place.geometry) {
+          console.log("Brak szczegółów dla: '" + place.name + "'");
+          infowindowRef.current.close();
+          marker.setMap(null);
+          return;
+        }
+
+        // Przesuń mapę do wybranego miejsca
+        if (place.geometry.viewport) {
+          map.fitBounds(place.geometry.viewport);
+        } else {
+          map.setCenter(place.geometry.location);
+          map.setZoom(15);
+        }
+
+        // Ustaw marker
+        marker.setPosition(place.geometry.location);
+        marker.setMap(map);
+
+        // Pokaż InfoWindow
+        infowindowRef.current.setContent(`
+          <div style="padding: 10px; max-width: 200px;">
+            <strong>${place.name}</strong><br>
+            <span style="color: #666; font-size: 0.9em;">${place.formatted_address}</span>
+          </div>
+        `);
+        infowindowRef.current.open(map, marker);
+
+        // Zaktualizuj wybraną lokalizację
+        setSelectedLocation({
+          name: place.name,
+          address: place.formatted_address,
+          coordinates: {
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng()
+          },
+          type: 'wyszukane miejsce'
+        });
+      });
+
+      // Zapisz referencje
+      mapInstance.current = map;
+      markerRef.current = marker;
+
+      setMapLoaded(true);
+      console.log('Google Maps zainicjalizowane pomyślnie');
     } catch (error) {
       console.error('Błąd inicjalizacji mapy:', error);
-      setError('Błąd inicjalizacji mapy');
+      setError('Błąd inicjalizacji mapy Google Maps');
     }
   };
 
@@ -369,32 +496,32 @@ export default function LocationMap({ theme }) {
 
       setSelectedLocation(locationData);
 
-      // Zaktualizuj placeholder mapy
-      if (mapRef.current) {
-        mapRef.current.innerHTML = `
-          <div style="
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #e8f4fd 0%, #d1e7dd 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: #333;
-            font-size: 1.2rem;
-            border-radius: 8px;
-          ">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">📍</div>
-            <div style="text-align: center;">
-              <div style="font-weight: bold; margin-bottom: 0.5rem; color: #0066cc;">${name}</div>
-              <div style="margin-bottom: 0.5rem;">Typ: ${type}</div>
-              <div style="margin-bottom: 0.5rem;">Kod: ${code}</div>
-              <div style="font-size: 0.9rem; color: #666;">
-                Lokalizacja wybrana pomyślnie!
-              </div>
+      // Jeśli mapa jest załadowana, przesuń do lokalizacji
+      if (mapLoaded && mapInstance.current && markerRef.current && locationData.coordinates) {
+        const map = mapInstance.current;
+        const marker = markerRef.current;
+        
+        const position = {
+          lat: locationData.coordinates.lat,
+          lng: locationData.coordinates.lng
+        };
+
+        map.setCenter(position);
+        map.setZoom(12);
+        marker.setPosition(position);
+        marker.setMap(map);
+
+        // Pokaż InfoWindow
+        if (infowindowRef.current) {
+          infowindowRef.current.setContent(`
+            <div style="padding: 10px; max-width: 200px;">
+              <strong>${locationData.name}</strong><br>
+              <span style="color: #666; font-size: 0.9em;">${locationData.type}</span><br>
+              <span style="color: #666; font-size: 0.9em;">Kod: ${locationData.code}</span>
             </div>
-          </div>
-        `;
+          `);
+          infowindowRef.current.open(map, marker);
+        }
       }
 
     } catch (error) {
@@ -470,7 +597,7 @@ export default function LocationMap({ theme }) {
       <MapHeader>
         <MapTitle>Mapa Lokalizacji</MapTitle>
         <MapSubtitle>
-          Wybierz lokalizację z hierarchii administracyjnej Polski
+          Wybierz lokalizację z hierarchii administracyjnej Polski lub wyszukaj miejsce
         </MapSubtitle>
       </MapHeader>
 
@@ -534,23 +661,26 @@ export default function LocationMap({ theme }) {
       </LocationControls>
 
       <MapContainer theme={theme}>
-        {window.google && window.google.maps ? (
-          <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
-        ) : (
-          <MapPlaceholder theme={theme}>
-            {isLoading ? (
-              <>
-                <LoadingSpinner theme={theme} />
-                <p>Ładowanie mapy...</p>
-              </>
-            ) : (
-              <>
-                <p>🗺️ Mapa Google Maps</p>
-                <p>Wybierz lokalizację z listy powyżej</p>
-              </>
-            )}
-          </MapPlaceholder>
-        )}
+        <MapWrapper ref={mapRef}>
+          {!mapLoaded && (
+            <MapPlaceholder theme={theme}>
+              {isLoading ? (
+                <>
+                  <LoadingSpinner theme={theme} />
+                  <p>Ładowanie Google Maps...</p>
+                </>
+              ) : (
+                <>
+                  <p>🗺️ Google Maps</p>
+                  <p>Inicjalizacja mapy...</p>
+                  <div style="margin-top: 1rem; font-size: 0.9rem; color: #888;">
+                    Google Maps API: {import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? '✅ Skonfigurowane' : '❌ Brak klucza'}
+                  </div>
+                </>
+              )}
+            </MapPlaceholder>
+          )}
+        </MapWrapper>
       </MapContainer>
 
       {selectedLocation && (
@@ -569,6 +699,13 @@ export default function LocationMap({ theme }) {
               <DetailItem>
                 <DetailLabel>Kod TERYT:</DetailLabel>
                 <DetailValue>{selectedLocation.code}</DetailValue>
+              </DetailItem>
+            )}
+            
+            {selectedLocation.address && (
+              <DetailItem>
+                <DetailLabel>Adres:</DetailLabel>
+                <DetailValue>{selectedLocation.address}</DetailValue>
               </DetailItem>
             )}
             
