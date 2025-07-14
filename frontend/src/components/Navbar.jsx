@@ -52,7 +52,9 @@ const Logo = styled(Link)`
   }
 `;
 
-const NavLinks = styled.div`
+const NavLinks = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['isOpen', 'theme', 'layout'].includes(prop)
+})`
   display: flex;
   align-items: ${props => props.layout === 'classic' ? 'stretch' : 'center'};
   flex-direction: ${props => props.layout === 'classic' ? 'column' : 'row'};
@@ -213,7 +215,9 @@ const UserMenu = styled.div`
   }
 `;
 
-const UserDropdown = styled.div`
+const UserDropdown = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['isOpen', 'theme'].includes(prop)
+})`
   position: absolute;
   top: 100%;
   right: 0;
@@ -361,7 +365,7 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications?limit=5`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications?limit=5`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

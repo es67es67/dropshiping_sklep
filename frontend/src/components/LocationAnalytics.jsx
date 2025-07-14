@@ -18,7 +18,7 @@ const LocationAnalytics = ({ locationId }) => {
   const loadAnalytics = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/locations/${locationId}/analytics?period=${period}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/locations/${locationId}/analytics?period=${period}`);
       const data = await response.json();
       
       if (response.ok) {
@@ -35,7 +35,7 @@ const LocationAnalytics = ({ locationId }) => {
 
   const exportAnalytics = async (format = 'json') => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/locations/${locationId}/export?format=${format}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/locations/${locationId}/export?format=${format}`);
       const data = await response.json();
       
       if (response.ok) {

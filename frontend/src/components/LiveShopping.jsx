@@ -364,7 +364,7 @@ export default function LiveShopping() {
   const fetchShopData = async () => {
     try {
       setLoading(true);
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/shops/${shopId}`, {
@@ -394,7 +394,7 @@ export default function LiveShopping() {
 
   const fetchProducts = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/products/shop/${shopId}`, {
@@ -415,7 +415,7 @@ export default function LiveShopping() {
 
   const startStream = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/shops/${shopId}/live/start`, {
@@ -447,7 +447,7 @@ export default function LiveShopping() {
     if (!currentStream) return;
     
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/shops/${shopId}/live/${currentStream._id}/end`, {

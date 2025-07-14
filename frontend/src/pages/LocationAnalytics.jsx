@@ -193,7 +193,7 @@ export default function LocationAnalytics() {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const response = await fetch(`${apiUrl}/api/locations/analytics`);
       if (!response.ok) {
         throw new Error('Błąd podczas pobierania danych analitycznych');

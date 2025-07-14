@@ -27,6 +27,7 @@
     "vite": "^7.0.4"
   },
   "scripts": {
+    "dev": "vite",
     "start": "vite",
     "build": "vite build --mode production",
     "preview": "vite preview"

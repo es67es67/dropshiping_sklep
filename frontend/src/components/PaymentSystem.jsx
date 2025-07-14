@@ -336,7 +336,7 @@ export default function PaymentSystem() {
       setLoading(true);
       setError(null);
       
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/payments/history`, {
@@ -438,7 +438,7 @@ export default function PaymentSystem() {
     setError(null);
     
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const paymentData = {

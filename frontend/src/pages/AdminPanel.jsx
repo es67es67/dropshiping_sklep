@@ -434,7 +434,7 @@ const AdminPanel = () => {
       setLoading(true);
       setError(null);
       
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/admin/dashboard`, {
@@ -473,7 +473,7 @@ const AdminPanel = () => {
       setLoading(true);
       setError(null);
       
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/admin/users`, {
@@ -533,7 +533,7 @@ const AdminPanel = () => {
       setLoading(true);
       setError(null);
       
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/admin/settings`, {
@@ -560,7 +560,7 @@ const AdminPanel = () => {
 
   const updateSystemSetting = async (key, value) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/admin/settings`, {

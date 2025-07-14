@@ -100,7 +100,7 @@ const DataManager = () => {
     setLoading(true);
     setError(null);
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const response = await fetch(`${apiUrl}/api/admin/${collection}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -117,7 +117,7 @@ const DataManager = () => {
 
   const fetchStats = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const response = await fetch(`${apiUrl}/api/admin/stats`);
       if (response.ok) {
         const result = await response.json();
@@ -130,7 +130,7 @@ const DataManager = () => {
 
   const handleEdit = async (item) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const response = await fetch(`${apiUrl}/api/admin/${selectedCollection}/${item._id}`, {
         method: 'PUT',
         headers: {
@@ -152,7 +152,7 @@ const DataManager = () => {
 
   const handleDelete = async (item) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const response = await fetch(`${apiUrl}/api/admin/${selectedCollection}/${item._id}`, {
         method: 'DELETE',
       });
@@ -170,7 +170,7 @@ const DataManager = () => {
 
   const handleAdd = async (item) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const response = await fetch(`${apiUrl}/api/admin/${selectedCollection}`, {
         method: 'POST',
         headers: {

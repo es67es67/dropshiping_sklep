@@ -54,7 +54,7 @@ const LocationSearch = ({ onLocationSelect, onClose }) => {
       if (maxPopulation) params.append('maxPopulation', maxPopulation);
       if (hasCoordinates) params.append('hasCoordinates', 'true');
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/locations/search/advanced?${params}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/locations/search/advanced?${params}`);
       const data = await response.json();
 
       if (response.ok) {

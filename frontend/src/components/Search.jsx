@@ -613,7 +613,7 @@ export default function Search() {
 
   const fetchSuggestions = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/search/suggestions?q=${encodeURIComponent(searchTerm)}`, {
@@ -642,7 +642,7 @@ export default function Search() {
     saveSearchHistory(searchTerm);
     
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const params = new URLSearchParams({

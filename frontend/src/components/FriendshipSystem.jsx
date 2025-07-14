@@ -228,7 +228,7 @@ const FriendshipSystem = ({ userId }) => {
   const loadFriendshipData = async () => {
     setLoading(true);
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
 
       const [friendsRes, pendingRes, sentRes, blockedRes, suggestionsRes, statsRes] = await Promise.all([
@@ -291,7 +291,7 @@ const FriendshipSystem = ({ userId }) => {
 
   const handleSendRequest = async (recipientId, message = '') => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
 
       const response = await fetch(`${apiUrl}/api/friendships/send-request`, {
@@ -318,7 +318,7 @@ const FriendshipSystem = ({ userId }) => {
 
   const handleAcceptRequest = async (friendshipId) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
 
       const response = await fetch(`${apiUrl}/api/friendships/accept/${friendshipId}`, {
@@ -341,7 +341,7 @@ const FriendshipSystem = ({ userId }) => {
 
   const handleRejectRequest = async (friendshipId) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
 
       const response = await fetch(`${apiUrl}/api/friendships/reject/${friendshipId}`, {
@@ -370,7 +370,7 @@ const FriendshipSystem = ({ userId }) => {
     if (!confirm('Czy na pewno chcesz usunąć tego znajomego?')) return;
 
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
 
       const response = await fetch(`${apiUrl}/api/friendships/remove/${friendshipId}`, {
@@ -393,7 +393,7 @@ const FriendshipSystem = ({ userId }) => {
 
   const handleBlockUser = async (userId) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
 
       const response = await fetch(`${apiUrl}/api/friendships/block/${userId}`, {

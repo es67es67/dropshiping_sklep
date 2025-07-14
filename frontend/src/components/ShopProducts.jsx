@@ -262,7 +262,7 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
 
   const fetchShopDetails = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/shops/${shopId}`, {
@@ -283,7 +283,7 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
 
   const fetchProducts = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/products/shop/${shopId}`, {
@@ -316,7 +316,7 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
     e.preventDefault();
     
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const productData = {
@@ -375,7 +375,7 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
     if (!window.confirm('Czy na pewno chcesz usunąć ten produkt?')) return;
     
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/products/${productId}`, {

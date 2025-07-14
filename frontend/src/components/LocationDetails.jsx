@@ -237,7 +237,7 @@ export default function LocationDetails({ location, onClose, theme }) {
     setError(null);
     
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       // Pobierz dane lokalizacji

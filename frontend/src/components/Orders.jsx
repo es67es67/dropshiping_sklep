@@ -19,8 +19,8 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       const url = filter === 'all' 
-        ? `${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/orders/my-orders`
-        : `${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/orders/my-orders?status=${filter}`;
+        ? `${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/orders/my-orders`
+        : `${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/orders/my-orders?status=${filter}`;
       
       const response = await fetch(url, {
         headers: {
@@ -41,7 +41,7 @@ const Orders = () => {
 
   const getOrderDetails = async (orderId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/orders/${orderId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/orders/${orderId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -61,7 +61,7 @@ const Orders = () => {
     if (!window.confirm('Czy na pewno chcesz anulować to zamówienie?')) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/orders/${orderId}/cancel`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/orders/${orderId}/cancel`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ const Orders = () => {
 
   const generateInvoice = async (orderId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/orders/${orderId}/invoice`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/orders/${orderId}/invoice`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

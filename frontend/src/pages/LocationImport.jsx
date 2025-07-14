@@ -477,7 +477,7 @@ export default function LocationImport() {
       setLoading(true);
       setError(null);
       
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/locations/import/history`, {
@@ -640,7 +640,7 @@ export default function LocationImport() {
       formData.append('file', selectedFile);
       formData.append('options', JSON.stringify(options));
 
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/locations/import`, {

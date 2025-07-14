@@ -35,7 +35,7 @@ const Chat = () => {
 
   const fetchConversations = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/conversations`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/conversations`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -59,7 +59,7 @@ const Chat = () => {
 
   const fetchMessages = async (conversationId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/conversations/${conversationId}/messages`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/conversations/${conversationId}/messages`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -79,7 +79,7 @@ const Chat = () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/conversations/${selectedConversation._id}/messages`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/conversations/${selectedConversation._id}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ const Chat = () => {
     formData.append('messageType', 'file');
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/conversations/${selectedConversation._id}/messages`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/conversations/${selectedConversation._id}/messages`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -137,7 +137,7 @@ const Chat = () => {
 
   const createNewConversation = async (recipientId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/conversations`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/conversations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

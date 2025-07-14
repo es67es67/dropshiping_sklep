@@ -132,7 +132,7 @@ const ProductRecommendations = ({ userId, productId = null, limit = 8 }) => {
 
     setLoading(true);
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
 
       let endpoint = `/api/recommendations?type=${algorithm}&limit=${limit}`;
@@ -181,7 +181,7 @@ const ProductRecommendations = ({ userId, productId = null, limit = 8 }) => {
 
   const handleRecommendationClick = async (productId, recommendationType) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
 
       await fetch(`${apiUrl}/api/recommendations/track-click`, {

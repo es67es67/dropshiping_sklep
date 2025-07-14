@@ -273,7 +273,7 @@ export default function Home() {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const [shopsRes, productsRes, usersRes] = await Promise.allSettled([

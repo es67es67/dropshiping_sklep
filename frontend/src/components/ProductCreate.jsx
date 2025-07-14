@@ -448,7 +448,7 @@ export default function ProductCreate() {
   const fetchUserShops = async () => {
     try {
       setLoadingShops(true);
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/shops/user`, {
@@ -552,7 +552,7 @@ export default function ProductCreate() {
     setIsSubmitting(true);
     
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
       const productData = {

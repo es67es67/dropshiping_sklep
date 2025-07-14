@@ -250,7 +250,7 @@ const LoyaltySystem = ({ userId }) => {
   const loadLoyaltyData = async () => {
     setLoading(true);
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
 
       const [loyaltyRes, rewardsRes, historyRes] = await Promise.all([
@@ -288,7 +288,7 @@ const LoyaltySystem = ({ userId }) => {
 
   const redeemReward = async (rewardId) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
 
       const response = await fetch(`${apiUrl}/api/loyalty/redeem`, {
@@ -316,7 +316,7 @@ const LoyaltySystem = ({ userId }) => {
 
   const checkBadges = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
 
       const response = await fetch(`${apiUrl}/api/loyalty/check-badges`, {

@@ -18,7 +18,7 @@ const Cart = () => {
 
   const fetchCart = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -37,7 +37,7 @@ const Cart = () => {
 
   const updateQuantity = async (itemId, quantity) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/update`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +56,7 @@ const Cart = () => {
 
   const removeItem = async (itemId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/remove/${itemId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/remove/${itemId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -75,7 +75,7 @@ const Cart = () => {
     if (!couponCode.trim()) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/coupon`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/coupon`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ const Cart = () => {
 
   const updateShipping = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/shipping`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/shipping`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ const Cart = () => {
     if (!window.confirm('Czy na pewno chcesz wyczyścić koszyk?')) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/clear`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/clear`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

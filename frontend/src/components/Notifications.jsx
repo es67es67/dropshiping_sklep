@@ -23,8 +23,8 @@ const Notifications = () => {
   const fetchNotifications = async () => {
     try {
       const url = filter === 'all' 
-        ? `${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications`
-        : `${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications?type=${filter}`;
+        ? `${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications`
+        : `${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications?type=${filter}`;
       
       const response = await fetch(url, {
         headers: {
@@ -45,7 +45,7 @@ const Notifications = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/${notificationId}/read`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -64,7 +64,7 @@ const Notifications = () => {
 
   const markAllAsRead = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/read-all`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/read-all`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -81,7 +81,7 @@ const Notifications = () => {
 
   const deleteNotification = async (notificationId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/${notificationId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/${notificationId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -98,7 +98,7 @@ const Notifications = () => {
 
   const archiveNotification = async (notificationId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/${notificationId}/archive`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/${notificationId}/archive`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -117,7 +117,7 @@ const Notifications = () => {
 
   const updateSettings = async (newSettings) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/settings`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

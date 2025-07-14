@@ -192,7 +192,7 @@ export default function Voivodeships() {
     try {
       setLoading(true);
       setError(null);
-      const apiUrl = process.env.REACT_APP_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const response = await fetch(`${apiUrl}/api/locations/voivodeships`);
       
       if (!response.ok) {

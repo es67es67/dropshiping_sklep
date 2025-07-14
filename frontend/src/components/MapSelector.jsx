@@ -147,7 +147,7 @@ export default function MapSelector({
     } else if (!window.google) {
       // Fallback - załaduj Google Maps API dynamicznie
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY || 'AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg'}&libraries=places&async=true&defer=true`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg'}&libraries=places&async=true&defer=true`;
       script.async = true;
       script.defer = true;
       script.onload = () => {

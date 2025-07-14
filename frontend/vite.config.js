@@ -27,7 +27,7 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      input: 'src/index.jsx',
+      // Usuwam input - Vite automatycznie znajdzie index.html
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
