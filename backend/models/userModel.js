@@ -35,6 +35,9 @@ const userSchema = new mongoose.Schema({
   blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   subscribedLocations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Location' }],
   
+  // Sklepy użytkownika
+  shops: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Shop' }],
+  
   // Gamifikacja
   points: { type: Number, default: 0 },
   level: { type: Number, default: 1 },

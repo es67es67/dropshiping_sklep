@@ -51,6 +51,16 @@ exports.createShop = async (req, res) => {
       }
     }
     
+    // Przetwórz paymentMethods - jeśli to tablica stringów, przekonwertuj na obiekty
+    let processedPaymentMethods = paymentMethods;
+    if (Array.isArray(paymentMethods)) {
+      processedPaymentMethods = paymentMethods.map(method => ({
+        name: method,
+        description: `Metoda płatności: ${method}`,
+        enabled: true
+      }));
+    }
+
     const shop = new Shop({ 
       name, 
       description, 
@@ -64,7 +74,7 @@ exports.createShop = async (req, res) => {
       categories,
       tags,
       openingHours,
-      paymentMethods,
+      paymentMethods: processedPaymentMethods,
       deliveryOptions
     });
     
@@ -93,7 +103,7 @@ exports.getUserShops = async (req, res) => {
       .populate('owner', 'username firstName lastName avatar')
       .populate('location', 'name')
       .sort({ createdAt: -1 });
-    res.json(shops);
+    res.json(shops); // Zwracaj czystą tablicę sklepów
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -175,6 +185,15 @@ exports.updateShop = async (req, res) => {
         // Jeśli nie można utworzyć/znaleźć lokalizacji, usuń pole location
         delete updateFields.location;
       }
+    }
+    
+    // Przetwórz paymentMethods - jeśli to tablica stringów, przekonwertuj na obiekty
+    if (updateFields.paymentMethods && Array.isArray(updateFields.paymentMethods)) {
+      updateFields.paymentMethods = updateFields.paymentMethods.map(method => ({
+        name: method,
+        description: `Metoda płatności: ${method}`,
+        enabled: true
+      }));
     }
     
     Object.keys(updateFields).forEach(key => {

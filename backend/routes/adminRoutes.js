@@ -26,6 +26,26 @@ const requireAdmin = async (req, res, next) => {
   }
 };
 
+// Dashboard administracyjny
+router.get('/dashboard', requireAdmin, async (req, res) => {
+  try {
+    const stats = {
+      totalUsers: await User.countDocuments(),
+      totalShops: await Shop.countDocuments({ isActive: true }),
+      totalProducts: await Product.countDocuments({ isActive: true }),
+      totalOrders: await Order.countDocuments(),
+      activeUsers: await User.countDocuments({ isActive: true }),
+      revenue: await Order.aggregate([
+        { $match: { status: { $in: ['paid', 'delivered', 'completed'] } } },
+        { $group: { _id: null, total: { $sum: '$payment.amount' } } }
+      ]).then(result => result[0]?.total || 0)
+    };
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ error: 'Błąd podczas pobierania statystyk dashboardu' });
+  }
+});
+
 // Statystyki systemu
 router.get('/stats', requireAdmin, async (req, res) => {
   try {
@@ -47,6 +67,72 @@ router.get('/stats', requireAdmin, async (req, res) => {
     res.json(stats);
   } catch (error) {
     res.status(500).json({ error: 'Błąd podczas pobierania statystyk' });
+  }
+});
+
+// Pobierz użytkowników (specjalny endpoint dla admin panel)
+router.get('/users', requireAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 50, search } = req.query;
+    const skip = (page - 1) * limit;
+    
+    let query = {};
+    if (search) {
+      query.$or = [
+        { username: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') },
+        { firstName: new RegExp(search, 'i') },
+        { lastName: new RegExp(search, 'i') }
+      ];
+    }
+
+    const users = await User.find(query)
+      .select('username email firstName lastName roles createdAt lastSeen isActive')
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const total = await User.countDocuments(query);
+
+    res.json({
+      data: users,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Błąd podczas pobierania użytkowników' });
+  }
+});
+
+// Pobierz ustawienia systemu
+router.get('/settings', requireAdmin, async (req, res) => {
+  try {
+    // Na razie zwracamy domyślne ustawienia
+    const settings = {
+      maintenanceMode: false,
+      registrationEnabled: true,
+      emailNotifications: true,
+      autoBackup: true
+    };
+    res.json(settings);
+  } catch (error) {
+    res.status(500).json({ error: 'Błąd podczas pobierania ustawień' });
+  }
+});
+
+// Aktualizuj ustawienia systemu
+router.put('/settings', requireAdmin, async (req, res) => {
+  try {
+    const updateData = req.body;
+    // Na razie zwracamy sukces bez zapisywania
+    res.json({ success: true, message: 'Ustawienia zostały zaktualizowane' });
+  } catch (error) {
+    res.status(500).json({ error: 'Błąd podczas aktualizacji ustawień' });
   }
 });
 

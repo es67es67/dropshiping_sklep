@@ -21,6 +21,7 @@ const recommendationRoutes = require('./routes/recommendationRoutes');
 const loyaltyRoutes = require('./routes/loyaltyRoutes');
 const abTestingRoutes = require('./routes/abTestingRoutes');
 const friendshipRoutes = require('./routes/friendshipRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -312,6 +313,7 @@ safeUse('/api/loyalty', loyaltyRoutes, 'loyaltyRoutes');
 safeUse('/api/ab-testing', abTestingRoutes, 'abTestingRoutes');
 safeUse('/api/friendships', friendshipRoutes, 'friendshipRoutes');
 safeUse('/api/company-profiles', require('./routes/companyProfileRoutes'), 'companyProfileRoutes');
+safeUse('/api/admin', adminRoutes, 'adminRoutes');
 
 // Middleware anty-XSS/NoSQL injection dla wyszukiwania produktów
 app.use('/api/products', (req, res, next) => {
