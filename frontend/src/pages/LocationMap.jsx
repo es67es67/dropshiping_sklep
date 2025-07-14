@@ -259,51 +259,46 @@ export default function LocationMap({ theme }) {
   }, []);
 
   const loadGoogleMapsAPI = () => {
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCwtl6-7ZwOqKa2rd967GHyp4JyCMgX2MI'}&libraries=places&async=true&defer=true`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      if (window.google && window.google.maps && !mapInstance.current) {
-        initMap();
-      }
-    };
-    script.onerror = () => {
-      setError('Nie udało się załadować Google Maps. Sprawdź połączenie z internetem.');
-    };
-    document.head.appendChild(script);
+    // Tymczasowo używamy prostego placeholder zamiast Google Maps
+    console.log('Ładowanie mapy...');
+    setTimeout(() => {
+      initMap();
+    }, 1000);
   };
 
   const initMap = () => {
     if (!mapRef.current) return;
 
     try {
-      const mapOptions = {
-        center: { lat: 52.2297, lng: 21.0122 }, // Warszawa
-        zoom: 6,
-        mapTypeId: window.google.maps.MapTypeId.ROADMAP,
-        styles: [
-          {
-            featureType: 'poi',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }]
-          }
-        ]
-      };
-
-      mapInstance.current = new window.google.maps.Map(mapRef.current, mapOptions);
-
-      // Dodaj marker
-      markerRef.current = new window.google.maps.Marker({
-        position: { lat: 52.2297, lng: 21.0122 },
-        map: mapInstance.current,
-        draggable: false,
-        title: 'Wybrana lokalizacja'
-      });
-
+      // Prosty placeholder mapy
+      mapRef.current.innerHTML = `
+        <div style="
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+          color: #666;
+          font-size: 1.2rem;
+          border-radius: 8px;
+        ">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div>
+          <div style="text-align: center;">
+            <div style="font-weight: bold; margin-bottom: 0.5rem;">Mapa Polski</div>
+            <div>Wybierz lokalizację z dropdownów poniżej</div>
+            <div style="margin-top: 1rem; font-size: 0.9rem; color: #888;">
+              Google Maps API: ${import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? '✅ Skonfigurowane' : '❌ Brak klucza'}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      console.log('Mapa zainicjalizowana (placeholder)');
     } catch (error) {
       console.error('Błąd inicjalizacji mapy:', error);
-      setError('Błąd inicjalizacji mapy Google Maps');
+      setError('Błąd inicjalizacji mapy');
     }
   };
 
@@ -374,19 +369,32 @@ export default function LocationMap({ theme }) {
 
       setSelectedLocation(locationData);
 
-      // Zaktualizuj mapę
-      if (mapInstance.current && locationData.coordinates) {
-        const position = {
-          lat: locationData.coordinates.lat,
-          lng: locationData.coordinates.lng
-        };
-
-        mapInstance.current.setCenter(position);
-        mapInstance.current.setZoom(type === 'miejscowość' ? 12 : type === 'gmina' ? 10 : type === 'powiat' ? 8 : 6);
-        
-        if (markerRef.current) {
-          markerRef.current.setPosition(position);
-        }
+      // Zaktualizuj placeholder mapy
+      if (mapRef.current) {
+        mapRef.current.innerHTML = `
+          <div style="
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e8f4fd 0%, #d1e7dd 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #333;
+            font-size: 1.2rem;
+            border-radius: 8px;
+          ">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📍</div>
+            <div style="text-align: center;">
+              <div style="font-weight: bold; margin-bottom: 0.5rem; color: #0066cc;">${name}</div>
+              <div style="margin-bottom: 0.5rem;">Typ: ${type}</div>
+              <div style="margin-bottom: 0.5rem;">Kod: ${code}</div>
+              <div style="font-size: 0.9rem; color: #666;">
+                Lokalizacja wybrana pomyślnie!
+              </div>
+            </div>
+          </div>
+        `;
       }
 
     } catch (error) {
