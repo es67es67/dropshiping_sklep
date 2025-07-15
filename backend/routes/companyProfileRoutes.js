@@ -3,18 +3,19 @@ const router = express.Router();
 const companyProfileController = require('../controllers/companyProfileController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// Wszystkie routes wymagają autoryzacji
-router.use(authMiddleware.authenticateToken);
-
-// Podstawowe operacje CRUD
-router.post('/', companyProfileController.createCompanyProfile);
-router.get('/my', companyProfileController.getMyCompanyProfile);
+// Publiczne trasy (bez autoryzacji) - tylko do odczytu
 router.get('/list', companyProfileController.getCompanyProfiles);
 router.get('/search', companyProfileController.searchCompanies);
+router.get('/search/teryt', companyProfileController.searchCompaniesByTeryt);
+router.get('/radius', companyProfileController.getCompaniesInRadius);
 router.get('/stats/industry', companyProfileController.getIndustryStats);
 
-// Operacje na konkretnym profilu
-router.get('/:id', companyProfileController.getCompanyProfile);
+// Trasy wymagające autoryzacji
+router.use(authMiddleware.authenticateToken);
+
+// Podstawowe operacje CRUD (wymagają autoryzacji)
+router.post('/', companyProfileController.createCompanyProfile);
+router.get('/my', companyProfileController.getMyCompanyProfile);
 router.put('/:id', companyProfileController.updateCompanyProfile);
 router.delete('/:id', companyProfileController.deleteCompanyProfile);
 
@@ -30,5 +31,8 @@ router.post('/:id/jobs/:jobId/apply', companyProfileController.applyForJob);
 
 // Recenzje firm
 router.post('/:id/reviews', companyProfileController.addCompanyReview);
+
+// Publiczny endpoint na samym końcu, aby nie łapał /list, /search itd.
+router.get('/:id', companyProfileController.getCompanyProfile);
 
 module.exports = router; 

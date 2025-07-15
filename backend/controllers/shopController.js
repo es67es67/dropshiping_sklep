@@ -558,3 +558,312 @@ exports.getShopStats = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Pobieranie wszystkich sklepów z filtrowaniem
+exports.getShops = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 12,
+      category,
+      search,
+      city,
+      voivodeship,
+      isActive,
+      isVerified,
+      // Nowe parametry dla kodów TERYT
+      tercCode,
+      simcCode,
+      ulicCode,
+      fullCode,
+      voivodeshipCode,
+      countyCode,
+      municipalityCode
+    } = req.query;
+
+    const skip = (page - 1) * limit;
+    
+    // Buduj query
+    let query = {};
+    
+    if (category) {
+      query.category = category;
+    }
+    
+    if (search) {
+      query.$text = { $search: search };
+    }
+    
+    if (city) {
+      query['address.city'] = new RegExp(city, 'i');
+    }
+    
+    if (voivodeship) {
+      query['address.voivodeship'] = new RegExp(voivodeship, 'i');
+    }
+    
+    if (isActive !== undefined) {
+      query.isActive = isActive === 'true';
+    }
+    
+    if (isVerified !== undefined) {
+      query.isVerified = isVerified === 'true';
+    }
+
+    // Nowe filtry dla kodów TERYT
+    if (tercCode) {
+      query['teryt.tercCode'] = tercCode;
+    }
+    
+    if (simcCode) {
+      query['teryt.simcCode'] = simcCode;
+    }
+    
+    if (ulicCode) {
+      query['teryt.ulicCode'] = ulicCode;
+    }
+    
+    if (fullCode) {
+      query['teryt.fullCode'] = fullCode;
+    }
+    
+    if (voivodeshipCode) {
+      query['teryt.voivodeshipCode'] = voivodeshipCode;
+    }
+    
+    if (countyCode) {
+      query['teryt.countyCode'] = countyCode;
+    }
+    
+    if (municipalityCode) {
+      query['teryt.municipalityCode'] = municipalityCode;
+    }
+    
+    const shops = await Shop.find(query)
+      .populate('owner', 'username firstName lastName avatar')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Shop.countDocuments(query);
+    
+    res.json({
+      shops,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobieranie pojedynczego sklepu
+exports.getShop = async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.params.id)
+      .populate('owner', 'username firstName lastName avatar')
+      .populate('followers', 'username firstName lastName avatar');
+    
+    if (!shop) {
+      return res.status(404).json({ error: 'Sklep nie został znaleziony' });
+    }
+    
+    // Zwiększ licznik wyświetleń
+    shop.stats.totalViews += 1;
+    await shop.save();
+    
+    res.json(shop);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Tworzenie nowego sklepu
+exports.createShop = async (req, res) => {
+  try {
+    const shop = new Shop({
+      ...req.body,
+      owner: req.userId
+    });
+    
+    await shop.save();
+    
+    const populatedShop = await Shop.findById(shop._id)
+      .populate('owner', 'username firstName lastName avatar');
+    
+    res.status(201).json(populatedShop);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Aktualizacja sklepu
+exports.updateShop = async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.params.id);
+    
+    if (!shop) {
+      return res.status(404).json({ error: 'Sklep nie został znaleziony' });
+    }
+    
+    if (shop.owner.toString() !== req.userId) {
+      return res.status(403).json({ error: 'Brak uprawnień do edycji tego sklepu' });
+    }
+    
+    const updatedShop = await Shop.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    ).populate('owner', 'username firstName lastName avatar');
+    
+    res.json(updatedShop);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Usuwanie sklepu
+exports.deleteShop = async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.params.id);
+    
+    if (!shop) {
+      return res.status(404).json({ error: 'Sklep nie został znaleziony' });
+    }
+    
+    if (shop.owner.toString() !== req.userId) {
+      return res.status(403).json({ error: 'Brak uprawnień do usunięcia tego sklepu' });
+    }
+    
+    await Shop.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Sklep został usunięty' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Wyszukiwanie sklepów po kodach TERYT
+exports.searchShopsByTeryt = async (req, res) => {
+  try {
+    const {
+      tercCode,
+      simcCode,
+      ulicCode,
+      fullCode,
+      voivodeshipCode,
+      countyCode,
+      municipalityCode,
+      page = 1,
+      limit = 12
+    } = req.query;
+
+    const skip = (page - 1) * limit;
+    
+    let query = {};
+    
+    // Buduj query na podstawie dostępnych kodów
+    if (fullCode) {
+      query['teryt.fullCode'] = fullCode;
+    } else {
+      if (tercCode) query['teryt.tercCode'] = tercCode;
+      if (simcCode) query['teryt.simcCode'] = simcCode;
+      if (ulicCode) query['teryt.ulicCode'] = ulicCode;
+      if (voivodeshipCode) query['teryt.voivodeshipCode'] = voivodeshipCode;
+      if (countyCode) query['teryt.countyCode'] = countyCode;
+      if (municipalityCode) query['teryt.municipalityCode'] = municipalityCode;
+    }
+    
+    // Sprawdź czy są jakieś filtry TERYT
+    if (Object.keys(query).length === 0) {
+      return res.status(400).json({ 
+        error: 'Musisz podać przynajmniej jeden kod TERYT do wyszukiwania' 
+      });
+    }
+    
+    const shops = await Shop.find(query)
+      .populate('owner', 'username firstName lastName avatar')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Shop.countDocuments(query);
+    
+    res.json({
+      shops,
+      searchCriteria: {
+        tercCode,
+        simcCode,
+        ulicCode,
+        fullCode,
+        voivodeshipCode,
+        countyCode,
+        municipalityCode
+      },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobieranie sklepów w promieniu (na podstawie kodów TERYT)
+exports.getShopsInRadius = async (req, res) => {
+  try {
+    const {
+      tercCode,
+      radius = 10, // km
+      page = 1,
+      limit = 12
+    } = req.query;
+
+    const skip = (page - 1) * limit;
+    
+    if (!tercCode) {
+      return res.status(400).json({ 
+        error: 'Kod TERC jest wymagany do wyszukiwania w promieniu' 
+      });
+    }
+    
+    // Znajdź sklepy z podobnym kodem TERC (w tym samym województwie/powiecie)
+    const tercPrefix = tercCode.substring(0, 4); // Pierwsze 4 cyfry (województwo + powiat)
+    
+    let query = {
+      'teryt.tercCode': { $regex: `^${tercPrefix}` }
+    };
+    
+    const shops = await Shop.find(query)
+      .populate('owner', 'username firstName lastName avatar')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Shop.countDocuments(query);
+    
+    res.json({
+      shops,
+      searchCriteria: {
+        tercCode,
+        radius: parseInt(radius),
+        tercPrefix
+      },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

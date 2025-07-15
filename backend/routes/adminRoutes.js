@@ -14,6 +14,7 @@ const Achievement = require('../models/achievementModel');
 const Badge = require('../models/badgeModel');
 const Payment = require('../models/paymentModel');
 const Order = require('../models/orderModel');
+const CompanyProfile = require('../models/companyProfileModel');
 
 // Middleware do sprawdzania uprawnień admina
 const requireAdmin = async (req, res, next) => {
@@ -53,6 +54,7 @@ router.get('/stats', requireAdmin, async (req, res) => {
       users: await User.countDocuments(),
       locations: await Location.countDocuments(),
       shops: await Shop.countDocuments(),
+      companies: await CompanyProfile.countDocuments(),
       products: await Product.countDocuments(),
       posts: await Post.countDocuments(),
       messages: await Message.countDocuments(),
@@ -147,6 +149,8 @@ router.get('/:collection', requireAdmin, async (req, res) => {
       case 'users': Model = User; break;
       case 'locations': Model = Location; break;
       case 'shops': Model = Shop; break;
+      case 'companies': Model = CompanyProfile; break;
+      case 'company-profiles': Model = CompanyProfile; break;
       case 'products': Model = Product; break;
       case 'posts': Model = Post; break;
       case 'messages': Model = Message; break;
@@ -208,6 +212,8 @@ router.put('/:collection/:id', requireAdmin, async (req, res) => {
       case 'users': Model = User; break;
       case 'locations': Model = Location; break;
       case 'shops': Model = Shop; break;
+      case 'companies': Model = CompanyProfile; break;
+      case 'company-profiles': Model = CompanyProfile; break;
       case 'products': Model = Product; break;
       case 'posts': Model = Post; break;
       case 'messages': Model = Message; break;
@@ -243,6 +249,8 @@ router.delete('/:collection/:id', requireAdmin, async (req, res) => {
       case 'users': Model = User; break;
       case 'locations': Model = Location; break;
       case 'shops': Model = Shop; break;
+      case 'companies': Model = CompanyProfile; break;
+      case 'company-profiles': Model = CompanyProfile; break;
       case 'products': Model = Product; break;
       case 'posts': Model = Post; break;
       case 'messages': Model = Message; break;
@@ -279,6 +287,8 @@ router.post('/:collection', requireAdmin, async (req, res) => {
       case 'users': Model = User; break;
       case 'locations': Model = Location; break;
       case 'shops': Model = Shop; break;
+      case 'companies': Model = CompanyProfile; break;
+      case 'company-profiles': Model = CompanyProfile; break;
       case 'products': Model = Product; break;
       case 'posts': Model = Post; break;
       case 'messages': Model = Message; break;
@@ -320,6 +330,8 @@ router.post('/export', requireAdmin, async (req, res) => {
         case 'users': Model = User; break;
         case 'locations': Model = Location; break;
         case 'shops': Model = Shop; break;
+        case 'companies': Model = CompanyProfile; break;
+        case 'company-profiles': Model = CompanyProfile; break;
         case 'products': Model = Product; break;
         case 'posts': Model = Post; break;
         case 'messages': Model = Message; break;

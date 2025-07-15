@@ -159,7 +159,22 @@ exports.deleteCompanyProfile = async (req, res) => {
 // Lista profili firm
 exports.getCompanyProfiles = async (req, res) => {
   try {
-    const { page = 1, limit = 10, industry, companyType, city, search } = req.query;
+    const { 
+      page = 1, 
+      limit = 10, 
+      industry, 
+      companyType, 
+      city, 
+      search,
+      // Nowe parametry dla kodów TERYT
+      tercCode,
+      simcCode,
+      ulicCode,
+      fullCode,
+      voivodeshipCode,
+      countyCode,
+      municipalityCode
+    } = req.query;
     const skip = (page - 1) * limit;
 
     let query = { isActive: true, status: 'active' };
@@ -170,6 +185,35 @@ exports.getCompanyProfiles = async (req, res) => {
     if (city) query['address.city'] = new RegExp(city, 'i');
     if (search) {
       query.$text = { $search: search };
+    }
+
+    // Nowe filtry dla kodów TERYT
+    if (tercCode) {
+      query['teryt.tercCode'] = tercCode;
+    }
+    
+    if (simcCode) {
+      query['teryt.simcCode'] = simcCode;
+    }
+    
+    if (ulicCode) {
+      query['teryt.ulicCode'] = ulicCode;
+    }
+    
+    if (fullCode) {
+      query['teryt.fullCode'] = fullCode;
+    }
+    
+    if (voivodeshipCode) {
+      query['teryt.voivodeshipCode'] = voivodeshipCode;
+    }
+    
+    if (countyCode) {
+      query['teryt.countyCode'] = countyCode;
+    }
+    
+    if (municipalityCode) {
+      query['teryt.municipalityCode'] = municipalityCode;
     }
 
     const companyProfiles = await CompanyProfile.find(query)
@@ -438,6 +482,129 @@ exports.searchCompanies = async (req, res) => {
       currentPage: parseInt(page),
       totalPages: Math.ceil(total / limit),
       totalCompanies: total
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}; 
+
+// Wyszukiwanie firm po kodach TERYT
+exports.searchCompaniesByTeryt = async (req, res) => {
+  try {
+    const {
+      tercCode,
+      simcCode,
+      ulicCode,
+      fullCode,
+      voivodeshipCode,
+      countyCode,
+      municipalityCode,
+      page = 1,
+      limit = 10
+    } = req.query;
+
+    const skip = (page - 1) * limit;
+    
+    let query = { isActive: true, status: 'active' };
+    
+    // Buduj query na podstawie dostępnych kodów
+    if (fullCode) {
+      query['teryt.fullCode'] = fullCode;
+    } else {
+      if (tercCode) query['teryt.tercCode'] = tercCode;
+      if (simcCode) query['teryt.simcCode'] = simcCode;
+      if (ulicCode) query['teryt.ulicCode'] = ulicCode;
+      if (voivodeshipCode) query['teryt.voivodeshipCode'] = voivodeshipCode;
+      if (countyCode) query['teryt.countyCode'] = countyCode;
+      if (municipalityCode) query['teryt.municipalityCode'] = municipalityCode;
+    }
+    
+    // Sprawdź czy są jakieś filtry TERYT
+    if (Object.keys(query).length === 2) { // Tylko isActive i status
+      return res.status(400).json({ 
+        error: 'Musisz podać przynajmniej jeden kod TERYT do wyszukiwania' 
+      });
+    }
+    
+    const companies = await CompanyProfile.find(query)
+      .populate('owner', 'username firstName lastName avatar')
+      .sort({ 'stats.followers': -1, createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await CompanyProfile.countDocuments(query);
+    
+    res.json({
+      companies,
+      searchCriteria: {
+        tercCode,
+        simcCode,
+        ulicCode,
+        fullCode,
+        voivodeshipCode,
+        countyCode,
+        municipalityCode
+      },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobieranie firm w promieniu (na podstawie kodów TERYT)
+exports.getCompaniesInRadius = async (req, res) => {
+  try {
+    const {
+      tercCode,
+      radius = 10, // km
+      page = 1,
+      limit = 10
+    } = req.query;
+
+    const skip = (page - 1) * limit;
+    
+    if (!tercCode) {
+      return res.status(400).json({ 
+        error: 'Kod TERC jest wymagany do wyszukiwania w promieniu' 
+      });
+    }
+    
+    // Znajdź firmy z podobnym kodem TERC (w tym samym województwie/powiecie)
+    const tercPrefix = tercCode.substring(0, 4); // Pierwsze 4 cyfry (województwo + powiat)
+    
+    let query = {
+      isActive: true,
+      status: 'active',
+      'teryt.tercCode': { $regex: `^${tercPrefix}` }
+    };
+    
+    const companies = await CompanyProfile.find(query)
+      .populate('owner', 'username firstName lastName avatar')
+      .sort({ 'stats.followers': -1, createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await CompanyProfile.countDocuments(query);
+    
+    res.json({
+      companies,
+      searchCriteria: {
+        tercCode,
+        radius: parseInt(radius),
+        tercPrefix
+      },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -46,6 +46,24 @@ const companyProfileSchema = new mongoose.Schema({
     country: { type: String, default: 'Polska' }
   },
   
+  // Kody TERYT (TERC, SIMC, ULIC) - nowe pola
+  teryt: {
+    // TERC - kod województwa (2 cyfry)
+    voivodeshipCode: { type: String, maxlength: 2 },
+    // TERC - kod powiatu (2 cyfry) 
+    countyCode: { type: String, maxlength: 4 },
+    // TERC - kod gminy (2 cyfry)
+    municipalityCode: { type: String, maxlength: 6 },
+    // Pełny kod TERC (województwo + powiat + gmina = 6 cyfr)
+    tercCode: { type: String, maxlength: 6 },
+    // SIMC - kod miejscowości (7 cyfr)
+    simcCode: { type: String, maxlength: 7 },
+    // ULIC - kod ulicy (5 cyfr)
+    ulicCode: { type: String, maxlength: 5 },
+    // Pełny kod adresu (TERC + SIMC + ULIC)
+    fullCode: { type: String, maxlength: 18 }
+  },
+  
   // Lokalizacja (koordynaty)
   location: {
     type: { type: String, default: 'Point' },
@@ -212,6 +230,18 @@ companyProfileSchema.index({ owner: 1 });
 companyProfileSchema.index({ 'address.city': 1 });
 companyProfileSchema.index({ companyType: 1 });
 
+// Dodaj indeksy dla kodów TERYT
+companyProfileSchema.index({ 'teryt.tercCode': 1 });
+companyProfileSchema.index({ 'teryt.simcCode': 1 });
+companyProfileSchema.index({ 'teryt.ulicCode': 1 });
+companyProfileSchema.index({ 'teryt.fullCode': 1 });
+companyProfileSchema.index({ 'teryt.voivodeshipCode': 1 });
+companyProfileSchema.index({ 'teryt.countyCode': 1 });
+companyProfileSchema.index({ 'teryt.municipalityCode': 1 });
+
+// Indeks tekstowy dla wyszukiwania
+companyProfileSchema.index({ name: 'text', description: 'text', 'address.city': 'text' });
+
 // Metoda do obliczania średniej oceny
 companyProfileSchema.methods.updateAverageRating = function() {
   if (this.reviews.length === 0) {
@@ -225,7 +255,19 @@ companyProfileSchema.methods.updateAverageRating = function() {
   return this.save();
 };
 
-// Hook przed zapisem - generuj slug
+// Metoda do generowania pełnego kodu TERYT
+companyProfileSchema.methods.generateFullTerytCode = function() {
+  if (this.teryt.tercCode && this.teryt.simcCode && this.teryt.ulicCode) {
+    this.teryt.fullCode = `${this.teryt.tercCode}${this.teryt.simcCode}${this.teryt.ulicCode}`;
+  } else if (this.teryt.tercCode && this.teryt.simcCode) {
+    this.teryt.fullCode = `${this.teryt.tercCode}${this.teryt.simcCode}`;
+  } else if (this.teryt.tercCode) {
+    this.teryt.fullCode = this.teryt.tercCode;
+  }
+  return this;
+};
+
+// Hook przed zapisem - generuj slug i pełny kod TERYT
 companyProfileSchema.pre('save', function(next) {
   if (this.isModified('name') && !this.seo.slug) {
     this.seo.slug = this.name
@@ -235,6 +277,12 @@ companyProfileSchema.pre('save', function(next) {
       .replace(/-+/g, '-')
       .trim('-');
   }
+  
+  // Generuj pełny kod TERYT jeśli są dostępne częściowe kody
+  if (this.isModified('teryt.tercCode') || this.isModified('teryt.simcCode') || this.isModified('teryt.ulicCode')) {
+    this.generateFullTerytCode();
+  }
+  
   next();
 });
 
