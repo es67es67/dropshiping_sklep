@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, required: true },
+  longDescription: { type: String }, // Dodane pole dla szczegółowego opisu
   price: { type: Number, required: true },
   originalPrice: { type: Number },
   currency: { type: String, default: 'PLN' },
@@ -11,6 +12,9 @@ const productSchema = new mongoose.Schema({
   brand: { type: String },
   sku: { type: String, unique: true },
   barcode: { type: String },
+  
+  // Specyfikacje techniczne
+  specifications: { type: Map, of: String }, // Dodane pole dla specyfikacji
   
   // Obrazy i multimedia
   images: [{ type: String }],

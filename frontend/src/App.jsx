@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { GlobalStyles, lightTheme, darkTheme } from './styles/GlobalStyles';
 import { AuthProvider } from './contexts/AuthContext';
@@ -10,6 +10,7 @@ import Register from './components/Register';
 import ProductList from './components/ProductList';
 import ShopList from './components/ShopList';
 import ShopDetails from './components/ShopDetails';
+import Cart from './components/Cart';
 import MessagingSystem from './components/MessagingSystem';
 import PaymentSystem from './components/PaymentSystem';
 import LocationSelector from './components/LocationSelector';
@@ -45,11 +46,12 @@ import TestShopsPage from './components/TestShopsPage';
 import TestComponent from './components/TestComponent';
 import LocationMap from './pages/LocationMap';
 import CompanyProfile from './pages/CompanyProfile';
-import Shop from './pages/Shop';
 import Product from './pages/Product';
 import User from './pages/User';
 import Post from './pages/Post';
 import AdvancedFeatures from './pages/AdvancedFeatures';
+import TerytFeatures from './pages/TerytFeatures';
+import ProductDetails from './components/ProductDetails';
 
 function App() {
   const [theme, setTheme] = useState('light');
@@ -59,8 +61,6 @@ function App() {
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
-    
-    // Pobierz ustawienia layoutu użytkownika
     fetchUserLayoutSettings();
   }, []);
 
@@ -68,14 +68,12 @@ function App() {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-
       const response = await fetch(`/api/users/layout-settings/portal`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-
       if (response.ok) {
         const settings = await response.json();
         console.log('Pobrane ustawienia:', settings);
@@ -93,7 +91,6 @@ function App() {
     localStorage.setItem('theme', newTheme);
   };
 
-  // Funkcja do tworzenia motywu na podstawie userTheme
   const createCustomTheme = (baseTheme, userThemeName) => {
     const themeVariants = {
       default: {
@@ -133,9 +130,7 @@ function App() {
         gradientHover: 'linear-gradient(135deg, #EA580C 0%, #BE185D 100%)'
       }
     };
-
     const variant = themeVariants[userThemeName] || themeVariants.default;
-    
     return {
       ...baseTheme,
       ...variant
@@ -150,16 +145,87 @@ function App() {
     fetchUserLayoutSettings();
   };
 
-  // Funkcja do renderowania layoutu
   const renderLayout = () => {
     const routes = (
       <Routes>
+        <Route path="/test-route" element={<div>TEST ROUTE DZIAŁA</div>} />
+        <Route path="/test-shop-page" element={
+          <div style={{ 
+            padding: '2rem', 
+            textAlign: 'center', 
+            fontFamily: 'Arial, sans-serif',
+            backgroundColor: '#f5f5f5',
+            minHeight: '100vh'
+          }}>
+            <h1 style={{ color: '#2196F3', fontSize: '2.5rem', marginBottom: '1rem' }}>
+              🧪 Testowa Strona Sklepu
+            </h1>
+            <div style={{ 
+              backgroundColor: 'white', 
+              padding: '2rem', 
+              borderRadius: '12px', 
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+              maxWidth: '600px',
+              margin: '0 auto'
+            }}>
+              <h2 style={{ color: '#4CAF50', marginBottom: '1rem' }}>
+                ✅ Jeśli widzisz tę stronę, routing działa poprawnie!
+              </h2>
+              <p style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>
+                To jest testowa strona, która potwierdza, że:
+              </p>
+              <ul style={{ textAlign: 'left', fontSize: '1rem', lineHeight: '1.6' }}>
+                <li>✅ React Router działa poprawnie</li>
+                <li>✅ Komponenty się renderują</li>
+                <li>✅ Stylowanie działa</li>
+                <li>✅ Routing dynamiczny powinien działać</li>
+              </ul>
+              <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#e3f2fd', borderRadius: '8px' }}>
+                <h3 style={{ color: '#1976d2', marginBottom: '0.5rem' }}>🔗 Testuj te linki:</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <a href="/shop/6875773831cf77c7af5e07b4" style={{ color: '#2196F3', textDecoration: 'none' }}>
+                    🏪 /shop/6875773831cf77c7af5e07b4 - Szczegóły sklepu (prawdziwy ID)
+                  </a>
+                  <a href="/company-profiles/6875773831cf77c7af5e07b4" style={{ color: '#2196F3', textDecoration: 'none' }}>
+                    🏢 /company-profiles/6875773831cf77c7af5e07b4 - Szczegóły firmy (prawdziwy ID)
+                  </a>
+                  <a href="/shop/1" style={{ color: '#2196F3', textDecoration: 'none' }}>
+                    🏪 /shop/1 - Szczegóły sklepu ID 1
+                  </a>
+                  <a href="/shops/1" style={{ color: '#2196F3', textDecoration: 'none' }}>
+                    🏪 /shops/1 - Przekierowanie do /shop/1
+                  </a>
+                  <a href="/test-route" style={{ color: '#2196F3', textDecoration: 'none' }}>
+                    🧪 /test-route - Prosty test
+                  </a>
+                </div>
+              </div>
+              <button 
+                onClick={() => alert('Testowy przycisk działa!')}
+                style={{
+                  marginTop: '1rem',
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: '#2196F3',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  cursor: 'pointer'
+                }}
+              >
+                🎯 Testowy Przycisk
+              </button>
+            </div>
+          </div>
+        } />
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/products" element={<ProductList />} />
         <Route path="/shops" element={<ShopList />} />
         <Route path="/shop/:shopId" element={<ShopDetails theme={currentTheme} />} />
+        <Route path="/shops/:id" element={<Navigate to={(location) => `/shop/${location.pathname.split('/').pop()}`} replace />} />
+        <Route path="/cart" element={<Cart />} />
         <Route path="/messages" element={<MessagingSystem />} />
         <Route path="/payment" element={<PaymentSystem />} />
         <Route path="/location" element={<LocationSelector />} />
@@ -175,7 +241,6 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/search" element={<Search />} />
         <Route path="/settings" element={<Settings />} />
-        
         {/* Lokalizacje */}
         <Route path="/country" element={<Country theme={currentTheme} />} />
         <Route path="/voivodeships" element={<Voivodeships theme={currentTheme} />} />
@@ -202,14 +267,14 @@ function App() {
         <Route path="/test" element={<TestComponent />} />
         <Route path="/location-map" element={<LocationMap theme={currentTheme} />} />
         <Route path="/company-profiles/:id" element={<CompanyProfile theme={currentTheme} />} />
-        <Route path="/shops/:id" element={<Shop theme={currentTheme} />} />
         <Route path="/products/:id" element={<Product theme={currentTheme} />} />
         <Route path="/users/:id" element={<User theme={currentTheme} />} />
         <Route path="/posts/:id" element={<Post theme={currentTheme} />} />
         <Route path="/advanced-features" element={<AdvancedFeatures theme={currentTheme} />} />
+        <Route path="/teryt-features" element={<TerytFeatures theme={currentTheme} />} />
+        <Route path="/product/:productId" element={<ProductDetails />} />
       </Routes>
     );
-
     switch (userLayout) {
       case 'classic':
         return (
@@ -232,7 +297,6 @@ function App() {
             </div>
           </div>
         );
-      
       case 'compact':
         return (
           <div style={{ 
@@ -246,7 +310,6 @@ function App() {
             </div>
           </div>
         );
-      
       default: // modern
         return (
           <div style={{ 
@@ -262,7 +325,6 @@ function App() {
         );
     }
   };
-
   return (
     <ThemeProvider theme={currentTheme}>
       <GlobalStyles />

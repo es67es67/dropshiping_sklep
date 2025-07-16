@@ -1116,6 +1116,297 @@ const getLocationByCoordinates = async (req, res) => {
   }
 };
 
+// Pobierz sklepy dla lokalizacji
+const getLocationShops = async (req, res) => {
+  try {
+    const { locationId } = req.params;
+    const { page = 1, limit = 20, search, category, sort = 'name' } = req.query;
+    
+    // Znajdź lokalizację
+    const location = await Location.findById(locationId);
+    if (!location) {
+      return res.status(404).json({ error: 'Lokalizacja nie znaleziona' });
+    }
+    
+    const Shop = require('../models/shopModel');
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    let query = { isActive: true };
+    
+    // Filtruj według lokalizacji
+    if (location.type === 'województwo') {
+      query['address.voivodeship'] = location.name;
+    } else if (location.type === 'powiat') {
+      query['address.county'] = location.name;
+    } else if (location.type === 'gmina') {
+      query['address.municipality'] = location.name;
+    } else if (location.type === 'miejscowość' || location.type === 'miasto') {
+      query['address.city'] = location.name;
+    }
+    
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { category: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (category) {
+      query.category = category;
+    }
+    
+    let sortQuery = {};
+    switch (sort) {
+      case 'name':
+        sortQuery.name = 1;
+        break;
+      case 'rating':
+        sortQuery['ratings.average'] = -1;
+        break;
+      case 'newest':
+        sortQuery.createdAt = -1;
+        break;
+      case 'oldest':
+        sortQuery.createdAt = 1;
+        break;
+      default:
+        sortQuery.name = 1;
+    }
+    
+    const shops = await Shop.find(query)
+      .populate('owner', 'username email')
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+    
+    const total = await Shop.countDocuments(query);
+    
+    res.json({
+      location: {
+        id: location._id,
+        name: location.name,
+        type: location.type,
+        code: location.code
+      },
+      shops,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Błąd pobierania sklepów dla lokalizacji:', error);
+    res.status(500).json({ error: 'Błąd serwera' });
+  }
+};
+
+// Pobierz firmy dla lokalizacji
+const getLocationCompanies = async (req, res) => {
+  try {
+    const { locationId } = req.params;
+    const { page = 1, limit = 20, search, industry, sort = 'name' } = req.query;
+    
+    // Znajdź lokalizację
+    const location = await Location.findById(locationId);
+    if (!location) {
+      return res.status(404).json({ error: 'Lokalizacja nie znaleziona' });
+    }
+    
+    const CompanyProfile = require('../models/companyProfileModel');
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    let query = { isActive: true };
+    
+    // Filtruj według lokalizacji
+    if (location.type === 'województwo') {
+      query['address.voivodeship'] = location.name;
+    } else if (location.type === 'powiat') {
+      query['address.county'] = location.name;
+    } else if (location.type === 'gmina') {
+      query['address.municipality'] = location.name;
+    } else if (location.type === 'miejscowość' || location.type === 'miasto') {
+      query['address.city'] = location.name;
+    }
+    
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { industry: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (industry) {
+      query.industry = industry;
+    }
+    
+    let sortQuery = {};
+    switch (sort) {
+      case 'name':
+        sortQuery.name = 1;
+        break;
+      case 'rating':
+        sortQuery['stats.averageRating'] = -1;
+        break;
+      case 'newest':
+        sortQuery.createdAt = -1;
+        break;
+      case 'oldest':
+        sortQuery.createdAt = 1;
+        break;
+      default:
+        sortQuery.name = 1;
+    }
+    
+    const companies = await CompanyProfile.find(query)
+      .populate('owner', 'username email')
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+    
+    const total = await CompanyProfile.countDocuments(query);
+    
+    res.json({
+      location: {
+        id: location._id,
+        name: location.name,
+        type: location.type,
+        code: location.code
+      },
+      companies,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Błąd pobierania firm dla lokalizacji:', error);
+    res.status(500).json({ error: 'Błąd serwera' });
+  }
+};
+
+// Pobierz statystyki lokalizacji (sklepy, firmy, produkty)
+const getLocationStats = async (req, res) => {
+  try {
+    const { locationId } = req.params;
+    
+    // Znajdź lokalizację
+    const location = await Location.findById(locationId);
+    if (!location) {
+      return res.status(404).json({ error: 'Lokalizacja nie znaleziona' });
+    }
+    
+    const Shop = require('../models/shopModel');
+    const CompanyProfile = require('../models/companyProfileModel');
+    const Product = require('../models/productModel');
+    
+    let locationQuery = {};
+    
+    // Filtruj według lokalizacji
+    if (location.type === 'województwo') {
+      locationQuery['address.voivodeship'] = location.name;
+    } else if (location.type === 'powiat') {
+      locationQuery['address.county'] = location.name;
+    } else if (location.type === 'gmina') {
+      locationQuery['address.municipality'] = location.name;
+    } else if (location.type === 'miejscowość' || location.type === 'miasto') {
+      locationQuery['address.city'] = location.name;
+    }
+    
+    // Pobierz statystyki sklepów
+    const shopsStats = await Shop.aggregate([
+      { $match: { ...locationQuery, isActive: true } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          verified: { $sum: { $cond: ['$isVerified', 1, 0] } },
+          avgRating: { $avg: '$ratings.average' },
+          totalProducts: { $sum: '$stats.totalProducts' },
+          totalSales: { $sum: '$stats.totalSales' }
+        }
+      }
+    ]);
+    
+    // Pobierz statystyki firm
+    const companiesStats = await CompanyProfile.aggregate([
+      { $match: { ...locationQuery, isActive: true } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          avgRating: { $avg: '$stats.averageRating' },
+          totalViews: { $sum: '$stats.profileViews' },
+          totalFollowers: { $sum: '$stats.followers' }
+        }
+      }
+    ]);
+    
+    // Pobierz statystyki produktów
+    const productsStats = await Product.aggregate([
+      { $match: { isActive: true } },
+      {
+        $lookup: {
+          from: 'shops',
+          localField: 'shop',
+          foreignField: '_id',
+          as: 'shopInfo'
+        }
+      },
+      { $unwind: '$shopInfo' },
+      { $match: { 'shopInfo.isActive': true, ...locationQuery } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          avgPrice: { $avg: '$price' },
+          totalStock: { $sum: '$stock' },
+          categories: { $addToSet: '$category' }
+        }
+      }
+    ]);
+    
+    // Pobierz top kategorie
+    const topCategories = await Shop.aggregate([
+      { $match: { ...locationQuery, isActive: true } },
+      { $unwind: '$categories' },
+      {
+        $group: {
+          _id: '$categories',
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 5 }
+    ]);
+    
+    res.json({
+      location: {
+        id: location._id,
+        name: location.name,
+        type: location.type,
+        code: location.code
+      },
+      stats: {
+        shops: shopsStats[0] || { total: 0, verified: 0, avgRating: 0, totalProducts: 0, totalSales: 0 },
+        companies: companiesStats[0] || { total: 0, avgRating: 0, totalViews: 0, totalFollowers: 0 },
+        products: productsStats[0] || { total: 0, avgPrice: 0, totalStock: 0, categories: [] },
+        topCategories
+      }
+    });
+  } catch (error) {
+    console.error('Błąd pobierania statystyk lokalizacji:', error);
+    res.status(500).json({ error: 'Błąd serwera' });
+  }
+};
+
 module.exports = {
   getLocation,
   getLocations,
@@ -1134,5 +1425,8 @@ module.exports = {
   getTownsForMunicipality,
   getLocationAnalytics,
   getAdministrativeBoundaries,
-  getLocationByCoordinates
+  getLocationByCoordinates,
+  getLocationShops,
+  getLocationCompanies,
+  getLocationStats
 }; 

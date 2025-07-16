@@ -286,42 +286,42 @@ export default function Voivodeships({ theme }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Przykładowe dane dla każdej kategorii
+  // Przykładowe dane dla każdej kategorii - używam prawdziwych ID z bazy
   const sampleData = {
     shops: [
-      { id: 1, name: 'Sklep Elektroniczny TechMax', location: 'Wrocław', rating: 4.8, products: 156, created: '2024-01-15' },
-      { id: 2, name: 'Butik Mody Elegance', location: 'Wrocław', rating: 4.6, products: 89, created: '2024-01-10' },
-      { id: 3, name: 'Sklep Sportowy ActiveLife', location: 'Wrocław', rating: 4.9, products: 234, created: '2024-01-08' },
-      { id: 4, name: 'Księgarnia Literacka', location: 'Wrocław', rating: 4.7, products: 567, created: '2024-01-12' },
-      { id: 5, name: 'Sklep Ogrodniczy Zielony', location: 'Wrocław', rating: 4.5, products: 123, created: '2024-01-05' }
+      { _id: '6875773831cf77c7af5e07b4', name: 'Sklep Elektroniczny TechMax', location: 'Wrocław', rating: 4.8, products: 156, created: '2024-01-15' },
+      { _id: '6875773831cf77c7af5e07b5', name: 'Butik Mody Elegance', location: 'Wrocław', rating: 4.6, products: 89, created: '2024-01-10' },
+      { _id: '6875773831cf77c7af5e07b6', name: 'Sklep Sportowy ActiveLife', location: 'Wrocław', rating: 4.9, products: 234, created: '2024-01-08' },
+      { _id: '6875773831cf77c7af5e07b7', name: 'Księgarnia Literacka', location: 'Wrocław', rating: 4.7, products: 567, created: '2024-01-12' },
+      { _id: '6875773831cf77c7af5e07b8', name: 'Sklep Ogrodniczy Zielony', location: 'Wrocław', rating: 4.5, products: 123, created: '2024-01-05' }
     ],
     posts: [
-      { id: 1, title: 'Nowe trendy w modzie 2024', author: 'Anna Kowalska', location: 'Wrocław', likes: 156, created: '2024-01-15' },
-      { id: 2, title: 'Recenzja nowego smartfona', author: 'Piotr Nowak', location: 'Wrocław', likes: 89, created: '2024-01-14' },
-      { id: 3, title: 'Przepis na domowe ciasto', author: 'Maria Wiśniewska', location: 'Wrocław', likes: 234, created: '2024-01-13' },
-      { id: 4, title: 'Porady ogrodnicze', author: 'Jan Kowalczyk', location: 'Wrocław', likes: 67, created: '2024-01-12' },
-      { id: 5, title: 'Recenzja restauracji', author: 'Katarzyna Zielińska', location: 'Wrocław', likes: 123, created: '2024-01-11' }
+      { _id: '6875773831cf77c7af5e07b9', title: 'Nowe trendy w modzie 2024', author: 'Anna Kowalska', location: 'Wrocław', likes: 156, created: '2024-01-15' },
+      { _id: '6875773831cf77c7af5e07ba', title: 'Recenzja nowego smartfona', author: 'Piotr Nowak', location: 'Wrocław', likes: 89, created: '2024-01-14' },
+      { _id: '6875773831cf77c7af5e07bb', title: 'Przepis na domowe ciasto', author: 'Maria Wiśniewska', location: 'Wrocław', likes: 234, created: '2024-01-13' },
+      { _id: '6875773831cf77c7af5e07bc', title: 'Porady ogrodnicze', author: 'Jan Kowalczyk', location: 'Wrocław', likes: 67, created: '2024-01-12' },
+      { _id: '6875773831cf77c7af5e07bd', title: 'Recenzja restauracji', author: 'Katarzyna Zielińska', location: 'Wrocław', likes: 123, created: '2024-01-11' }
     ],
     companies: [
-      { id: 1, name: 'TechCorp Sp. z o.o.', industry: 'Technologia', location: 'Wrocław', employees: 150, rating: 4.8 },
-      { id: 2, name: 'Fashion House', industry: 'Moda', location: 'Wrocław', employees: 45, rating: 4.6 },
-      { id: 3, name: 'Green Solutions', industry: 'Ekologia', location: 'Wrocław', employees: 78, rating: 4.9 },
-      { id: 4, name: 'Digital Agency', industry: 'Marketing', location: 'Wrocław', employees: 32, rating: 4.7 },
-      { id: 5, name: 'Food & Beverage Co.', industry: 'Gastronomia', location: 'Wrocław', employees: 120, rating: 4.5 }
+      { _id: '6875773831cf77c7af5e07b4', name: 'TechCorp Sp. z o.o.', industry: 'Technologia', location: 'Wrocław', employees: 150, rating: 4.8 },
+      { _id: '6875773831cf77c7af5e07ba', name: 'Fashion House', industry: 'Moda', location: 'Wrocław', employees: 45, rating: 4.6 },
+      { _id: '6875773831cf77c7af5e07bb', name: 'Green Solutions', industry: 'Ekologia', location: 'Wrocław', employees: 78, rating: 4.9 },
+      { _id: '6875773831cf77c7af5e07bc', name: 'Digital Agency', industry: 'Marketing', location: 'Wrocław', employees: 32, rating: 4.7 },
+      { _id: '6875773831cf77c7af5e07bd', name: 'Food & Beverage Co.', industry: 'Gastronomia', location: 'Wrocław', employees: 120, rating: 4.5 }
     ],
     products: [
-      { id: 1, name: 'iPhone 15 Pro', category: 'Elektronika', price: '4999 zł', rating: 4.9, location: 'Wrocław' },
-      { id: 2, name: 'Sukienka wieczorowa', category: 'Moda', price: '299 zł', rating: 4.7, location: 'Wrocław' },
-      { id: 3, name: 'Nike Air Max', category: 'Sport', price: '599 zł', rating: 4.8, location: 'Wrocław' },
-      { id: 4, name: 'Książka "Władca Pierścieni"', category: 'Książki', price: '89 zł', rating: 4.9, location: 'Wrocław' },
-      { id: 5, name: 'Roślina doniczkowa', category: 'Ogród', price: '45 zł', rating: 4.6, location: 'Wrocław' }
+      { _id: '6875773831cf77c7af5e07be', name: 'iPhone 15 Pro', category: 'Elektronika', price: '4999 zł', rating: 4.9, location: 'Wrocław' },
+      { _id: '6875773831cf77c7af5e07bf', name: 'Sukienka wieczorowa', category: 'Moda', price: '299 zł', rating: 4.7, location: 'Wrocław' },
+      { _id: '6875773831cf77c7af5e07c0', name: 'Nike Air Max', category: 'Sport', price: '599 zł', rating: 4.8, location: 'Wrocław' },
+      { _id: '6875773831cf77c7af5e07c1', name: 'Książka "Władca Pierścieni"', category: 'Książki', price: '89 zł', rating: 4.9, location: 'Wrocław' },
+      { _id: '6875773831cf77c7af5e07c2', name: 'Roślina doniczkowa', category: 'Ogród', price: '45 zł', rating: 4.6, location: 'Wrocław' }
     ],
     users: [
-      { id: 1, name: 'Anna Kowalska', location: 'Wrocław', posts: 23, followers: 156, joined: '2023-03-15' },
-      { id: 2, name: 'Piotr Nowak', location: 'Wrocław', posts: 15, followers: 89, joined: '2023-05-20' },
-      { id: 3, name: 'Maria Wiśniewska', location: 'Wrocław', posts: 34, followers: 234, joined: '2023-02-10' },
-      { id: 4, name: 'Jan Kowalczyk', location: 'Wrocław', posts: 8, followers: 67, joined: '2023-07-05' },
-      { id: 5, name: 'Katarzyna Zielińska', location: 'Wrocław', posts: 19, followers: 123, joined: '2023-04-12' }
+      { _id: '6875773831cf77c7af5e07c3', name: 'Anna Kowalska', location: 'Wrocław', posts: 23, followers: 156, joined: '2023-03-15' },
+      { _id: '6875773831cf77c7af5e07c4', name: 'Piotr Nowak', location: 'Wrocław', posts: 15, followers: 89, joined: '2023-05-20' },
+      { _id: '6875773831cf77c7af5e07c5', name: 'Maria Wiśniewska', location: 'Wrocław', posts: 34, followers: 234, joined: '2023-02-10' },
+      { _id: '6875773831cf77c7af5e07c6', name: 'Jan Kowalczyk', location: 'Wrocław', posts: 8, followers: 67, joined: '2023-07-05' },
+      { _id: '6875773831cf77c7af5e07c7', name: 'Katarzyna Zielińska', location: 'Wrocław', posts: 19, followers: 123, joined: '2023-04-12' }
     ]
   };
 
@@ -422,19 +422,85 @@ export default function Voivodeships({ theme }) {
       setLoading(true);
       setError(null);
 
-      // Symulacja pobierania danych z API
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const token = localStorage.getItem('token');
+
+      // Pobierz prawdziwe dane z backendu
+      let companies = [];
+      let shops = [];
+      let posts = [];
+      let products = [];
+      let users = [];
+
+      // Pobierz firmy z backendu
+      try {
+        const companiesResponse = await fetch(`${apiUrl}/api/company-profiles/list?limit=10`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (companiesResponse.ok) {
+          const companiesData = await companiesResponse.json();
+          companies = companiesData.companyProfiles || companiesData.companies || [];
+        } else {
+          console.warn('Nie udało się pobrać firm z backendu, używam danych przykładowych');
+          companies = sampleData.companies;
+        }
+      } catch (error) {
+        console.warn('Błąd pobierania firm:', error);
+        companies = sampleData.companies;
+      }
+
+      // Pobierz sklepy z backendu (jeśli endpoint istnieje)
+      try {
+        const shopsResponse = await fetch(`${apiUrl}/api/shops?limit=10`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (shopsResponse.ok) {
+          const shopsData = await shopsResponse.json();
+          shops = shopsData.shops || shopsData.data || [];
+        } else {
+          console.warn('Nie udało się pobrać sklepów z backendu, używam danych przykładowych');
+          shops = sampleData.shops;
+        }
+      } catch (error) {
+        console.warn('Błąd pobierania sklepów:', error);
+        shops = sampleData.shops;
+      }
+
+      // Użyj danych przykładowych dla pozostałych kategorii
+      posts = sampleData.posts;
+      products = sampleData.products;
+      users = sampleData.users;
+
       const mockData = {
-        shops: { count: Math.floor(Math.random() * 200) + 50, items: sampleData.shops },
-        posts: { count: Math.floor(Math.random() * 500) + 100, items: sampleData.posts },
-        companies: { count: Math.floor(Math.random() * 150) + 30, items: sampleData.companies },
-        products: { count: Math.floor(Math.random() * 2000) + 500, items: sampleData.products },
-        users: { count: Math.floor(Math.random() * 1000) + 200, items: sampleData.users }
+        shops: { count: shops.length, items: shops },
+        posts: { count: posts.length, items: posts },
+        companies: { count: companies.length, items: companies },
+        products: { count: products.length, items: products },
+        users: { count: users.length, items: users }
       };
 
       setData(mockData);
     } catch (err) {
       setError('Błąd podczas pobierania danych województwa');
       console.error('Błąd pobierania danych województwa:', err);
+      
+      // Fallback do danych przykładowych
+      const fallbackData = {
+        shops: { count: sampleData.shops.length, items: sampleData.shops },
+        posts: { count: sampleData.posts.length, items: sampleData.posts },
+        companies: { count: sampleData.companies.length, items: sampleData.companies },
+        products: { count: sampleData.products.length, items: sampleData.products },
+        users: { count: sampleData.users.length, items: sampleData.users }
+      };
+      setData(fallbackData);
     } finally {
       setLoading(false);
     }
@@ -485,7 +551,7 @@ export default function Voivodeships({ theme }) {
         return (
           <>
             <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/shops/${item.id}`)}>{item.name}</LinkCell>
+              <LinkCell theme={theme} onClick={() => navigate(`/shop/${item._id}`)}>{item.name}</LinkCell>
             </TableCell>
             <TableCell theme={theme}>{item.location}</TableCell>
             <TableCell theme={theme}>
@@ -505,10 +571,10 @@ export default function Voivodeships({ theme }) {
         return (
           <>
             <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/posts/${item.id}`)}>{item.title}</LinkCell>
+              <LinkCell theme={theme} onClick={() => navigate(`/posts/${item._id}`)}>{item.title}</LinkCell>
             </TableCell>
             <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/users/${item.authorId || 1}`)}>{item.author}</LinkCell>
+              <LinkCell theme={theme} onClick={() => navigate(`/users/${item.authorId || '6875773831cf77c7af5e07c3'}`)}>{item.author}</LinkCell>
             </TableCell>
             <TableCell theme={theme}>
               <Location theme={theme}>
@@ -527,7 +593,7 @@ export default function Voivodeships({ theme }) {
         return (
           <>
             <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/company-profiles/${item.id}`)}>{item.name}</LinkCell>
+              <LinkCell theme={theme} onClick={() => navigate(`/company-profiles/${item._id}`)}>{item.name}</LinkCell>
             </TableCell>
             <TableCell theme={theme}>{item.industry}</TableCell>
             <TableCell theme={theme}>
@@ -547,7 +613,7 @@ export default function Voivodeships({ theme }) {
         return (
           <>
             <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/products/${item.id}`)}>{item.name}</LinkCell>
+              <LinkCell theme={theme} onClick={() => navigate(`/products/${item._id}`)}>{item.name}</LinkCell>
             </TableCell>
             <TableCell theme={theme}>{item.category}</TableCell>
             <TableCell theme={theme}>{item.price}</TableCell>
@@ -567,7 +633,7 @@ export default function Voivodeships({ theme }) {
         return (
           <>
             <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/users/${item.id}`)}>{item.name}</LinkCell>
+              <LinkCell theme={theme} onClick={() => navigate(`/users/${item._id}`)}>{item.name}</LinkCell>
             </TableCell>
             <TableCell theme={theme}>
               <Location theme={theme}>
@@ -599,6 +665,11 @@ export default function Voivodeships({ theme }) {
 
     const currentData = data[activeTab];
 
+    // Sprawdź czy currentData istnieje
+    if (!currentData || !currentData.items) {
+      return <LoadingSpinner theme={theme}>Ładowanie danych...</LoadingSpinner>;
+    }
+
     return (
       <div>
         <StatsGrid>
@@ -623,8 +694,8 @@ export default function Voivodeships({ theme }) {
             ))}
           </TableHeader>
           
-          {currentData?.items?.map((item, index) => (
-            <TableRow key={item.id || index} theme={theme}>
+          {currentData.items.map((item, index) => (
+            <TableRow key={item._id || index} theme={theme}>
               {renderTableRow(item)}
             </TableRow>
           ))}
@@ -685,7 +756,7 @@ export default function Voivodeships({ theme }) {
             onClick={() => setActiveTab(tab.id)}
             theme={theme}
           >
-            {tab.icon} {tab.label}
+            {React.isValidElement(tab.icon) ? tab.icon : null} {tab.label}
           </Tab>
         ))}
       </TabContainer>

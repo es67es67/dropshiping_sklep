@@ -1,5 +1,7 @@
 const Product = require('../models/productModel');
 const Shop = require('../models/shopModel');
+const Review = require('../models/reviewModel');
+const User = require('../models/userModel');
 
 // Pobieranie wszystkich produktów z filtrowaniem
 exports.getProducts = async (req, res) => {
@@ -338,6 +340,107 @@ exports.getProductsByShop = async (req, res) => {
       }
     });
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobieranie recenzji produktu
+exports.getProductReviews = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+
+    // Sprawdź czy produkt istnieje
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Produkt nie został znaleziony' });
+    }
+
+    // Pobierz recenzje
+    const reviews = await Review.find({ product: productId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    const total = await Review.countDocuments({ product: productId });
+
+    res.json({
+      reviews,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Dodawanie recenzji do produktu
+exports.addProductReview = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { rating, comment } = req.body;
+    const userId = req.userId;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Ocena musi być między 1 a 5' });
+    }
+    if (!comment || comment.trim().length < 10) {
+      return res.status(400).json({ error: 'Komentarz musi mieć co najmniej 10 znaków' });
+    }
+
+    // Sprawdź czy produkt istnieje
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Produkt nie został znaleziony' });
+    }
+
+    // Sprawdź czy użytkownik już dodał recenzję
+    const existing = await Review.findOne({ product: productId, user: userId });
+    if (existing) {
+      return res.status(400).json({ error: 'Już dodałeś recenzję do tego produktu' });
+    }
+
+    // Pobierz nazwę użytkownika
+    const user = await User.findById(userId);
+    const userName = user ? (user.username || user.email || 'Użytkownik') : 'Użytkownik';
+
+    // Sprawdź czy użytkownik kupił produkt (prosta symulacja)
+    // TODO: Można sprawdzić zamówienia
+    const verified = false;
+
+    // Dodaj recenzję
+    const review = new Review({
+      product: productId,
+      user: userId,
+      userName,
+      rating,
+      comment,
+      verified
+    });
+    await review.save();
+
+    // Zaktualizuj średnią ocenę produktu
+    const allReviews = await Review.find({ product: productId });
+    const avg = allReviews.reduce((sum, r) => sum + r.rating, 0) / (allReviews.length || 1);
+    product.ratings.average = Math.round(avg * 10) / 10;
+    product.ratings.count = allReviews.length;
+    // Rozkład ocen
+    product.ratings.distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    allReviews.forEach(r => { product.ratings.distribution[r.rating] = (product.ratings.distribution[r.rating] || 0) + 1; });
+    await product.save();
+
+    res.json({ 
+      message: 'Recenzja została dodana',
+      review
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ error: 'Już dodałeś recenzję do tego produktu' });
+    }
     res.status(500).json({ error: err.message });
   }
 };

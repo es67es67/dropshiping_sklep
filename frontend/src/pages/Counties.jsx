@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaStore, FaComments, FaBuilding, FaBox, FaUsers, FaMapMarkedAlt, FaChevronDown, FaStar, FaCalendar, FaMapMarkerAlt } from 'react-icons/fa';
 import SearchInput from '../components/SearchInput';
@@ -243,9 +243,51 @@ const Location = styled.div`
   font-size: 0.9rem;
 `;
 
+const LinkCell = styled.span`
+  color: ${props => props.theme.primary};
+  text-decoration: underline;
+  cursor: pointer;
+  &:hover {
+    color: ${props => props.theme.primary}cc;
+    text-decoration: underline;
+  }
+`;
+
 export default function Counties({ theme }) {
-  const { countyCode } = useParams();
   const location = useLocation();
+  const { voivodeshipCode } = useParams();
+  const navigate = useNavigate();
+  
+  // Lista powiatów Polski - przeniesiona przed useState
+  const counties = [
+    { id: '0201', name: 'Wrocławski', voivodeship: 'Dolnośląskie', code: 'WRC' },
+    { id: '0202', name: 'Wałbrzyski', voivodeship: 'Dolnośląskie', code: 'WAB' },
+    { id: '0203', name: 'Legnicki', voivodeship: 'Dolnośląskie', code: 'LEG' },
+    { id: '0204', name: 'Jeleniogórski', voivodeship: 'Dolnośląskie', code: 'JEL' },
+    { id: '0205', name: 'Lubański', voivodeship: 'Dolnośląskie', code: 'LUB' },
+    { id: '0206', name: 'Zgorzelecki', voivodeship: 'Dolnośląskie', code: 'ZGO' },
+    { id: '0207', name: 'Bolesławiecki', voivodeship: 'Dolnośląskie', code: 'BOL' },
+    { id: '0208', name: 'Dzierżoniowski', voivodeship: 'Dolnośląskie', code: 'DZI' },
+    { id: '0209', name: 'Świdnicki', voivodeship: 'Dolnośląskie', code: 'SWI' },
+    { id: '0210', name: 'Ząbkowicki', voivodeship: 'Dolnośląskie', code: 'ZAB' },
+    { id: '0211', name: 'Kłodzki', voivodeship: 'Dolnośląskie', code: 'KLO' },
+    { id: '0212', name: 'Trzebnicki', voivodeship: 'Dolnośląskie', code: 'TRZ' },
+    { id: '0213', name: 'Oleśnicki', voivodeship: 'Dolnośląskie', code: 'OLE' },
+    { id: '0214', name: 'Oławski', voivodeship: 'Dolnośląskie', code: 'OLA' },
+    { id: '0215', name: 'Strzeliński', voivodeship: 'Dolnośląskie', code: 'STR' },
+    { id: '0216', name: 'Milicki', voivodeship: 'Dolnośląskie', code: 'MIL' },
+    { id: '0217', name: 'Górowski', voivodeship: 'Dolnośląskie', code: 'GOR' },
+    { id: '0218', name: 'Wołowski', voivodeship: 'Dolnośląskie', code: 'WOL' },
+    { id: '0219', name: 'Polkowicki', voivodeship: 'Dolnośląskie', code: 'POL' },
+    { id: '0220', name: 'Lubiński', voivodeship: 'Dolnośląskie', code: 'LUB' },
+    { id: '0221', name: 'Głogowski', voivodeship: 'Dolnośląskie', code: 'GLO' },
+    { id: '0222', name: 'Kamiennogórski', voivodeship: 'Dolnośląskie', code: 'KAM' },
+    { id: '0223', name: 'Jaworski', voivodeship: 'Dolnośląskie', code: 'JAW' },
+    { id: '0224', name: 'Lwówecki', voivodeship: 'Dolnośląskie', code: 'LWO' },
+    { id: '0225', name: 'Złotoryjski', voivodeship: 'Dolnośląskie', code: 'ZLO' },
+    { id: '0226', name: 'Średzki', voivodeship: 'Dolnośląskie', code: 'SRE' }
+  ];
+
   const [activeTab, setActiveTab] = useState('shops');
   const [selectedCounty, setSelectedCounty] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -254,56 +296,42 @@ export default function Counties({ theme }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Lista powiatów (przykładowe dla Mazowieckiego)
-  const counties = [
-    { id: '0201', name: 'Warszawa', type: 'miasto na prawach powiatu', voivodeship: 'Mazowieckie' },
-    { id: '0202', name: 'powiat grodziski', type: 'powiat', voivodeship: 'Mazowieckie' },
-    { id: '0203', name: 'powiat legionowski', type: 'powiat', voivodeship: 'Mazowieckie' },
-    { id: '0204', name: 'powiat nowodworski', type: 'powiat', voivodeship: 'Mazowieckie' },
-    { id: '0205', name: 'powiat otwocki', type: 'powiat', voivodeship: 'Mazowieckie' },
-    { id: '0206', name: 'powiat piaseczyński', type: 'powiat', voivodeship: 'Mazowieckie' },
-    { id: '0207', name: 'powiat pruszkowski', type: 'powiat', voivodeship: 'Mazowieckie' },
-    { id: '0208', name: 'powiat warszawski zachodni', type: 'powiat', voivodeship: 'Mazowieckie' },
-    { id: '0209', name: 'powiat wołomiński', type: 'powiat', voivodeship: 'Mazowieckie' },
-    { id: '0210', name: 'powiat żyrardowski', type: 'powiat', voivodeship: 'Mazowieckie' }
-  ];
-
-  // Przykładowe dane dla każdej kategorii
+  // Przykładowe dane dla każdej kategorii - używam prawdziwych ID z bazy
   const sampleData = {
     shops: [
-      { id: 1, name: 'Sklep Elektroniczny TechMax', location: 'Warszawa', rating: 4.8, products: 156, created: '2024-01-15' },
-      { id: 2, name: 'Butik Mody Elegance', location: 'Warszawa', rating: 4.6, products: 89, created: '2024-01-10' },
-      { id: 3, name: 'Sklep Sportowy ActiveLife', location: 'Warszawa', rating: 4.9, products: 234, created: '2024-01-08' },
-      { id: 4, name: 'Księgarnia Literacka', location: 'Warszawa', rating: 4.7, products: 567, created: '2024-01-12' },
-      { id: 5, name: 'Sklep Ogrodniczy Zielony', location: 'Warszawa', rating: 4.5, products: 123, created: '2024-01-05' }
+      { _id: '6875773831cf77c7af5e07b4', name: 'Sklep Elektroniczny TechMax', location: 'Wrocław', rating: 4.8, products: 156, created: '2024-01-15' },
+      { _id: '6875773831cf77c7af5e07b5', name: 'Butik Mody Elegance', location: 'Wrocław', rating: 4.6, products: 89, created: '2024-01-10' },
+      { _id: '6875773831cf77c7af5e07b6', name: 'Sklep Sportowy ActiveLife', location: 'Wrocław', rating: 4.9, products: 234, created: '2024-01-08' },
+      { _id: '6875773831cf77c7af5e07b7', name: 'Księgarnia Literacka', location: 'Wrocław', rating: 4.7, products: 567, created: '2024-01-12' },
+      { _id: '6875773831cf77c7af5e07b8', name: 'Sklep Ogrodniczy Zielony', location: 'Wrocław', rating: 4.5, products: 123, created: '2024-01-05' }
     ],
     posts: [
-      { id: 1, title: 'Nowe trendy w modzie 2024', author: 'Anna Kowalska', location: 'Warszawa', likes: 156, created: '2024-01-15' },
-      { id: 2, title: 'Recenzja nowego smartfona', author: 'Piotr Nowak', location: 'Warszawa', likes: 89, created: '2024-01-14' },
-      { id: 3, title: 'Przepis na domowe ciasto', author: 'Maria Wiśniewska', location: 'Warszawa', likes: 234, created: '2024-01-13' },
-      { id: 4, title: 'Porady ogrodnicze', author: 'Jan Kowalczyk', location: 'Warszawa', likes: 67, created: '2024-01-12' },
-      { id: 5, title: 'Recenzja restauracji', author: 'Katarzyna Zielińska', location: 'Warszawa', likes: 123, created: '2024-01-11' }
+      { _id: '6875773831cf77c7af5e07b9', title: 'Nowe trendy w modzie 2024', author: 'Anna Kowalska', location: 'Wrocław', likes: 156, created: '2024-01-15' },
+      { _id: '6875773831cf77c7af5e07ba', title: 'Recenzja nowego smartfona', author: 'Piotr Nowak', location: 'Wrocław', likes: 89, created: '2024-01-14' },
+      { _id: '6875773831cf77c7af5e07bb', title: 'Przepis na domowe ciasto', author: 'Maria Wiśniewska', location: 'Wrocław', likes: 234, created: '2024-01-13' },
+      { _id: '6875773831cf77c7af5e07bc', title: 'Porady ogrodnicze', author: 'Jan Kowalczyk', location: 'Wrocław', likes: 67, created: '2024-01-12' },
+      { _id: '6875773831cf77c7af5e07bd', title: 'Recenzja restauracji', author: 'Katarzyna Zielińska', location: 'Wrocław', likes: 123, created: '2024-01-11' }
     ],
     companies: [
-      { id: 1, name: 'TechCorp Sp. z o.o.', industry: 'Technologia', location: 'Warszawa', employees: 150, rating: 4.8 },
-      { id: 2, name: 'Fashion House', industry: 'Moda', location: 'Warszawa', employees: 45, rating: 4.6 },
-      { id: 3, name: 'Green Solutions', industry: 'Ekologia', location: 'Warszawa', employees: 78, rating: 4.9 },
-      { id: 4, name: 'Digital Agency', industry: 'Marketing', location: 'Warszawa', employees: 32, rating: 4.7 },
-      { id: 5, name: 'Food & Beverage Co.', industry: 'Gastronomia', location: 'Warszawa', employees: 120, rating: 4.5 }
+      { _id: '6875773831cf77c7af5e07b4', name: 'TechCorp Sp. z o.o.', industry: 'Technologia', location: 'Wrocław', employees: 150, rating: 4.8 },
+      { _id: '6875773831cf77c7af5e07ba', name: 'Fashion House', industry: 'Moda', location: 'Wrocław', employees: 45, rating: 4.6 },
+      { _id: '6875773831cf77c7af5e07bb', name: 'Green Solutions', industry: 'Ekologia', location: 'Wrocław', employees: 78, rating: 4.9 },
+      { _id: '6875773831cf77c7af5e07bc', name: 'Digital Agency', industry: 'Marketing', location: 'Wrocław', employees: 32, rating: 4.7 },
+      { _id: '6875773831cf77c7af5e07bd', name: 'Food & Beverage Co.', industry: 'Gastronomia', location: 'Wrocław', employees: 120, rating: 4.5 }
     ],
     products: [
-      { id: 1, name: 'iPhone 15 Pro', category: 'Elektronika', price: '4999 zł', rating: 4.9, location: 'Warszawa' },
-      { id: 2, name: 'Sukienka wieczorowa', category: 'Moda', price: '299 zł', rating: 4.7, location: 'Warszawa' },
-      { id: 3, name: 'Nike Air Max', category: 'Sport', price: '599 zł', rating: 4.8, location: 'Warszawa' },
-      { id: 4, name: 'Książka "Władca Pierścieni"', category: 'Książki', price: '89 zł', rating: 4.9, location: 'Warszawa' },
-      { id: 5, name: 'Roślina doniczkowa', category: 'Ogród', price: '45 zł', rating: 4.6, location: 'Warszawa' }
+      { _id: '6875773831cf77c7af5e07be', name: 'iPhone 15 Pro', category: 'Elektronika', price: '4999 zł', rating: 4.9, location: 'Wrocław' },
+      { _id: '6875773831cf77c7af5e07bf', name: 'Sukienka wieczorowa', category: 'Moda', price: '299 zł', rating: 4.7, location: 'Wrocław' },
+      { _id: '6875773831cf77c7af5e07c0', name: 'Nike Air Max', category: 'Sport', price: '599 zł', rating: 4.8, location: 'Wrocław' },
+      { _id: '6875773831cf77c7af5e07c1', name: 'Książka "Władca Pierścieni"', category: 'Książki', price: '89 zł', rating: 4.9, location: 'Wrocław' },
+      { _id: '6875773831cf77c7af5e07c2', name: 'Roślina doniczkowa', category: 'Ogród', price: '45 zł', rating: 4.6, location: 'Wrocław' }
     ],
     users: [
-      { id: 1, name: 'Anna Kowalska', location: 'Warszawa', posts: 23, followers: 156, joined: '2023-03-15' },
-      { id: 2, name: 'Piotr Nowak', location: 'Warszawa', posts: 15, followers: 89, joined: '2023-05-20' },
-      { id: 3, name: 'Maria Wiśniewska', location: 'Warszawa', posts: 34, followers: 234, joined: '2023-02-10' },
-      { id: 4, name: 'Jan Kowalczyk', location: 'Warszawa', posts: 8, followers: 67, joined: '2023-07-05' },
-      { id: 5, name: 'Katarzyna Zielińska', location: 'Warszawa', posts: 19, followers: 123, joined: '2023-04-12' }
+      { _id: '6875773831cf77c7af5e07c3', name: 'Anna Kowalska', location: 'Wrocław', posts: 23, followers: 156, joined: '2023-03-15' },
+      { _id: '6875773831cf77c7af5e07c4', name: 'Piotr Nowak', location: 'Wrocław', posts: 15, followers: 89, joined: '2023-05-20' },
+      { _id: '6875773831cf77c7af5e07c5', name: 'Maria Wiśniewska', location: 'Wrocław', posts: 34, followers: 234, joined: '2023-02-10' },
+      { _id: '6875773831cf77c7af5e07c6', name: 'Jan Kowalczyk', location: 'Wrocław', posts: 8, followers: 67, joined: '2023-07-05' },
+      { _id: '6875773831cf77c7af5e07c7', name: 'Katarzyna Zielińska', location: 'Wrocław', posts: 19, followers: 123, joined: '2023-04-12' }
     ]
   };
 
@@ -316,16 +344,16 @@ export default function Counties({ theme }) {
   ];
 
   useEffect(() => {
-    // Sprawdź czy jest parametr URL lub state z nawigacji
-    if (countyCode) {
-      const countyFromUrl = counties.find(c => c.id === countyCode);
-      if (countyFromUrl) {
-        setSelectedCounty(countyFromUrl);
-        fetchCountyData(countyFromUrl.id);
+    // Jeśli jest voivodeshipCode w URL, ustaw wybrane powiaty na podstawie kodu województwa
+    if (voivodeshipCode) {
+      const countiesForVoivodeship = counties.filter(c => c.voivodeship.toLowerCase().includes(voivodeshipCode.toLowerCase()));
+      if (countiesForVoivodeship.length > 0) {
+        setSelectedCounty(countiesForVoivodeship[0]);
+        fetchCountyData(countiesForVoivodeship[0].id);
         return;
       }
     }
-
+    // Sprawdź czy jest state z nawigacji
     if (location.state?.selectedCounty) {
       const countyFromState = counties.find(c => c.id === location.state.selectedCounty.code);
       if (countyFromState) {
@@ -334,12 +362,11 @@ export default function Counties({ theme }) {
         return;
       }
     }
-
     // Fallback do domyślnego powiatu
     const defaultCounty = counties.find(c => c.id === '0201') || counties[0];
     setSelectedCounty(defaultCounty);
     fetchCountyData(defaultCounty.id);
-  }, [countyCode, location.state]);
+  }, [location.state, voivodeshipCode]);
 
   const fetchUserLocation = async () => {
     try {
@@ -405,19 +432,123 @@ export default function Counties({ theme }) {
       setLoading(true);
       setError(null);
 
-      // Symulacja pobierania danych z API
-      const mockData = {
-        shops: { count: Math.floor(Math.random() * 100) + 20, items: sampleData.shops },
-        posts: { count: Math.floor(Math.random() * 300) + 50, items: sampleData.posts },
-        companies: { count: Math.floor(Math.random() * 80) + 15, items: sampleData.companies },
-        products: { count: Math.floor(Math.random() * 1000) + 200, items: sampleData.products },
-        users: { count: Math.floor(Math.random() * 500) + 100, items: sampleData.users }
-      };
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const token = localStorage.getItem('token');
 
-      setData(mockData);
-    } catch (err) {
-      setError('Błąd podczas pobierania danych powiatu');
-      console.error('Błąd pobierania danych powiatu:', err);
+      // Pobierz prawdziwe dane z backendu
+      let companies = [];
+      let shops = [];
+      let posts = [];
+      let products = [];
+      let users = [];
+
+      // Pobierz firmy z backendu
+      try {
+        const companiesResponse = await fetch(`${apiUrl}/api/company-profiles/list?limit=10`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (companiesResponse.ok) {
+          const companiesData = await companiesResponse.json();
+          companies = companiesData.companyProfiles || companiesData.companies || [];
+        } else {
+          console.warn('Nie udało się pobrać firm z backendu, używam danych przykładowych');
+          companies = sampleData.companies;
+        }
+      } catch (error) {
+        console.warn('Błąd pobierania firm:', error);
+        companies = sampleData.companies;
+      }
+
+      // Pobierz sklepy z backendu
+      try {
+        const shopsResponse = await fetch(`${apiUrl}/api/shops?limit=10`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (shopsResponse.ok) {
+          const shopsData = await shopsResponse.json();
+          shops = shopsData.shops || shopsData || [];
+        } else {
+          console.warn('Nie udało się pobrać sklepów z backendu, używam danych przykładowych');
+          shops = sampleData.shops;
+        }
+      } catch (error) {
+        console.warn('Błąd pobierania sklepów:', error);
+        shops = sampleData.shops;
+      }
+
+      // Pobierz produkty z backendu
+      try {
+        const productsResponse = await fetch(`${apiUrl}/api/products?limit=10`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (productsResponse.ok) {
+          const productsData = await productsResponse.json();
+          products = productsData.products || productsData || [];
+        } else {
+          console.warn('Nie udało się pobrać produktów z backendu, używam danych przykładowych');
+          products = sampleData.products;
+        }
+      } catch (error) {
+        console.warn('Błąd pobierania produktów:', error);
+        products = sampleData.products;
+      }
+
+      // Pobierz użytkowników z backendu
+      try {
+        const usersResponse = await fetch(`${apiUrl}/api/users?limit=10`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (usersResponse.ok) {
+          const usersData = await usersResponse.json();
+          users = usersData.users || usersData || [];
+        } else {
+          console.warn('Nie udało się pobrać użytkowników z backendu, używam danych przykładowych');
+          users = sampleData.users;
+        }
+      } catch (error) {
+        console.warn('Błąd pobierania użytkowników:', error);
+        users = sampleData.users;
+      }
+
+      // Posty na razie używają danych przykładowych
+      posts = sampleData.posts;
+
+      const countyData = {
+        shops: { count: shops.length, items: shops },
+        posts: { count: posts.length, items: posts },
+        companies: { count: companies.length, items: companies },
+        products: { count: products.length, items: products },
+        users: { count: users.length, items: users }
+      };
+      setData(countyData);
+    } catch (error) {
+      console.error('Błąd pobierania danych powiatu:', error);
+      setError('Wystąpił błąd podczas pobierania danych');
+      // Fallback do danych przykładowych
+      const fallbackData = {
+        shops: { count: sampleData.shops.length, items: sampleData.shops },
+        posts: { count: sampleData.posts.length, items: sampleData.posts },
+        companies: { count: sampleData.companies.length, items: sampleData.companies },
+        products: { count: sampleData.products.length, items: sampleData.products },
+        users: { count: sampleData.users.length, items: sampleData.users }
+      };
+      setData(fallbackData);
     } finally {
       setLoading(false);
     }
@@ -434,8 +565,7 @@ export default function Counties({ theme }) {
       setFilteredCounties(counties);
     } else {
       const filtered = counties.filter(county =>
-        county.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        county.voivodeship.toLowerCase().includes(searchTerm.toLowerCase())
+        county.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredCounties(filtered);
     }
@@ -468,12 +598,10 @@ export default function Counties({ theme }) {
       case 'shops':
         return (
           <>
-            <TableCell theme={theme}>{item.name}</TableCell>
             <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaMapMarkerAlt /> {item.location}
-              </Location>
+              <LinkCell theme={theme} onClick={() => navigate(`/shop/${item._id}`)}>{item.name}</LinkCell>
             </TableCell>
+            <TableCell theme={theme}>{item.location}</TableCell>
             <TableCell theme={theme}>
               <Rating>
                 <FaStar /> {item.rating}
@@ -490,8 +618,12 @@ export default function Counties({ theme }) {
       case 'posts':
         return (
           <>
-            <TableCell theme={theme}>{item.title}</TableCell>
-            <TableCell theme={theme}>{item.author}</TableCell>
+            <TableCell theme={theme}>
+              <LinkCell theme={theme} onClick={() => navigate(`/posts/${item._id}`)}>{item.title}</LinkCell>
+            </TableCell>
+            <TableCell theme={theme}>
+              <LinkCell theme={theme} onClick={() => navigate(`/users/${item.authorId || '6875773831cf77c7af5e07c3'}`)}>{item.author}</LinkCell>
+            </TableCell>
             <TableCell theme={theme}>
               <Location theme={theme}>
                 <FaMapMarkerAlt /> {item.location}
@@ -508,7 +640,9 @@ export default function Counties({ theme }) {
       case 'companies':
         return (
           <>
-            <TableCell theme={theme}>{item.name}</TableCell>
+            <TableCell theme={theme}>
+              <LinkCell theme={theme} onClick={() => navigate(`/company-profiles/${item._id}`)}>{item.name}</LinkCell>
+            </TableCell>
             <TableCell theme={theme}>{item.industry}</TableCell>
             <TableCell theme={theme}>
               <Location theme={theme}>
@@ -526,7 +660,9 @@ export default function Counties({ theme }) {
       case 'products':
         return (
           <>
-            <TableCell theme={theme}>{item.name}</TableCell>
+            <TableCell theme={theme}>
+              <LinkCell theme={theme} onClick={() => navigate(`/products/${item._id}`)}>{item.name}</LinkCell>
+            </TableCell>
             <TableCell theme={theme}>{item.category}</TableCell>
             <TableCell theme={theme}>{item.price}</TableCell>
             <TableCell theme={theme}>
@@ -544,7 +680,9 @@ export default function Counties({ theme }) {
       case 'users':
         return (
           <>
-            <TableCell theme={theme}>{item.name}</TableCell>
+            <TableCell theme={theme}>
+              <LinkCell theme={theme} onClick={() => navigate(`/users/${item._id}`)}>{item.name}</LinkCell>
+            </TableCell>
             <TableCell theme={theme}>
               <Location theme={theme}>
                 <FaMapMarkerAlt /> {item.location}
@@ -575,6 +713,11 @@ export default function Counties({ theme }) {
 
     const currentData = data[activeTab];
 
+    // Sprawdź czy currentData istnieje
+    if (!currentData || !currentData.items) {
+      return <LoadingSpinner theme={theme}>Ładowanie danych...</LoadingSpinner>;
+    }
+
     return (
       <div>
         <StatsGrid>
@@ -599,8 +742,8 @@ export default function Counties({ theme }) {
             ))}
           </TableHeader>
           
-          {currentData?.items?.map((item, index) => (
-            <TableRow key={item.id || index} theme={theme}>
+          {currentData.items.map((item, index) => (
+            <TableRow key={item._id || index} theme={theme}>
               {renderTableRow(item)}
             </TableRow>
           ))}
@@ -635,7 +778,7 @@ export default function Counties({ theme }) {
                 onClick={() => handleCountySelect(county)}
                 theme={theme}
               >
-                {county.name} ({county.type})
+                {county.name}
               </LocationOption>
             ))}
           </LocationDropdownContent>
@@ -650,7 +793,7 @@ export default function Counties({ theme }) {
         searchKey="name"
         theme={theme}
         minChars={2}
-        maxSuggestions={20}
+        maxSuggestions={16}
       />
 
       <TabContainer theme={theme}>
@@ -661,7 +804,7 @@ export default function Counties({ theme }) {
             onClick={() => setActiveTab(tab.id)}
             theme={theme}
           >
-            {tab.icon} {tab.label}
+            {React.isValidElement(tab.icon) ? tab.icon : null} {tab.label}
           </Tab>
         ))}
       </TabContainer>

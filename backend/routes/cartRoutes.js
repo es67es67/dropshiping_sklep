@@ -9,6 +9,9 @@ router.use(authenticateToken);
 // Pobieranie koszyka
 router.get('/', cartController.getCart);
 
+// Pobieranie podsumowania koszyka
+router.get('/summary', cartController.getCartSummary);
+
 // Dodawanie produktu do koszyka
 router.post('/add', cartController.addToCart);
 
@@ -17,6 +20,12 @@ router.put('/update', cartController.updateQuantity);
 
 // Usuwanie produktu z koszyka
 router.delete('/remove/:itemId', cartController.removeFromCart);
+
+// Usuwanie wszystkich produktów od sprzedawcy
+router.delete('/seller/:shopId', cartController.removeSellerItems);
+
+// Aktualizacja ilości produktu w grupie sprzedawcy
+router.put('/seller/quantity', cartController.updateSellerItemQuantity);
 
 // Czyszczenie koszyka
 router.delete('/clear', cartController.clearCart);
@@ -29,8 +38,5 @@ router.delete('/coupon', cartController.removeCoupon);
 
 // Aktualizacja dostawy
 router.put('/shipping', cartController.updateShipping);
-
-// Podsumowanie koszyka
-router.get('/summary', cartController.getCartSummary);
 
 module.exports = router; 

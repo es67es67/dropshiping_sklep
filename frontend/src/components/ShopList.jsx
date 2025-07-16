@@ -417,7 +417,7 @@ export default function ShopList() {
   const fetchShops = async () => {
     try {
       setLoading(true);
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
       
       // Wybierz endpoint w zależności od filtra

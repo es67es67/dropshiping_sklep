@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
       console.log('Logowanie użytkownika:', credentials);
       
       // Wyślij dane do backendu
-      const response = await fetch(`/api/users/login`, {
+      const response = await fetch(`http://localhost:5000/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,8 +53,20 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(credentials),
       });
 
-      const data = await response.json();
-      
+      let data = null;
+      let text = '';
+      const contentType = response.headers.get('content-type');
+      try {
+        text = await response.text();
+        if (contentType && contentType.includes('application/json') && text) {
+          data = JSON.parse(text);
+        } else {
+          data = { error: text || 'Brak odpowiedzi z serwera' };
+        }
+      } catch (parseError) {
+        data = { error: 'Nieprawidłowa odpowiedź z serwera' };
+      }
+
       if (!response.ok) {
         return { success: false, error: data.error || 'Wystąpił błąd podczas logowania' };
       }
@@ -78,7 +90,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: userData };
     } catch (error) {
       console.error('Błąd logowania:', error);
-      return { success: false, error: 'Wystąpił błąd podczas logowania' };
+      return { success: false, error: 'Wystąpił błąd podczas logowania (brak połączenia z serwerem)' };
     }
   };
 

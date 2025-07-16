@@ -399,6 +399,49 @@ const LocationDropdownLabel = styled.div`
   cursor: default;
 `;
 
+const CartLink = styled(Link)`
+  color: ${props => props.theme.text};
+  text-decoration: none;
+  font-weight: 500;
+  padding: ${props => props.layout === 'compact' ? '0.25rem 0.5rem' : '0.5rem 1rem'};
+  border-radius: ${props => props.layout === 'compact' ? '4px' : '8px'};
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: ${props => props.layout === 'classic' ? '100%' : 'auto'};
+  justify-content: ${props => props.layout === 'classic' ? 'flex-start' : 'center'};
+  position: relative;
+  
+  &:hover {
+    background: ${props => props.theme.primary}20;
+    color: ${props => props.theme.primary};
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    justify-content: flex-start;
+  }
+`;
+
+const CartBadge = styled.span`
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: ${props => props.theme.primary};
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  min-width: 20px;
+`;
+
 export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
   const { user, isAuthenticated, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -408,12 +451,15 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState(false);
   const locationDropdownRef = useRef(null);
+  const [cartItemCount, setCartItemCount] = useState(0);
+  
   // Dodajemy ref do timeoutu zamykania dropdowna lokalizacji
   const locationDropdownCloseTimeout = useRef(null);
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchNotifications();
+      fetchCartSummary();
     }
   }, [isAuthenticated]);
 
@@ -432,6 +478,23 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
       }
     } catch (error) {
       console.error('Błąd pobierania powiadomień:', error);
+    }
+  };
+
+  const fetchCartSummary = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/summary`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCartItemCount(data.itemCount || 0);
+      }
+    } catch (error) {
+      console.error('Błąd pobierania podsumowania koszyka:', error);
     }
   };
 
@@ -517,7 +580,7 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
         {isMenuOpen ? '✕' : '☰'}
       </HamburgerButton>
       
-              <NavLinks isOpen={isMenuOpen} theme={theme} layout={layout}>
+      <NavLinks isOpen={isMenuOpen} theme={theme} layout={layout}>
         <NavLink to="/" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🏠 Strona główna
         </NavLink>
@@ -527,6 +590,19 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
         <NavLink to="/shops" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🏪 Sklepy
         </NavLink>
+        
+        {/* Koszyk z licznikiem */}
+        {isAuthenticated && (
+          <CartLink to="/cart" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+            🛒 Koszyk
+            {cartItemCount > 0 && (
+              <CartBadge theme={theme}>
+                {cartItemCount > 99 ? '99+' : cartItemCount}
+              </CartBadge>
+            )}
+          </CartLink>
+        )}
+        
         <NavLink to="/messages" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           💬 Wiadomości
         </NavLink>
@@ -541,6 +617,9 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
         </NavLink>
         <NavLink to="/advanced-features" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🚀 Zaawansowane
+        </NavLink>
+        <NavLink to="/teryt-features" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+          🗺️ TERYT
         </NavLink>
         
         {/* Zarządzanie sklepami - tylko dla właścicieli */}
@@ -613,6 +692,14 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
               setIsMenuOpen(false);
             }}>
               👤 Mój profil
+            </DropdownItem>
+            
+            <DropdownItem onClick={() => { 
+              window.location.href = '/cart'; 
+              closeUserDropdown(); 
+              setIsMenuOpen(false);
+            }}>
+              🛒 Mój koszyk {cartItemCount > 0 && `(${cartItemCount})`}
             </DropdownItem>
             
             {user?.shops && user.shops.length > 0 && (

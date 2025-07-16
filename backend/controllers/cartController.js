@@ -2,6 +2,48 @@ const Cart = require('../models/cartModel');
 const Product = require('../models/productModel');
 const User = require('../models/userModel');
 
+// Funkcja do grupowania produktów według sprzedawców
+const groupItemsBySeller = (items) => {
+  const sellerGroups = {};
+  
+  items.forEach(item => {
+    if (item.product && item.product.shop) {
+      const shopId = item.product.shop._id.toString();
+      const shopName = item.product.shop.name;
+      const shopLogo = item.product.shop.logo;
+      
+      if (!sellerGroups[shopId]) {
+        sellerGroups[shopId] = {
+          shopId,
+          shopName,
+          shopLogo,
+          items: [],
+          subtotal: 0,
+          shippingCost: 0,
+          itemCount: 0
+        };
+      }
+      
+      const itemTotal = item.price * item.quantity;
+      sellerGroups[shopId].items.push(item);
+      sellerGroups[shopId].subtotal += itemTotal;
+      sellerGroups[shopId].itemCount += item.quantity;
+    }
+  });
+  
+  // Oblicz koszt dostawy dla każdego sprzedawcy
+  Object.values(sellerGroups).forEach(group => {
+    // Domyślny koszt dostawy - można dostosować logikę
+    if (group.subtotal >= 100) {
+      group.shippingCost = 0; // Darmowa dostawa od 100 zł
+    } else {
+      group.shippingCost = 15.99; // Standardowa dostawa
+    }
+  });
+  
+  return Object.values(sellerGroups);
+};
+
 // Pobieranie koszyka użytkownika
 exports.getCart = async (req, res) => {
   try {
@@ -11,7 +53,7 @@ exports.getCart = async (req, res) => {
         select: 'name price originalPrice images mainImage stock isActive shop',
         populate: {
           path: 'shop',
-          select: 'name logo'
+          select: 'name logo address city'
         }
       });
 
@@ -29,14 +71,25 @@ exports.getCart = async (req, res) => {
     }
     await cart.save();
 
+    // Grupuj produkty według sprzedawców
+    const sellerGroups = groupItemsBySeller(cart.items);
+    
+    // Oblicz ogólne podsumowanie
+    const totalSubtotal = sellerGroups.reduce((sum, group) => sum + group.subtotal, 0);
+    const totalShipping = sellerGroups.reduce((sum, group) => sum + group.shippingCost, 0);
+    const totalDiscount = cart.getDiscount();
+    const total = Math.max(0, totalSubtotal - totalDiscount + totalShipping);
+
     res.json({
       cart,
+      sellerGroups,
       summary: {
         itemCount: cart.getItemCount(),
-        subtotal: cart.getSubtotal(),
-        discount: cart.getDiscount(),
-        shipping: cart.getShippingCost(),
-        total: cart.getTotal()
+        subtotal: totalSubtotal,
+        discount: totalDiscount,
+        shipping: totalShipping,
+        total: total,
+        sellerCount: sellerGroups.length
       }
     });
   } catch (err) {
@@ -307,29 +360,165 @@ exports.updateShipping = async (req, res) => {
   }
 };
 
-// Pobieranie podsumowania koszyka
+// Usuwanie wszystkich produktów od jednego sprzedawcy
+exports.removeSellerItems = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+
+    const cart = await Cart.findOne({ user: req.userId, status: 'active' })
+      .populate({
+        path: 'items.product',
+        populate: { path: 'shop' }
+      });
+
+    if (!cart) {
+      return res.status(404).json({ error: 'Koszyk nie został znaleziony' });
+    }
+
+    // Usuń wszystkie produkty od danego sprzedawcy
+    const originalLength = cart.items.length;
+    cart.items = cart.items.filter(item => 
+      item.product.shop._id.toString() !== shopId
+    );
+
+    if (cart.items.length === originalLength) {
+      return res.status(404).json({ error: 'Nie znaleziono produktów od tego sprzedawcy' });
+    }
+
+    await cart.save();
+
+    // Pobierz zaktualizowany koszyk z grupowaniem
+    const updatedCart = await Cart.findById(cart._id)
+      .populate({
+        path: 'items.product',
+        select: 'name price originalPrice images mainImage stock isActive shop',
+        populate: {
+          path: 'shop',
+          select: 'name logo address city'
+        }
+      });
+
+    const sellerGroups = groupItemsBySeller(updatedCart.items);
+    const totalSubtotal = sellerGroups.reduce((sum, group) => sum + group.subtotal, 0);
+    const totalShipping = sellerGroups.reduce((sum, group) => sum + group.shippingCost, 0);
+    const totalDiscount = updatedCart.getDiscount();
+    const total = Math.max(0, totalSubtotal - totalDiscount + totalShipping);
+
+    res.json({
+      message: 'Produkty od sprzedawcy zostały usunięte',
+      cart: updatedCart,
+      sellerGroups,
+      summary: {
+        itemCount: updatedCart.getItemCount(),
+        subtotal: totalSubtotal,
+        discount: totalDiscount,
+        shipping: totalShipping,
+        total: total,
+        sellerCount: sellerGroups.length
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Aktualizacja ilości produktu w grupie sprzedawcy
+exports.updateSellerItemQuantity = async (req, res) => {
+  try {
+    const { shopId, itemId, quantity } = req.body;
+
+    if (quantity < 1) {
+      return res.status(400).json({ error: 'Ilość musi być większa od 0' });
+    }
+
+    const cart = await Cart.findOne({ user: req.userId, status: 'active' })
+      .populate({
+        path: 'items.product',
+        populate: { path: 'shop' }
+      });
+
+    if (!cart) {
+      return res.status(404).json({ error: 'Koszyk nie został znaleziony' });
+    }
+
+    // Znajdź produkt w grupie sprzedawcy
+    const item = cart.items.find(item => 
+      item._id.toString() === itemId && 
+      item.product.shop._id.toString() === shopId
+    );
+
+    if (!item) {
+      return res.status(404).json({ error: 'Produkt nie został znaleziony w tej grupie' });
+    }
+
+    // Sprawdź stan magazynowy
+    if (item.product.stock < quantity) {
+      return res.status(400).json({ error: 'Niewystarczający stan magazynowy' });
+    }
+
+    // Aktualizuj ilość
+    item.quantity = quantity;
+    await cart.save();
+
+    // Pobierz zaktualizowany koszyk z grupowaniem
+    const updatedCart = await Cart.findById(cart._id)
+      .populate({
+        path: 'items.product',
+        select: 'name price originalPrice images mainImage stock isActive shop',
+        populate: {
+          path: 'shop',
+          select: 'name logo address city'
+        }
+      });
+
+    const sellerGroups = groupItemsBySeller(updatedCart.items);
+    const totalSubtotal = sellerGroups.reduce((sum, group) => sum + group.subtotal, 0);
+    const totalShipping = sellerGroups.reduce((sum, group) => sum + group.shippingCost, 0);
+    const totalDiscount = updatedCart.getDiscount();
+    const total = Math.max(0, totalSubtotal - totalDiscount + totalShipping);
+
+    res.json({
+      message: 'Ilość zaktualizowana',
+      cart: updatedCart,
+      sellerGroups,
+      summary: {
+        itemCount: updatedCart.getItemCount(),
+        subtotal: totalSubtotal,
+        discount: totalDiscount,
+        shipping: totalShipping,
+        total: total,
+        sellerCount: sellerGroups.length
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobieranie podsumowania koszyka (liczba produktów)
 exports.getCartSummary = async (req, res) => {
   try {
     const cart = await Cart.findOne({ user: req.userId, status: 'active' });
     
-    if (!cart || cart.items.length === 0) {
+    if (!cart) {
       return res.json({
         itemCount: 0,
-        subtotal: 0,
-        discount: 0,
-        shipping: 0,
-        total: 0
+        totalItems: 0,
+        totalPrice: 0
       });
     }
 
+    const itemCount = cart.items.length;
+    const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
     res.json({
-      itemCount: cart.getItemCount(),
-      subtotal: cart.getSubtotal(),
-      discount: cart.getDiscount(),
-      shipping: cart.getShippingCost(),
-      total: cart.getTotal()
+      itemCount,
+      totalItems,
+      totalPrice
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error('Błąd pobierania podsumowania koszyka:', error);
+    res.status(500).json({ error: 'Błąd serwera' });
   }
 }; 

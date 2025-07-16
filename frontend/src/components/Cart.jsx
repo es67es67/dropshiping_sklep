@@ -1,353 +1,651 @@
 import React, { useState, useEffect } from 'react';
-import { FaTrash, FaMinus, FaPlus, FaShoppingCart, FaCreditCard, FaTruck, FaTag } from 'react-icons/fa';
-import { useAuth } from '../contexts/AuthContext';
+import styled from 'styled-components';
+import { FaShoppingCart, FaTrash, FaMinus, FaPlus, FaStore, FaTruck, FaCreditCard } from 'react-icons/fa';
+
+const CartContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+`;
+
+const CartHeader = styled.div`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+  }
+
+  .cart-icon {
+    font-size: 2.5rem;
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-10px);
+    }
+    60% {
+      transform: translateY(-5px);
+    }
+  }
+`;
+
+const SellerCard = styled.div`
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+  overflow: hidden;
+  border: 2px solid #f0f0f0;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    border-color: #667eea;
+  }
+`;
+
+const SellerHeader = styled.div`
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+
+  .seller-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+  }
+
+  .seller-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+
+  .seller-details {
+    flex: 1;
+  }
+
+  .seller-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+  }
+
+  .seller-location {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin: 0;
+  }
+
+  .seller-summary {
+    text-align: right;
+    min-width: 150px;
+  }
+
+  .item-count {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin: 0 0 5px 0;
+  }
+
+  .subtotal {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+  }
+`;
+
+const SellerContent = styled.div`
+  padding: 20px;
+`;
+
+const ProductGrid = styled.div`
+  display: grid;
+  gap: 20px;
+  margin-bottom: 20px;
+`;
+
+const ProductCard = styled.div`
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.3s ease;
+  border: 1px solid #e0e0e0;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .product-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .product-info {
+    flex: 1;
+  }
+
+  .product-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: #333;
+  }
+
+  .product-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #667eea;
+    margin: 0 0 8px 0;
+  }
+
+  .product-original-price {
+    font-size: 0.9rem;
+    color: #999;
+    text-decoration: line-through;
+    margin: 0 0 8px 0;
+  }
+
+  .quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .quantity-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+
+  .quantity-display {
+    font-size: 1.1rem;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: center;
+    color: #333;
+  }
+
+  .remove-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    }
+  }
+`;
+
+const SellerFooter = styled.div`
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+
+  .shipping-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    font-size: 0.9rem;
+  }
+
+  .seller-total {
+    text-align: right;
+  }
+
+  .total-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0 0 5px 0;
+  }
+
+  .total-amount {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #667eea;
+    margin: 0;
+  }
+`;
+
+const CartSummary = styled.div`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 15px;
+  margin-top: 30px;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+
+  h2 {
+    margin: 0 0 20px 0;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+
+  .summary-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  .summary-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin: 0 0 5px 0;
+  }
+
+  .summary-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .checkout-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 auto;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    }
+  }
+`;
+
+const EmptyCart = styled.div`
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+
+  .empty-icon {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    color: #666;
+    margin: 0 0 15px 0;
+  }
+
+  p {
+    color: #999;
+    margin: 0 0 30px 0;
+  }
+
+  .continue-shopping {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+  }
+`;
+
+const LoadingSpinner = styled.div`
+  text-align: center;
+  padding: 40px;
+  color: #666;
+`;
 
 const Cart = () => {
-  const { user, isAuthenticated } = useAuth();
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [couponCode, setCouponCode] = useState('');
-  const [shippingMethod, setShippingMethod] = useState('standard');
-  const [checkoutStep, setCheckoutStep] = useState('cart'); // cart, shipping, payment, review
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchCart();
-    }
-  }, [isAuthenticated]);
+    fetchCart();
+  }, []);
 
   const fetchCart = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart`, {
+      setLoading(true);
+      const response = await fetch('/api/cart', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setCart(data.cart);
+
+      if (!response.ok) {
+        throw new Error('Nie udało się pobrać koszyka');
       }
-    } catch (error) {
-      console.error('Błąd pobierania koszyka:', error);
+
+      const data = await response.json();
+      setCart(data);
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const updateQuantity = async (itemId, quantity) => {
+  const updateQuantity = async (itemId, newQuantity) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/update`, {
+      const response = await fetch('/api/cart/update-quantity', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ itemId, quantity })
+        body: JSON.stringify({ itemId, quantity: newQuantity })
       });
 
-      if (response.ok) {
-        await fetchCart();
+      if (!response.ok) {
+        throw new Error('Nie udało się zaktualizować ilości');
       }
-    } catch (error) {
-      console.error('Błąd aktualizacji ilości:', error);
+
+      await fetchCart();
+    } catch (err) {
+      console.error('Błąd aktualizacji ilości:', err);
     }
   };
 
   const removeItem = async (itemId) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/remove/${itemId}`, {
+      const response = await fetch(`/api/cart/remove/${itemId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      if (response.ok) {
-        await fetchCart();
+      if (!response.ok) {
+        throw new Error('Nie udało się usunąć produktu');
       }
-    } catch (error) {
-      console.error('Błąd usuwania produktu:', error);
-    }
-  };
 
-  const applyCoupon = async () => {
-    if (!couponCode.trim()) return;
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/coupon`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ couponCode })
-      });
-
-      if (response.ok) {
-        await fetchCart();
-        setCouponCode('');
-      } else {
-        const error = await response.json();
-        alert(error.error || 'Błąd aplikowania kuponu');
-      }
-    } catch (error) {
-      console.error('Błąd aplikowania kuponu:', error);
-    }
-  };
-
-  const updateShipping = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/shipping`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ method: shippingMethod })
-      });
-
-      if (response.ok) {
-        await fetchCart();
-      }
-    } catch (error) {
-      console.error('Błąd aktualizacji dostawy:', error);
+      await fetchCart();
+    } catch (err) {
+      console.error('Błąd usuwania produktu:', err);
     }
   };
 
   const clearCart = async () => {
-    if (!window.confirm('Czy na pewno chcesz wyczyścić koszyk?')) return;
-
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/clear`, {
+      const response = await fetch('/api/cart/clear', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      if (response.ok) {
-        await fetchCart();
+      if (!response.ok) {
+        throw new Error('Nie udało się wyczyścić koszyka');
       }
-    } catch (error) {
-      console.error('Błąd czyszczenia koszyka:', error);
+
+      await fetchCart();
+    } catch (err) {
+      console.error('Błąd czyszczenia koszyka:', err);
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <FaShoppingCart className="text-6xl text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-700 mb-2">Zaloguj się</h2>
-          <p className="text-gray-600 mb-4">Aby zobaczyć swój koszyk, musisz się zalogować.</p>
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-            Zaloguj się
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <CartContainer>
+        <LoadingSpinner>Ładowanie koszyka...</LoadingSpinner>
+      </CartContainer>
     );
   }
 
-  if (!cart || cart.items.length === 0) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <FaShoppingCart className="text-6xl text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-700 mb-2">Twój koszyk jest pusty</h2>
-          <p className="text-gray-600 mb-4">Dodaj produkty do koszyka, aby rozpocząć zakupy.</p>
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+      <CartContainer>
+        <div style={{ textAlign: 'center', color: 'red' }}>
+          Błąd: {error}
+        </div>
+      </CartContainer>
+    );
+  }
+
+  if (!cart || !cart.sellerGroups || cart.sellerGroups.length === 0) {
+    return (
+      <CartContainer>
+        <EmptyCart>
+          <div className="empty-icon">🛒</div>
+          <h2>Twój koszyk jest pusty</h2>
+          <p>Dodaj produkty, aby rozpocząć zakupy</p>
+          <button className="continue-shopping" onClick={() => window.history.back()}>
             Kontynuuj zakupy
           </button>
-        </div>
-      </div>
+        </EmptyCart>
+      </CartContainer>
     );
   }
 
-  const subtotal = cart.items.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const discount = cart.coupon ? (subtotal * cart.coupon.discount) / 100 : 0;
-  const shipping = shippingMethod === 'free' ? 0 : shippingMethod === 'express' ? 29.99 : 15.99;
-  const total = subtotal - discount + shipping;
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Lista produktów */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Koszyk</h1>
-                <button
-                  onClick={clearCart}
-                  className="text-red-600 hover:text-red-800 text-sm"
-                >
-                  Wyczyść koszyk
-                </button>
-              </div>
+    <CartContainer>
+      <CartHeader>
+        <FaShoppingCart className="cart-icon" />
+        <h1>Koszyk zakupów</h1>
+      </CartHeader>
 
-              {/* Produkty */}
-              <div className="space-y-4">
-                {cart.items.map((item) => (
-                  <div key={item._id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
-                    <img
-                      src={item.product.mainImage || '/placeholder-product.jpg'}
-                      alt={item.product.name}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                    
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{item.product.name}</h3>
-                      <p className="text-sm text-gray-600">{item.product.shop?.name}</p>
-                      <p className="text-lg font-bold text-gray-900">{item.price.toFixed(2)} zł</p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => updateQuantity(item._id, Math.max(1, item.quantity - 1))}
-                        className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"
-                      >
-                        <FaMinus className="text-sm" />
-                      </button>
-                      <span className="w-12 text-center font-semibold">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                        className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"
-                      >
-                        <FaPlus className="text-sm" />
-                      </button>
-                    </div>
-
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900">{(item.price * item.quantity).toFixed(2)} zł</p>
-                      <button
-                        onClick={() => removeItem(item._id)}
-                        className="text-red-600 hover:text-red-800 mt-2"
-                      >
-                        <FaTrash />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Kupon */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <FaTag />
-                Kupon rabatowy
-              </h3>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Wprowadź kod kuponu"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={applyCoupon}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Zastosuj
-                </button>
-              </div>
-              {cart.coupon && (
-                <div className="mt-2 text-sm text-green-600">
-                  Kupon "{cart.coupon.code}" zastosowany! Zniżka: {cart.coupon.discount}%
-                </div>
-              )}
-            </div>
-
-            {/* Dostawa */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <FaTruck />
-                Metoda dostawy
-              </h3>
-              <div className="space-y-2">
-                {[
-                  { id: 'free', name: 'Darmowa dostawa', cost: 0, time: '3-5 dni' },
-                  { id: 'standard', name: 'Dostawa standardowa', cost: 15.99, time: '2-3 dni' },
-                  { id: 'express', name: 'Dostawa ekspresowa', cost: 29.99, time: '1 dzień' }
-                ].map((method) => (
-                  <label key={method.id} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                    <input
-                      type="radio"
-                      name="shipping"
-                      value={method.id}
-                      checked={shippingMethod === method.id}
-                      onChange={(e) => setShippingMethod(e.target.value)}
-                      className="text-blue-600"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium">{method.name}</div>
-                      <div className="text-sm text-gray-600">{method.time}</div>
-                    </div>
-                    <div className="font-bold">
-                      {method.cost === 0 ? 'Darmo' : `${method.cost.toFixed(2)} zł`}
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Podsumowanie */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Podsumowanie zamówienia</h2>
-              
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between">
-                  <span>Wartość produktów:</span>
-                  <span>{subtotal.toFixed(2)} zł</span>
-                </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Zniżka:</span>
-                    <span>-{discount.toFixed(2)} zł</span>
-                  </div>
+      {cart.sellerGroups.map((sellerGroup, index) => (
+        <SellerCard key={sellerGroup.shopId}>
+          <SellerHeader>
+            <div className="seller-info">
+              <div className="seller-logo">
+                {sellerGroup.shopLogo ? (
+                  <img src={sellerGroup.shopLogo} alt={sellerGroup.shopName} style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
+                ) : (
+                  <FaStore />
                 )}
-                <div className="flex justify-between">
-                  <span>Dostawa:</span>
-                  <span>{shipping === 0 ? 'Darmo' : `${shipping.toFixed(2)} zł`}</span>
-                </div>
-                <div className="border-t pt-3">
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Razem:</span>
-                    <span>{total.toFixed(2)} zł</span>
-                  </div>
-                </div>
               </div>
-
-              <button
-                onClick={() => setCheckoutStep('shipping')}
-                className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-              >
-                <FaCreditCard />
-                Przejdź do kasy
-              </button>
-
-              <div className="mt-4 text-sm text-gray-600">
-                <p>• Bezpieczne płatności</p>
-                <p>• Darmowe zwroty w ciągu 14 dni</p>
-                <p>• Gwarancja jakości</p>
+              <div className="seller-details">
+                <h3 className="seller-name">{sellerGroup.shopName}</h3>
+                <p className="seller-location">📍 Lokalizacja sprzedawcy</p>
               </div>
             </div>
+            <div className="seller-summary">
+              <p className="item-count">{sellerGroup.itemCount} produktów</p>
+              <p className="subtotal">{sellerGroup.subtotal.toFixed(2)} zł</p>
+            </div>
+          </SellerHeader>
+
+          <SellerContent>
+            <ProductGrid>
+              {sellerGroup.items.map((item) => (
+                <ProductCard key={item._id}>
+                  <img
+                    src={item.product.mainImage || item.product.images?.[0] || '/placeholder-product.jpg'}
+                    alt={item.product.name}
+                    className="product-image"
+                    onError={(e) => {
+                      e.target.src = '/placeholder-product.jpg';
+                    }}
+                  />
+                  <div className="product-info">
+                    <h4 className="product-name">{item.product.name}</h4>
+                    <p className="product-price">{item.price.toFixed(2)} zł</p>
+                    {item.originalPrice && item.originalPrice > item.price && (
+                      <p className="product-original-price">{item.originalPrice.toFixed(2)} zł</p>
+                    )}
+                  </div>
+                  <div className="quantity-controls">
+                    <button
+                      className="quantity-btn"
+                      onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                    >
+                      <FaMinus />
+                    </button>
+                    <span className="quantity-display">{item.quantity}</span>
+                    <button
+                      className="quantity-btn"
+                      onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                    >
+                      <FaPlus />
+                    </button>
+                  </div>
+                  <button
+                    className="remove-btn"
+                    onClick={() => removeItem(item._id)}
+                  >
+                    <FaTrash />
+                    Usuń
+                  </button>
+                </ProductCard>
+              ))}
+            </ProductGrid>
+          </SellerContent>
+
+          <SellerFooter>
+            <div className="shipping-info">
+              <FaTruck />
+              <span>
+                {sellerGroup.shippingCost === 0 
+                  ? 'Darmowa dostawa' 
+                  : `Dostawa: ${sellerGroup.shippingCost.toFixed(2)} zł`
+                }
+              </span>
+            </div>
+            <div className="seller-total">
+              <p className="total-label">Suma częściowa:</p>
+              <p className="total-amount">{(sellerGroup.subtotal + sellerGroup.shippingCost).toFixed(2)} zł</p>
+            </div>
+          </SellerFooter>
+        </SellerCard>
+      ))}
+
+      <CartSummary>
+        <h2>
+          <FaCreditCard />
+          Podsumowanie zamówienia
+        </h2>
+        
+        <div className="summary-grid">
+          <div className="summary-item">
+            <p className="summary-label">Liczba sprzedawców</p>
+            <p className="summary-value">{cart.summary.sellerCount}</p>
           </div>
+          <div className="summary-item">
+            <p className="summary-label">Łączna ilość produktów</p>
+            <p className="summary-value">{cart.summary.itemCount}</p>
+          </div>
+          <div className="summary-item">
+            <p className="summary-label">Suma częściowa</p>
+            <p className="summary-value">{cart.summary.subtotal.toFixed(2)} zł</p>
+          </div>
+          <div className="summary-item">
+            <p className="summary-label">Dostawa</p>
+            <p className="summary-value">{cart.summary.shipping.toFixed(2)} zł</p>
+          </div>
+          {cart.summary.discount > 0 && (
+            <div className="summary-item">
+              <p className="summary-label">Rabat</p>
+              <p className="summary-value">-{cart.summary.discount.toFixed(2)} zł</p>
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '2rem', margin: '0 0 10px 0' }}>
+            Razem: {cart.summary.total.toFixed(2)} zł
+          </h3>
+        </div>
+
+        <button className="checkout-btn">
+          <FaCreditCard />
+          Przejdź do kasy
+        </button>
+      </CartSummary>
+    </CartContainer>
   );
 };
 

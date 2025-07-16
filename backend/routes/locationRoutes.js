@@ -147,6 +147,17 @@ router.get('/municipalities/:municipalityCode/towns', locationController.getTown
 // Pobierz szczegóły konkretnej lokalizacji
 router.get('/:id', locationController.getLocation);
 
+// 🏪 Nowe endpointy dla sklepów i firm według lokalizacji
+
+// Pobierz sklepy dla lokalizacji
+router.get('/:locationId/shops', locationController.getLocationShops);
+
+// Pobierz firmy dla lokalizacji
+router.get('/:locationId/companies', locationController.getLocationCompanies);
+
+// Pobierz statystyki lokalizacji
+router.get('/:locationId/stats', locationController.getLocationStats);
+
 // Import danych lokalizacji
 router.post('/import', authMiddleware.authenticateToken, (req, res) => {
   // TODO: Implementacja importu

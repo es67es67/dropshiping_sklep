@@ -8,7 +8,6 @@ const { uploadShop } = require('../middleware/uploadMiddleware');
 router.get('/', shopController.getShops);
 router.get('/search/teryt', shopController.searchShopsByTeryt);
 router.get('/radius', shopController.getShopsInRadius);
-router.get('/:id', shopController.getShop);
 
 // Trasy wymagające autoryzacji
 router.use(authMiddleware.authenticateToken);
@@ -23,6 +22,9 @@ router.get('/', shopController.getAllShops);
 router.get('/all', shopController.getAllShopsIncludingInactive);
 router.put('/:id', shopController.updateShop);
 router.delete('/:id', shopController.deleteShop);
+
+// Publiczne trasy (po autoryzacji, ale przed /:id)
+router.get('/:id', shopController.getShop);
 
 // Recenzje i oceny
 router.post('/:id/review', shopController.addReview);

@@ -72,22 +72,43 @@ const cartSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Metody koszyka
-cartSchema.methods.addItem = function(productId, quantity = 1, options = []) {
+cartSchema.methods.addItem = async function(productId, quantity = 1, options = []) {
+  console.log('🛒 Dodawanie produktu do koszyka:', { productId, quantity, options });
+  
+  // Pobierz produkt, aby uzyskać cenę
+  const Product = mongoose.model('Product');
+  const product = await Product.findById(productId);
+  
+  if (!product) {
+    console.log('❌ Produkt nie został znaleziony:', productId);
+    throw new Error('Produkt nie został znaleziony');
+  }
+
+  console.log('✅ Znaleziono produkt:', { name: product.name, price: product.price });
+
   const existingItem = this.items.find(item => 
     item.product.toString() === productId.toString() &&
     JSON.stringify(item.selectedOptions) === JSON.stringify(options)
   );
 
   if (existingItem) {
+    console.log('🔄 Aktualizuję istniejący element koszyka');
     existingItem.quantity += quantity;
+    // Aktualizuj cenę na wypadek zmiany
+    existingItem.price = product.price;
+    existingItem.originalPrice = product.originalPrice;
   } else {
+    console.log('➕ Dodaję nowy element do koszyka z ceną:', product.price);
     this.items.push({
       product: productId,
       quantity,
+      price: product.price,
+      originalPrice: product.originalPrice,
       selectedOptions: options
     });
   }
 
+  console.log('💾 Zapisuję koszyk...');
   return this.save();
 };
 

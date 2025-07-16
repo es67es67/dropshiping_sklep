@@ -389,7 +389,7 @@ export default function ShopDetails({ theme }) {
   const [shop, setShop] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('details');
+  const [activeTab, setActiveTab] = useState('products');
 
   // Sprawdź czy użytkownik jest właścicielem sklepu
   const isOwner = shop && user && shop.owner && shop.owner._id === user._id;
@@ -537,16 +537,16 @@ export default function ShopDetails({ theme }) {
 
       <TabsContainer>
         <Tab 
-          active={activeTab === 'details'} 
-          onClick={() => setActiveTab('details')}
-        >
-          📋 Szczegóły
-        </Tab>
-        <Tab 
           active={activeTab === 'products'} 
           onClick={() => setActiveTab('products')}
         >
           📦 Produkty
+        </Tab>
+        <Tab 
+          active={activeTab === 'details'} 
+          onClick={() => setActiveTab('details')}
+        >
+          📋 Szczegóły
         </Tab>
       </TabsContainer>
 
@@ -610,7 +610,7 @@ export default function ShopDetails({ theme }) {
 
           <DetailSection>
             <SectionTitle>🚚 Dostawa</SectionTitle>
-            {shop.delivery.map((method, index) => (
+            {(shop.delivery || []).map((method, index) => (
               <DetailItem key={index}>
                 <DetailLabel>Metoda {index + 1}:</DetailLabel>
                 <DetailValue>{method}</DetailValue>
@@ -620,7 +620,7 @@ export default function ShopDetails({ theme }) {
 
           <DetailSection>
             <SectionTitle>💳 Płatności</SectionTitle>
-            {shop.payment.map((method, index) => (
+            {(shop.payment || []).map((method, index) => (
               <DetailItem key={index}>
                 <DetailLabel>Metoda {index + 1}:</DetailLabel>
                 <DetailValue>{method}</DetailValue>
@@ -630,7 +630,7 @@ export default function ShopDetails({ theme }) {
 
           <DetailSection>
             <SectionTitle>🕒 Godziny otwarcia</SectionTitle>
-            {Object.entries(shop.hours).map(([day, hours]) => (
+            {Object.entries(shop.hours || {}).map(([day, hours]) => (
               <DetailItem key={day}>
                 <DetailLabel>{day.charAt(0).toUpperCase() + day.slice(1)}:</DetailLabel>
                 <DetailValue>{hours}</DetailValue>

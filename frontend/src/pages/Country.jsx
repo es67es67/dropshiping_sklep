@@ -126,21 +126,6 @@ const TableCell = styled.div`
   color: ${props => props.theme.text};
 `;
 
-const Rating = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: #ffd700;
-`;
-
-const Location = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: ${props => props.theme.textSecondary};
-  font-size: 0.9rem;
-`;
-
 const LoadingSpinner = styled.div`
   display: flex;
   justify-content: center;
@@ -257,101 +242,47 @@ export default function Country({ theme }) {
   const renderTableRow = (item) => {
     switch (activeTab) {
       case 'shops':
-        return (
-          <>
-            <TableCell theme={theme}>{item.name}</TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaMapMarkerAlt /> {item.location}
-              </Location>
-            </TableCell>
-            <TableCell theme={theme}>
-              <Rating>
-                <FaStar /> {item.rating}
-              </Rating>
-            </TableCell>
-            <TableCell theme={theme}>{item.products}</TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaCalendar /> {item.created}
-              </Location>
-            </TableCell>
-          </>
-        );
+        return [
+          item.name,
+          item.location,
+          `${item.rating} ⭐`,
+          item.products,
+          item.created
+        ];
       case 'posts':
-        return (
-          <>
-            <TableCell theme={theme}>{item.title}</TableCell>
-            <TableCell theme={theme}>{item.author}</TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaMapMarkerAlt /> {item.location}
-              </Location>
-            </TableCell>
-            <TableCell theme={theme}>{item.likes}</TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaCalendar /> {item.created}
-              </Location>
-            </TableCell>
-          </>
-        );
+        return [
+          item.title,
+          item.author,
+          item.location,
+          item.likes,
+          item.created
+        ];
       case 'companies':
-        return (
-          <>
-            <TableCell theme={theme}>{item.name}</TableCell>
-            <TableCell theme={theme}>{item.industry}</TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaMapMarkerAlt /> {item.location}
-              </Location>
-            </TableCell>
-            <TableCell theme={theme}>{item.employees}</TableCell>
-            <TableCell theme={theme}>
-              <Rating>
-                <FaStar /> {item.rating}
-              </Rating>
-            </TableCell>
-          </>
-        );
+        return [
+          item.name,
+          item.industry,
+          item.location,
+          item.employees,
+          `${item.rating} ⭐`
+        ];
       case 'products':
-        return (
-          <>
-            <TableCell theme={theme}>{item.name}</TableCell>
-            <TableCell theme={theme}>{item.category}</TableCell>
-            <TableCell theme={theme}>{item.price}</TableCell>
-            <TableCell theme={theme}>
-              <Rating>
-                <FaStar /> {item.rating}
-              </Rating>
-            </TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaMapMarkerAlt /> {item.location}
-              </Location>
-            </TableCell>
-          </>
-        );
+        return [
+          item.name,
+          item.category,
+          item.price,
+          `${item.rating} ⭐`,
+          item.location
+        ];
       case 'users':
-        return (
-          <>
-            <TableCell theme={theme}>{item.name}</TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaMapMarkerAlt /> {item.location}
-              </Location>
-            </TableCell>
-            <TableCell theme={theme}>{item.posts}</TableCell>
-            <TableCell theme={theme}>{item.followers}</TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaCalendar /> {item.joined}
-              </Location>
-            </TableCell>
-          </>
-        );
+        return [
+          item.name,
+          item.location,
+          item.posts,
+          item.followers,
+          item.joined
+        ];
       default:
-        return null;
+        return [];
     }
   };
 
@@ -392,7 +323,9 @@ export default function Country({ theme }) {
           
           {currentData?.items?.map((item, index) => (
             <TableRow key={item.id || index} theme={theme}>
-              {renderTableRow(item)}
+              {renderTableRow(item).map((cell, cellIndex) => (
+                <TableCell key={cellIndex} theme={theme}>{cell}</TableCell>
+              ))}
             </TableRow>
           ))}
         </DataTable>

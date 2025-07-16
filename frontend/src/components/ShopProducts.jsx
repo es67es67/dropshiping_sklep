@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -222,8 +223,61 @@ const Select = styled.select`
   }
 `;
 
+const AddToCartButton = styled.button`
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background: ${props => props.theme.primary};
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.theme.primary}dd;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const Notification = styled.div`
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+  
+  &.success {
+    background: #4caf50;
+  }
+  
+  &.error {
+    background: #f44336;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+`;
+
 export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -295,7 +349,7 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
 
       if (response.ok) {
         const data = await response.json();
-        setProducts(data);
+        setProducts(data.products || data); // Obsługuje zarówno nową jak i starą strukturę
       }
     } catch (error) {
       console.error('Błąd podczas pobierania produktów:', error);
@@ -417,12 +471,64 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
     resetForm();
   };
 
+  const addToCart = async (productId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      setNotification({ type: 'error', message: 'Musisz się zalogować, aby dodać produkt do koszyka' });
+      return;
+    }
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/add`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          productId: productId,
+          quantity: 1
+        })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setNotification({ type: 'success', message: 'Dodano do koszyka!' });
+      } else {
+        setNotification({ type: 'error', message: data.error || 'Błąd dodawania do koszyka' });
+      }
+    } catch (error) {
+      setNotification({ type: 'error', message: 'Błąd sieci' });
+    }
+  };
+
+  // Auto-hide notification after 3 seconds
+  const [notification, setNotification] = useState(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   if (loading) {
     return <div>Ładowanie produktów...</div>;
   }
 
   return (
     <Container>
+      {notification && (
+        <Notification className={notification.type}>
+          {notification.message}
+        </Notification>
+      )}
+      
       <Title>Produkty sklepu</Title>
       
       <Header>
@@ -443,32 +549,42 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
       ) : (
         <ProductGrid>
           {products.map(product => (
-            <ProductCard key={product._id}>
-              {product.images && product.images[0] && (
-                <ProductImage src={product.images[0]} alt={product.name} />
-              )}
-              <ProductName>{product.name}</ProductName>
-              <ProductPrice>{product.price} zł</ProductPrice>
-              <ProductDescription>{product.description}</ProductDescription>
-              <ProductActions>
-                {isOwner && (
-                  <>
-                    <ActionButton 
-                      className="edit" 
-                      onClick={() => handleEdit(product)}
-                    >
-                      ✏️ Edytuj
-                    </ActionButton>
-                    <ActionButton 
-                      className="delete" 
-                      onClick={() => handleDelete(product._id)}
-                    >
-                      🗑️ Usuń
-                    </ActionButton>
-                  </>
+            <Link to={`/product/${product._id}`} key={product._id} style={{ textDecoration: 'none' }}>
+              <ProductCard>
+                {product.images && product.images[0] && (
+                  <ProductImage src={product.images[0]} alt={product.name} />
                 )}
-              </ProductActions>
-            </ProductCard>
+                <ProductName>{product.name}</ProductName>
+                <ProductPrice>{product.price} zł</ProductPrice>
+                <ProductDescription>{product.description}</ProductDescription>
+                <ProductActions>
+                  {isAuthenticated && product.isActive && product.stock > 0 && (
+                    <AddToCartButton 
+                      theme={theme}
+                      onClick={(e) => addToCart(product._id, e)}
+                    >
+                      🛒 Dodaj do koszyka
+                    </AddToCartButton>
+                  )}
+                  {isOwner && (
+                    <>
+                      <ActionButton 
+                        className="edit" 
+                        onClick={e => { e.preventDefault(); handleEdit(product); }}
+                      >
+                        ✏️ Edytuj
+                      </ActionButton>
+                      <ActionButton 
+                        className="delete" 
+                        onClick={e => { e.preventDefault(); handleDelete(product._id); }}
+                      >
+                        🗑️ Usuń
+                      </ActionButton>
+                    </>
+                  )}
+                </ProductActions>
+              </ProductCard>
+            </Link>
           ))}
         </ProductGrid>
       )}
