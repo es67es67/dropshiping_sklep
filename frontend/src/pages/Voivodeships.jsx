@@ -356,7 +356,7 @@ export default function Voivodeships({ theme }) {
     const defaultVoivodeship = voivodeships.find(v => v.id === '14') || voivodeships[0];
     setSelectedVoivodeship(defaultVoivodeship);
     fetchVoivodeshipData(defaultVoivodeship.id);
-  }, [location.state, voivodeshipCode]);
+  }, [location.state, voivodeshipCode, voivodeships]);
 
   const fetchUserLocation = async () => {
     try {
@@ -421,6 +421,16 @@ export default function Voivodeships({ theme }) {
     try {
       setLoading(true);
       setError(null);
+
+      // Ustaw dane przykładowe na początku, aby uniknąć migania
+      const fallbackData = {
+        shops: { count: sampleData.shops.length, items: sampleData.shops },
+        posts: { count: sampleData.posts.length, items: sampleData.posts },
+        companies: { count: sampleData.companies.length, items: sampleData.companies },
+        products: { count: sampleData.products.length, items: sampleData.products },
+        users: { count: sampleData.users.length, items: sampleData.users }
+      };
+      setData(fallbackData);
 
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
@@ -548,109 +558,47 @@ export default function Voivodeships({ theme }) {
   const renderTableRow = (item) => {
     switch (activeTab) {
       case 'shops':
-        return (
-          <>
-            <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/shop/${item._id}`)}>{item.name}</LinkCell>
-            </TableCell>
-            <TableCell theme={theme}>{item.location}</TableCell>
-            <TableCell theme={theme}>
-              <Rating>
-                <FaStar /> {item.rating}
-              </Rating>
-            </TableCell>
-            <TableCell theme={theme}>{item.products}</TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaCalendar /> {item.created}
-              </Location>
-            </TableCell>
-          </>
-        );
+        return [
+          item.name,
+          item.location,
+          `${item.rating} ⭐`,
+          item.products,
+          item.created
+        ];
       case 'posts':
-        return (
-          <>
-            <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/posts/${item._id}`)}>{item.title}</LinkCell>
-            </TableCell>
-            <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/users/${item.authorId || '6875773831cf77c7af5e07c3'}`)}>{item.author}</LinkCell>
-            </TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaMapMarkerAlt /> {item.location}
-              </Location>
-            </TableCell>
-            <TableCell theme={theme}>{item.likes}</TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaCalendar /> {item.created}
-              </Location>
-            </TableCell>
-          </>
-        );
+        return [
+          item.title,
+          item.author,
+          item.location,
+          item.likes,
+          item.created
+        ];
       case 'companies':
-        return (
-          <>
-            <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/company-profiles/${item._id}`)}>{item.name}</LinkCell>
-            </TableCell>
-            <TableCell theme={theme}>{item.industry}</TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaMapMarkerAlt /> {item.location}
-              </Location>
-            </TableCell>
-            <TableCell theme={theme}>{item.employees}</TableCell>
-            <TableCell theme={theme}>
-              <Rating>
-                <FaStar /> {item.rating}
-              </Rating>
-            </TableCell>
-          </>
-        );
+        return [
+          item.name,
+          item.industry,
+          item.location,
+          item.employees,
+          `${item.rating} ⭐`
+        ];
       case 'products':
-        return (
-          <>
-            <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/products/${item._id}`)}>{item.name}</LinkCell>
-            </TableCell>
-            <TableCell theme={theme}>{item.category}</TableCell>
-            <TableCell theme={theme}>{item.price}</TableCell>
-            <TableCell theme={theme}>
-              <Rating>
-                <FaStar /> {item.rating}
-              </Rating>
-            </TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaMapMarkerAlt /> {item.location}
-              </Location>
-            </TableCell>
-          </>
-        );
+        return [
+          item.name,
+          item.category,
+          item.price,
+          `${item.rating} ⭐`,
+          item.location
+        ];
       case 'users':
-        return (
-          <>
-            <TableCell theme={theme}>
-              <LinkCell theme={theme} onClick={() => navigate(`/users/${item._id}`)}>{item.name}</LinkCell>
-            </TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaMapMarkerAlt /> {item.location}
-              </Location>
-            </TableCell>
-            <TableCell theme={theme}>{item.posts}</TableCell>
-            <TableCell theme={theme}>{item.followers}</TableCell>
-            <TableCell theme={theme}>
-              <Location theme={theme}>
-                <FaCalendar /> {item.joined}
-              </Location>
-            </TableCell>
-          </>
-        );
+        return [
+          item.name,
+          item.location,
+          item.posts,
+          item.followers,
+          item.joined
+        ];
       default:
-        return null;
+        return [];
     }
   };
 
@@ -696,7 +644,9 @@ export default function Voivodeships({ theme }) {
           
           {currentData.items.map((item, index) => (
             <TableRow key={item._id || index} theme={theme}>
-              {renderTableRow(item)}
+              {renderTableRow(item).map((cell, cellIndex) => (
+                <TableCell key={cellIndex} theme={theme}>{cell}</TableCell>
+              ))}
             </TableRow>
           ))}
         </DataTable>
