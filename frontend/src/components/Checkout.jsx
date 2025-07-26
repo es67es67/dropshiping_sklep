@@ -52,7 +52,7 @@ const Checkout = () => {
 
   const fetchCart = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart`, {
+      const response = await fetch(`/api/cart`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -91,7 +91,7 @@ const Checkout = () => {
         notes: ''
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/orders`, {
+      const response = await fetch(`/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

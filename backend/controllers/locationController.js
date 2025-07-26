@@ -142,7 +142,7 @@ exports.getLocationFeed = async (req, res) => {
       totalPages: Math.ceil(total / limit),
       totalItems: total,
       location: {
-        id: location._id,
+        _id: location._id,
         name: location.name,
         type: location.type,
         stats: location.stats
@@ -1407,6 +1407,183 @@ const getLocationStats = async (req, res) => {
   }
 };
 
+// Pobierz konkretne województwo według kodu GUS
+const getVoivodeshipByCode = async (req, res) => {
+  try {
+    const { voivodeshipCode } = req.params;
+    
+    // Znajdź województwo według kodu GUS
+    const voivodeship = await Location.findOne({
+      type: 'województwo',
+      code: voivodeshipCode,
+      isActive: true
+    });
+    
+    if (!voivodeship) {
+      return res.status(404).json({ 
+        error: 'Województwo nie zostało znalezione',
+        code: voivodeshipCode 
+      });
+    }
+    
+    // Pobierz statystyki dla województwa
+    const stats = await getLocationStatsHelper(voivodeship._id);
+    
+    res.json({
+      voivodeship: {
+        id: voivodeship._id,
+        name: voivodeship.name,
+        code: voivodeship.code,
+        type: voivodeship.type,
+        stats: stats
+      }
+    });
+  } catch (err) {
+    console.error('Błąd pobierania województwa:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobierz konkretny powiat według kodu GUS
+const getCountyByCode = async (req, res) => {
+  try {
+    const { countyCode } = req.params;
+    
+    // Znajdź powiat według kodu GUS
+    const county = await Location.findOne({
+      type: 'powiat',
+      code: countyCode,
+      isActive: true
+    });
+    
+    if (!county) {
+      return res.status(404).json({ 
+        error: 'Powiat nie został znaleziony',
+        code: countyCode 
+      });
+    }
+    
+    // Pobierz statystyki dla powiatu
+    const stats = await getLocationStatsHelper(county._id);
+    
+    res.json({
+      county: {
+        id: county._id,
+        name: county.name,
+        code: county.code,
+        type: county.type,
+        stats: stats
+      }
+    });
+  } catch (err) {
+    console.error('Błąd pobierania powiatu:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobierz konkretną gminę według kodu GUS
+const getMunicipalityByCode = async (req, res) => {
+  try {
+    const { municipalityCode } = req.params;
+    
+    // Znajdź gminę według kodu GUS
+    const municipality = await Location.findOne({
+      type: 'gmina',
+      code: municipalityCode,
+      isActive: true
+    });
+    
+    if (!municipality) {
+      return res.status(404).json({ 
+        error: 'Gmina nie została znaleziona',
+        code: municipalityCode 
+      });
+    }
+    
+    // Pobierz statystyki dla gminy
+    const stats = await getLocationStatsHelper(municipality._id);
+    
+    res.json({
+      municipality: {
+        id: municipality._id,
+        name: municipality.name,
+        code: municipality.code,
+        type: municipality.type,
+        stats: stats
+      }
+    });
+  } catch (err) {
+    console.error('Błąd pobierania gminy:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Pobierz konkretne miasto/miejscowość według kodu GUS
+const getCityByCode = async (req, res) => {
+  try {
+    const { cityCode } = req.params;
+    
+    // Znajdź miasto/miejscowość według kodu GUS
+    const city = await Location.findOne({
+      type: 'miejscowość',
+      code: cityCode,
+      isActive: true
+    });
+    
+    if (!city) {
+      return res.status(404).json({ 
+        error: 'Miasto/miejscowość nie zostało znalezione',
+        code: cityCode 
+      });
+    }
+    
+    // Pobierz statystyki dla miasta
+    const stats = await getLocationStatsHelper(city._id);
+    
+    res.json({
+      city: {
+        id: city._id,
+        name: city.name,
+        code: city.code,
+        type: city.type,
+        stats: stats
+      }
+    });
+  } catch (err) {
+    console.error('Błąd pobierania miasta:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Funkcja pomocnicza do pobierania statystyk lokalizacji
+const getLocationStatsHelper = async (locationId) => {
+  try {
+    const userCount = await User.countDocuments({ location: locationId });
+    const shopCount = await Shop.countDocuments({ location: locationId });
+    const productCount = await Product.countDocuments({ 
+      shop: { $in: await Shop.find({ location: locationId }).select('_id') }
+    });
+    const postCount = await Post.countDocuments({ 
+      author: { $in: await User.find({ location: locationId }).select('_id') }
+    });
+    
+    return {
+      totalUsers: userCount,
+      totalShops: shopCount,
+      totalProducts: productCount,
+      totalPosts: postCount
+    };
+  } catch (error) {
+    console.error('Błąd pobierania statystyk:', error);
+    return {
+      totalUsers: 0,
+      totalShops: 0,
+      totalProducts: 0,
+      totalPosts: 0
+    };
+  }
+};
+
 module.exports = {
   getLocation,
   getLocations,
@@ -1428,5 +1605,9 @@ module.exports = {
   getLocationByCoordinates,
   getLocationShops,
   getLocationCompanies,
-  getLocationStats
+  getLocationStats,
+  getVoivodeshipByCode,
+  getCountyByCode,
+  getMunicipalityByCode,
+  getCityByCode
 }; 

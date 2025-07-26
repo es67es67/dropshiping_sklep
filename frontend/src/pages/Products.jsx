@@ -1,7 +1,314 @@
 import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import ProductList from '../components/ProductList';
 import ProductCard from '../components/ProductCard';
+import PageTitle from '../components/PageTitle';
 import { FaSearch, FaTimes, FaShoppingCart, FaHeart } from 'react-icons/fa';
+
+const Container = styled.div`
+  min-height: 100vh;
+  background: ${props => props.theme.background};
+`;
+
+const Header = styled.div`
+  background: ${props => props.theme.surface};
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid ${props => props.theme.border};
+`;
+
+const HeaderContent = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+`;
+
+const HeaderFlex = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+`;
+
+const HeaderInfo = styled.div``;
+
+const Title = styled.h1.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
+  font-size: 2rem;
+  font-weight: 800;
+  color: ${props => props.theme.text};
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+`;
+
+const Subtitle = styled.p.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
+  color: ${props => props.theme.textSecondary};
+  margin: 0.25rem 0 0 0;
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+`;
+
+const SearchContainer = styled.div`
+  position: relative;
+  max-width: 400px;
+  width: 100%;
+`;
+
+const SearchInput = styled.input.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 2.5rem;
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 8px;
+  background: ${props => props.theme.background};
+  color: ${props => props.theme.text};
+  font-size: 1rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.primary};
+    box-shadow: 0 0 0 3px ${props => props.theme.primary}20;
+  }
+  
+  &::placeholder {
+    color: ${props => props.theme.textSecondary};
+  }
+`;
+
+const SearchIcon = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: ${props => props.theme.textSecondary};
+`;
+
+const ClearButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: ${props => props.theme.textSecondary};
+  cursor: pointer;
+  padding: 0;
+  
+  &:hover {
+    color: ${props => props.theme.text};
+  }
+`;
+
+const MainContent = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+`;
+
+const ModalContent = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
+  background: ${props => props.theme.surface};
+  border-radius: 12px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+`;
+
+const ModalHeader = styled.div`
+  padding: 1.5rem;
+  border-bottom: 1px solid ${props => props.theme.border};
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+`;
+
+const ModalTitle = styled.h2`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${props => props.theme.text};
+  margin: 0;
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  color: ${props => props.theme.textSecondary};
+  cursor: pointer;
+  padding: 0;
+  
+  &:hover {
+    color: ${props => props.theme.text};
+  }
+`;
+
+const ModalBody = styled.div`
+  padding: 1.5rem;
+`;
+
+const ModalGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+  }
+`;
+
+const ProductImage = styled.img`
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+`;
+
+const ProductInfo = styled.div``;
+
+const ProductDescription = styled.p`
+  color: ${props => props.theme.textSecondary};
+  margin-bottom: 1rem;
+  line-height: 1.6;
+`;
+
+const PriceContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+`;
+
+const CurrentPrice = styled.span`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${props => props.theme.text};
+`;
+
+const OriginalPrice = styled.span`
+  font-size: 1.125rem;
+  color: ${props => props.theme.textSecondary};
+  text-decoration: line-through;
+`;
+
+const RatingContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+`;
+
+const StarIcon = styled(FaHeart)`
+  color: ${props => props.filled ? '#fbbf24' : '#d1d5db'};
+  width: 1rem;
+  height: 1rem;
+`;
+
+const RatingText = styled.span`
+  font-size: 0.875rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
+const ProductDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+`;
+
+const DetailItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
+const DetailLabel = styled.span``;
+
+const DetailValue = styled.span`
+  font-weight: 500;
+  color: ${props => props.theme.text};
+`;
+
+const FreeShipping = styled.div`
+  font-size: 0.875rem;
+  color: #10b981;
+`;
+
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 0.75rem;
+`;
+
+const AddToCartButton = styled.button`
+  flex: 1;
+  background: ${props => props.theme.primary};
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    background: ${props => props.theme.primary}dd;
+  }
+`;
+
+const WishlistButton = styled.button`
+  padding: 0.75rem;
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 8px;
+  background: ${props => props.theme.background};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.theme.border};
+  }
+`;
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -244,45 +551,44 @@ const Products = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <Container>
+      <PageTitle title="Produkty" description="Odkryj najlepsze produkty w najlepszych cenach" />
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Produkty</h1>
-              <p className="text-gray-600 mt-1">
+      <Header>
+        <HeaderContent>
+          <HeaderFlex>
+            <HeaderInfo>
+              <Title>Produkty</Title>
+              <Subtitle>
                 Odkryj najlepsze produkty w najlepszych cenach
-              </p>
-            </div>
+              </Subtitle>
+            </HeaderInfo>
             
             {/* Search Bar */}
-            <div className="relative max-w-md w-full">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaSearch className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
+            <SearchContainer>
+              <SearchIcon>
+                <FaSearch />
+              </SearchIcon>
+              <SearchInput
                 type="text"
                 placeholder="Szukaj produktów..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               {searchQuery && (
-                <button
+                <ClearButton
                   onClick={() => handleSearch('')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
-                  <FaTimes className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                </button>
+                  <FaTimes />
+                </ClearButton>
               )}
-            </div>
-          </div>
-        </div>
-      </div>
+            </SearchContainer>
+          </HeaderFlex>
+        </HeaderContent>
+      </Header>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <MainContent>
         <ProductList
           products={filteredProducts}
           loading={loading}
@@ -292,109 +598,99 @@ const Products = () => {
           onFiltersChange={handleFiltersChange}
           onSortChange={handleSortChange}
         />
-      </div>
+      </MainContent>
 
       {/* Quick View Modal */}
       {showQuickView && selectedProduct && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {selectedProduct.name}
-                </h2>
-                <button
-                  onClick={() => setShowQuickView(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <FaTimes className="h-6 w-6" />
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ModalOverlay onClick={() => setShowQuickView(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <ModalTitle>
+                {selectedProduct.name}
+              </ModalTitle>
+              <CloseButton
+                onClick={() => setShowQuickView(false)}
+              >
+                <FaTimes size={24} />
+              </CloseButton>
+            </ModalHeader>
+            
+            <ModalBody>
+              <ModalGrid>
                 {/* Product Image */}
-                <div>
-                  <img
-                    src={selectedProduct.mainImage}
-                    alt={selectedProduct.name}
-                    className="w-full h-64 object-cover rounded-lg"
-                  />
-                </div>
+                <ProductImage
+                  src={selectedProduct.mainImage}
+                  alt={selectedProduct.name}
+                />
                 
                 {/* Product Info */}
-                <div>
-                  <p className="text-gray-600 mb-4">
+                <ProductInfo>
+                  <ProductDescription>
                     {selectedProduct.description}
-                  </p>
+                  </ProductDescription>
                   
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-2xl font-bold text-gray-900">
+                  <PriceContainer>
+                    <CurrentPrice>
                       {selectedProduct.price.toFixed(2)} zł
-                    </span>
+                    </CurrentPrice>
                     {selectedProduct.originalPrice && (
-                      <span className="text-lg text-gray-500 line-through">
+                      <OriginalPrice>
                         {selectedProduct.originalPrice.toFixed(2)} zł
-                      </span>
+                      </OriginalPrice>
                     )}
-                  </div>
+                  </PriceContainer>
                   
-                  <div className="flex items-center gap-2 mb-4">
+                  <RatingContainer>
                     {[...Array(5)].map((_, i) => (
-                      <FaHeart
+                      <StarIcon
                         key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(selectedProduct.ratings.average)
-                            ? 'text-yellow-400'
-                            : 'text-gray-300'
-                        }`}
+                        filled={i < Math.floor(selectedProduct.ratings.average)}
                       />
                     ))}
-                    <span className="text-sm text-gray-600">
+                    <RatingText>
                       ({selectedProduct.ratings.count} opinii)
-                    </span>
-                  </div>
+                    </RatingText>
+                  </RatingContainer>
                   
-                  <div className="space-y-2 mb-6">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <span>Sklep:</span>
-                      <span className="font-medium">{selectedProduct.shop.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <span>Stan magazynowy:</span>
-                      <span className="font-medium">{selectedProduct.stock} sztuk</span>
-                    </div>
+                  <ProductDetails>
+                    <DetailItem>
+                      <DetailLabel>Sklep:</DetailLabel>
+                      <DetailValue>{selectedProduct.shop.name}</DetailValue>
+                    </DetailItem>
+                    <DetailItem>
+                      <DetailLabel>Stan magazynowy:</DetailLabel>
+                      <DetailValue>{selectedProduct.stock} sztuk</DetailValue>
+                    </DetailItem>
                     {selectedProduct.shipping.freeShipping && (
-                      <div className="text-sm text-green-600">
+                      <FreeShipping>
                         ✓ Darmowa dostawa
-                      </div>
+                      </FreeShipping>
                     )}
-                  </div>
+                  </ProductDetails>
                   
-                  <div className="flex gap-3">
-                    <button
+                  <ActionButtons>
+                    <AddToCartButton
                       onClick={() => {
                         handleAddToCart(selectedProduct);
                         setShowQuickView(false);
                       }}
-                      className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
                     >
                       <FaShoppingCart />
                       Dodaj do koszyka
-                    </button>
-                    <button
+                    </AddToCartButton>
+                    <WishlistButton
                       onClick={() => handleAddToWishlist(selectedProduct)}
-                      className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      <FaHeart className="text-red-500" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                      <FaHeart style={{ color: '#ef4444' }} />
+                    </WishlistButton>
+                  </ActionButtons>
+                </ProductInfo>
+              </ModalGrid>
+            </ModalBody>
+          </ModalContent>
+        </ModalOverlay>
       )}
-    </div>
+    </Container>
   );
 };
 

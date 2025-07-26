@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -318,6 +319,7 @@ export default function LocalProducts() {
   if (loading) {
     return (
       <Container>
+              <PageTitle title="Produkty lokalne" description="Produkty z Twojej okolicy" />
         <Title>Produkty lokalne</Title>
         <LoadingSpinner>Ładowanie produktów lokalnych...</LoadingSpinner>
       </Container>
@@ -326,6 +328,7 @@ export default function LocalProducts() {
 
   return (
     <Container>
+      <PageTitle title="Produkty lokalne" description="Produkty z Twojej okolicy" />
       <Title>🏘️ Produkty lokalne</Title>
       
       <StatsBar data-testid="stats-bar">

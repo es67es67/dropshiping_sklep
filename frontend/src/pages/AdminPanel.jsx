@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import { useAuth } from '../contexts/AuthContext';
 import DataManager from '../components/DataManager';
 import DataExport from '../components/DataExport';
+import { api } from '../utils/api';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -434,21 +436,7 @@ const AdminPanel = () => {
       setLoading(true);
       setError(null);
       
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${apiUrl}/api/admin/dashboard`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Błąd pobierania statystyk dashboardu');
-      }
-
-      const data = await response.json();
+      const data = await api.get('/admin/dashboard');
       setStats(data);
       
     } catch (err) {
@@ -473,22 +461,8 @@ const AdminPanel = () => {
       setLoading(true);
       setError(null);
       
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${apiUrl}/api/admin/users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Błąd pobierania użytkowników');
-      }
-
-      const data = await response.json();
-      setUsers(data.users || data || []);
+      const data = await api.get('/admin/users');
+      setUsers(data.data || data.users || data || []);
       
     } catch (err) {
       console.error('Błąd pobierania użytkowników:', err);
@@ -533,21 +507,7 @@ const AdminPanel = () => {
       setLoading(true);
       setError(null);
       
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${apiUrl}/api/admin/settings`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Błąd pobierania ustawień systemu');
-      }
-
-      const data = await response.json();
+      const data = await api.get('/admin/settings');
       setSystemSettings(data);
       
     } catch (err) {
@@ -560,22 +520,7 @@ const AdminPanel = () => {
 
   const updateSystemSetting = async (key, value) => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
-      const token = localStorage.getItem('token');
-      
-      const response = await fetch(`${apiUrl}/api/admin/settings`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ [key]: value })
-      });
-
-      if (!response.ok) {
-        throw new Error('Błąd aktualizacji ustawienia');
-      }
-
+      await api.put('/admin/settings', { [key]: value });
       setSystemSettings(prev => ({ ...prev, [key]: value }));
       
     } catch (err) {
@@ -606,6 +551,7 @@ const AdminPanel = () => {
   if (!user || !user.roles || !user.roles.includes('admin')) {
     return (
       <AccessDenied>
+      <PageTitle title="Panel Admina" description="Zarządzanie systemem i danymi" />
         <AccessDeniedIcon>🚫</AccessDeniedIcon>
         <h2>Brak dostępu</h2>
         <p>Panel administracyjny jest dostępny tylko dla administratorów.</p>
@@ -715,8 +661,8 @@ const AdminPanel = () => {
                     <strong>{user.username}</strong>
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{getRoleBadge(user.role)}</TableCell>
-                  <TableCell>{formatDate(user.lastLogin)}</TableCell>
+                  <TableCell>{getRoleBadge(user.roles && user.roles.length > 0 ? user.roles[0] : 'user')}</TableCell>
+                  <TableCell>{formatDate(user.lastSeen || user.lastLogin)}</TableCell>
                   <TableCell>
                     <ActionButton className="edit">Edytuj</ActionButton>
                     <ActionButton className="delete">Usuń</ActionButton>
@@ -798,6 +744,7 @@ const AdminPanel = () => {
 
   return (
     <Container>
+      <PageTitle title="Panel Admina" description="Zarządzanie systemem i danymi" />
       <Header>
         <Title>Panel administracyjny</Title>
         <UserInfo>

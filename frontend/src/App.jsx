@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
+import { HelmetProvider } from 'react-helmet-async';
 import { GlobalStyles, lightTheme, darkTheme } from './styles/GlobalStyles';
 import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './components/Login';
 import Register from './components/Register';
 import ProductList from './components/ProductList';
+import Products from './pages/Products';
 import ShopList from './components/ShopList';
 import ShopDetails from './components/ShopDetails';
 import Cart from './components/Cart';
@@ -52,6 +55,9 @@ import Post from './pages/Post';
 import AdvancedFeatures from './pages/AdvancedFeatures';
 import TerytFeatures from './pages/TerytFeatures';
 import ProductDetails from './components/ProductDetails';
+import LocationDemo from './pages/LocationDemo';
+import Feed from './pages/Feed';
+
 
 function App() {
   const [theme, setTheme] = useState('light');
@@ -221,12 +227,16 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/products" element={<ProductList />} />
-        <Route path="/shops" element={<ShopList />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/shops" element={
+          <ProtectedRoute>
+            <ShopList />
+          </ProtectedRoute>
+        } />
         <Route path="/shop/:shopId" element={<ShopDetails theme={currentTheme} />} />
         <Route path="/shops/:id" element={<Navigate to={(location) => `/shop/${location.pathname.split('/').pop()}`} replace />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/messages" element={<MessagingSystem />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="/payment" element={<PaymentSystem />} />
         <Route path="/location" element={<LocationSelector />} />
         <Route path="/gamification" element={<GamificationPanel />} />
@@ -263,16 +273,21 @@ function App() {
         <Route path="/friends" element={<Friends />} />
         <Route path="/friendship" element={<FriendshipSystem userId={localStorage.getItem('userId')} />} />
         <Route path="/posts/create" element={<PostCreate />} />
-        <Route path="/messages" element={<Messages />} />
         <Route path="/test" element={<TestComponent />} />
         <Route path="/location-map" element={<LocationMap theme={currentTheme} />} />
         <Route path="/company-profiles/:id" element={<CompanyProfile theme={currentTheme} />} />
         <Route path="/products/:id" element={<Product theme={currentTheme} />} />
         <Route path="/users/:id" element={<User theme={currentTheme} />} />
         <Route path="/posts/:id" element={<Post theme={currentTheme} />} />
+        <Route path="/feed" element={
+          <ProtectedRoute>
+            <Feed theme={currentTheme} />
+          </ProtectedRoute>
+        } />
         <Route path="/advanced-features" element={<AdvancedFeatures theme={currentTheme} />} />
         <Route path="/teryt-features" element={<TerytFeatures theme={currentTheme} />} />
-        <Route path="/product/:productId" element={<ProductDetails />} />
+        <Route path="/product/:productId" element={<ProductDetails theme={currentTheme} />} />
+        <Route path="/location-demo" element={<LocationDemo />} />
       </Routes>
     );
     switch (userLayout) {
@@ -326,14 +341,16 @@ function App() {
     }
   };
   return (
-    <ThemeProvider theme={currentTheme}>
-      <GlobalStyles />
-      <AuthProvider>
-        <Router>
-          {renderLayout()}
-        </Router>
-      </AuthProvider>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider theme={currentTheme}>
+        <GlobalStyles />
+        <AuthProvider>
+          <Router>
+            {renderLayout()}
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 

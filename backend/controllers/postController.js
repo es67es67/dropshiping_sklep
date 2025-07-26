@@ -212,3 +212,72 @@ exports.deletePost = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Pobierz posty konkretnego użytkownika (publiczne)
+exports.getUserPostsPublic = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+    
+    const posts = await Post.find({ 
+      author: userId,
+      isPublic: true 
+    })
+      .populate('author', 'username firstName lastName avatar')
+      .populate('likes', 'username firstName lastName avatar')
+      .populate('comments.author', 'username firstName lastName avatar')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Post.countDocuments({ 
+      author: userId,
+      isPublic: true 
+    });
+    
+    res.json({
+      posts,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      totalPosts: total
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Polub/odlub post
+exports.likePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    
+    const post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({ error: 'Post nie został znaleziony' });
+    }
+    
+    const isLiked = post.likes.includes(userId);
+    
+    if (isLiked) {
+      // Odlub post
+      post.likes = post.likes.filter(likeId => likeId.toString() !== userId);
+    } else {
+      // Polub post
+      post.likes.push(userId);
+    }
+    
+    await post.save();
+    
+    // Pobierz zaktualizowany post
+    const updatedPost = await Post.findById(id)
+      .populate('author', 'username firstName lastName avatar')
+      .populate('likes', 'username firstName lastName avatar')
+      .populate('comments.author', 'username firstName lastName avatar');
+    
+    res.json(updatedPost);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

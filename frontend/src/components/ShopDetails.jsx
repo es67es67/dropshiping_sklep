@@ -31,7 +31,9 @@ const Header = styled.div`
   }
 `;
 
-const BackButton = styled(Link)`
+const BackButton = styled(Link).withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -51,7 +53,9 @@ const BackButton = styled(Link)`
   }
 `;
 
-const ShopHero = styled.div`
+const ShopHero = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   background: ${props => props.theme.surface};
   border-radius: 20px;
   padding: 2rem;
@@ -82,7 +86,9 @@ const ShopHeader = styled.div`
   }
 `;
 
-const ShopLogo = styled.div`
+const ShopLogo = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   width: 120px;
   height: 120px;
   background: ${props => props.theme.gradient};
@@ -110,7 +116,9 @@ const ShopInfo = styled.div`
   flex: 1;
 `;
 
-const ShopName = styled.h1`
+const ShopName = styled.h1.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 2.5rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
@@ -401,7 +409,7 @@ export default function ShopDetails({ theme }) {
   const fetchShopDetails = async () => {
     try {
       setLoading(true);
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/shops/${shopId}`, {

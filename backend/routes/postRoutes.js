@@ -17,4 +17,12 @@ router.delete('/:id', postController.deletePost);
 router.post('/:id/like', postController.toggleLike);
 router.post('/:id/comment', postController.addComment);
 
+// NOWE ENDPOINTY DLA PROFILU UŻYTKOWNIKA
+
+// Pobierz posty konkretnego użytkownika (publiczne)
+router.get('/user/:userId', postController.getUserPostsPublic);
+
+// Polub/odlub post (alias)
+router.post('/:id/like', postController.likePost);
+
 module.exports = router;

@@ -31,7 +31,9 @@ const TabsContainer = styled.div`
   }
 `;
 
-const Tab = styled.button`
+const Tab = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['active', 'theme'].includes(prop)
+})`
   padding: 1rem 2rem;
   background: ${props => props.active ? props.theme.primary : 'transparent'};
   color: ${props => props.active ? 'white' : props.theme.text};
@@ -71,7 +73,9 @@ const LayoutGrid = styled.div`
   margin-bottom: 2rem;
 `;
 
-const LayoutCard = styled.div`
+const LayoutCard = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['selected', 'theme'].includes(prop)
+})`
   border: 3px solid ${props => props.selected ? props.theme.primary : props.theme.border};
   border-radius: 16px;
   padding: 1.5rem;
@@ -163,7 +167,9 @@ const ThemeGrid = styled.div`
   margin-bottom: 2rem;
 `;
 
-const ThemeCard = styled.div`
+const ThemeCard = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['selected', 'theme'].includes(prop)
+})`
   border: 3px solid ${props => props.selected ? props.theme.primary : props.theme.border};
   border-radius: 16px;
   padding: 1.5rem;
@@ -177,7 +183,9 @@ const ThemeCard = styled.div`
   }
 `;
 
-const ThemePreview = styled.div`
+const ThemePreview = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['gradient', 'color'].includes(prop)
+})`
   width: 100%;
   height: 120px;
   border-radius: 12px;
@@ -210,7 +218,9 @@ const ColorPalette = styled.div`
   margin-bottom: 2rem;
 `;
 
-const ColorOption = styled.div`
+const ColorOption = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['selected', 'theme'].includes(prop)
+})`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -227,7 +237,9 @@ const ColorOption = styled.div`
   }
 `;
 
-const ColorPreview = styled.div`
+const ColorPreview = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['color', 'theme'].includes(prop)
+})`
   width: 40px;
   height: 40px;
   border-radius: 50%;

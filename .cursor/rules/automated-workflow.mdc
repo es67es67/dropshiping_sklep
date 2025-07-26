@@ -1,0 +1,117 @@
+# AUTOMATYCZNY WORKFLOW I CHECKLISTA
+
+## 1. Kompletna automatyczna checklista
+
+| Krok | Status | Uwagi — kto ocenia / inspiracja |
+|------|--------|----------------------------------|
+| **Analiza wpływu zmiany** | Automatyczny | Architekt, Analityk, QA, Psycholog UX |
+| **Analiza zależności** | Automatyczny | AI + specjaliści od bezpieczeństwa, backend, frontend |
+| **Backup kodu** | Automatyczny | DevOps |
+| **Zaproponuj zmianę** | Automatyczny | Konsultacja z PM/Product Owner |
+| **Testy automatyczne** (unit, e2e, browser) | Automatyczny | QA – inspiracje z największych portali |
+| **Automatyczna naprawa + ponowne testy** | Automatyczny | AI + QA |
+| **Analiza wpływu (ponowna)** | Automatyczny | Cały zespół — wszyscy kluczowi specjaliści |
+| **Review zmian** | Automatyczny/ludzki | Kierownik, zespół wg komplementarności |
+| **Dokumentacja i logowanie** | Automatyczny | Dziennik zmian + dokumentacja inspiracji rynkowych |
+
+## 2. Zasady współpracy i komunikacji
+
+### Każde wdrażanie funkcji lub poprawka jest:
+
+#### Konsultowana pod kątem wpływu na:
+- **Użytkownika** - UX/UI, Psychologowie UX
+- **Marketing** - Strategia, retention, viral features
+- **Bezpieczeństwo** - DevSecOps, audyty, compliance
+- **Prawo** - Legal counsel, RODO, compliance
+- **Strona techniczna** - Architekci, DevOps, QA
+
+#### Automatycznie testowana:
+- Testy jednostkowe
+- Testy integracyjne
+- Testy przeglądarkowe
+- Testy performance
+- Testy bezpieczeństwa
+
+### Dokumentacja zmian:
+- Opisywane w changelogu (co, gdzie, dlaczego się zmieniło)
+- Powołanie na inspiracje lub standardy branżowe
+- Komentarze w kodzie z listą plików używających funkcji
+- Przewidywany wpływ na inne moduły
+- Ostrzeżenia o możliwych skutkach zmian
+
+## 3. Elastyczność, bezpieczeństwo, transparentność
+
+### Każdy krok automatyzuje, ale z pełną kontrolą:
+- **Backupy** - automatyczne przed każdą zmianą
+- **Code review** - automatyczne + manualne dla kluczowych zmian
+- **Testy** - automatyczne suite testów
+- **Audyty bezpieczeństwa** - automatyczne skanowanie
+
+### Nowe funkcje zawsze:
+- Najpierw wdrażane w środowisku testowym
+- Ograniczony rollout pod szczególnym nadzorem
+- Nadzór zespołu QA, DevSecOps oraz psychologów UX
+- Monitoring w czasie rzeczywistym
+
+## 4. Automatyczne testy i naprawy
+
+### Po każdej zmianie:
+```bash
+# Automatyczny workflow testów
+npm run test:unit          # Testy jednostkowe
+npm run test:integration   # Testy integracyjne
+npm run test:e2e          # Testy end-to-end
+npm run test:puppeteer:smoke        # Podstawowe testy Puppeteer
+npm run test:puppeteer:friendship   # Testy systemu znajomości
+npm run test:puppeteer:notifications # Testy powiadomień
+npm run test:puppeteer:ecommerce    # Testy e-commerce
+npm run test:puppeteer:responsive   # Testy responsywności
+npm run test:puppeteer:performance  # Testy wydajności
+npm run test:puppeteer:accessibility # Testy dostępności
+npm run test:security     # Testy bezpieczeństwa
+npm run test:performance  # Testy wydajności
+```
+
+### Jeśli test nie przejdzie:
+1. **Automatyczna analiza logów** - AI analizuje błędy
+2. **Automatyczna naprawa** - AI proponuje i implementuje poprawki
+3. **Ponowne testy** - automatyczne uruchomienie testów
+4. **Pętla napraw** - powtarzaj aż wszystkie testy przejdą
+5. **Wyjątek** - jeśli nie można naprawić automatycznie, zgłoś do ręcznej interwencji
+
+## 5. Monitoring i raportowanie
+
+### Automatyczne raporty:
+- **Status testów** - codzienny raport przejścia testów
+- **Performance metrics** - monitoring wydajności
+- **Security alerts** - powiadomienia o zagrożeniach
+- **User feedback** - analiza feedbacku użytkowników
+- **Business metrics** - KPI, conversion rates, engagement
+
+### Dziennik zmian:
+```markdown
+# Changelog - [Data]
+
+## Zmiany techniczne
+- [Funkcja] Dodano system rekomendacji produktów
+- [Inspiracja] Amazon, Netflix recommendation algorithms
+- [Wpływ] userExperience.js, productService.js, analytics.js
+
+## Wpływ na zespół
+- **UX/UI**: Nowe komponenty rekomendacji
+- **Backend**: Nowe API endpoints
+- **Analytics**: Nowe metryki śledzenia
+- **Marketing**: Możliwość personalizacji kampanii
+
+## Testy i walidacja
+- ✅ Testy jednostkowe: 95% coverage
+- ✅ Testy integracyjne: Wszystkie przechodzą
+- ✅ Testy e2e: Scenariusze zakupowe
+- ✅ Testy Puppeteer: Wszystkie funkcje UI/UX
+- ✅ Performance: <2s load time
+- ✅ Security: Brak podatności
+```
+description:
+globs:
+alwaysApply: false
+---

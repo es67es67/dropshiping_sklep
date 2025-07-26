@@ -1,0 +1,62 @@
+# OCHRONA KLUCZOWYCH FRAGMENTÓW PROJEKTU
+
+## 1. Zasady ochrony kodu i struktury projektu
+
+### Analiza zależności przed zmianami
+- **PRZED KAŻDĄ ZMIANĄ** wykonaj pełną analizę zależności danego fragmentu kodu w całym projekcie
+- Nie zmieniaj plików, zmiennych, funkcji, struktur ani modułów, które odpowiadają za działanie innych części projektu
+- Jeśli zmiana mogłaby wpłynąć negatywnie na pozostałe moduły lub funkcjonalności - ZATRZYMAJ się i przeanalizuj wpływ
+
+### Komentowanie zależności
+```javascript
+// [KLUCZOWA FUNKCJA] getUserData
+// Używana w: authController.js, profileService.js, ordersModule.js
+// UWAGA: Zmiana tej funkcji może wpłynąć na:
+// - Logowanie użytkowników
+// - Wyświetlanie profilu
+// - Przetwarzanie zamówień
+// - System powiadomień
+```
+
+### Bezpieczne wprowadzanie zmian
+- Wdrażaj zmiany etapowo i wyłącznie w tych obszarach kodu, gdzie została potwierdzona pełna izolacja
+- Nie zmieniaj fragmentów powiązanych z wieloma kluczowymi modułami bez zatwierdzenia
+- Aktualizuj komentarze za każdym razem, gdy zmieniasz zależności
+
+## 2. Automatyczne testy i workflow
+
+### Po każdej zmianie uruchamiaj:
+- Testy jednostkowe
+- Testy integracyjne  
+- Testy e2e
+- Testy przeglądarkowe
+
+### Jeśli test nie przejdzie:
+- Automatycznie analizuj logi
+- Wprowadzaj poprawki aż do uzyskania przejścia wszystkich testów
+- Lub zgłoś wyjątek do ręcznej interwencji
+
+## 3. Dokumentacja i przejrzystość
+
+### W changelogu/komentarzach zapisuj:
+- Które fragmenty mogły zostać pośrednio naruszone przez zmianę
+- Aktualizuj dokumentację techniczną przy każdej istotnej zmianie
+- Opisuj zależności i wpływ na inne moduły
+
+### Przykład dokumentacji:
+```javascript
+/**
+ * @function processUserOrder
+ * @description Przetwarza zamówienie użytkownika
+ * @dependencies cartController.js, paymentService.js, notificationService.js
+ * @affectedModules userProfile.js, orderHistory.js, loyaltySystem.js
+ * @lastModified 2024-01-15
+ * @changeLog 
+ * - 2024-01-15: Dodano integrację z systemem lojalnościowym
+ * - 2024-01-10: Poprawiono obsługę płatności
+ */
+```
+description:
+globs:
+alwaysApply: false
+---

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -795,6 +796,7 @@ export default function LocationMap() {
 
   return (
     <MapPageContainer>
+      <PageTitle title="Mapa lokalizacji" description="Interaktywna mapa lokalizacji" />
       <MapHeader>
         <MapTitle>Interaktywna Mapa Lokalizacji</MapTitle>
         <MapSubtitle>

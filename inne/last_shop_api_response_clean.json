@@ -1,0 +1,173 @@
+﻿{
+    "address":  {
+                    "street":  "ul. Przykładowa 59",
+                    "houseNumber":  "44",
+                    "postalCode":  "99-236",
+                    "city":  "Świdnik",
+                    "voivodeship":  "Lubelskie"
+                },
+    "teryt":  {
+                  "countyCode":  "01",
+                  "fullCode":  "0601010665011",
+                  "municipalityCode":  "01",
+                  "simcCode":  "0665011",
+                  "tercCode":  "060101",
+                  "voivodeshipCode":  "06"
+              },
+    "location":  {
+                     "coordinates":  {
+                                         "lat":  51.219928581535555,
+                                         "lng":  22.693563330832934
+                                     },
+                     "type":  "Point"
+                 },
+    "openingHours":  {
+                         "monday":  {
+                                        "open":  "09:00",
+                                        "close":  "17:00",
+                                        "closed":  false
+                                    },
+                         "tuesday":  {
+                                         "open":  "09:00",
+                                         "close":  "17:00",
+                                         "closed":  false
+                                     },
+                         "wednesday":  {
+                                           "open":  "09:00",
+                                           "close":  "17:00",
+                                           "closed":  false
+                                       },
+                         "thursday":  {
+                                          "open":  "09:00",
+                                          "close":  "17:00",
+                                          "closed":  false
+                                      },
+                         "friday":  {
+                                        "open":  "09:00",
+                                        "close":  "17:00",
+                                        "closed":  false
+                                    },
+                         "saturday":  {
+                                          "open":  "09:00",
+                                          "close":  "15:00",
+                                          "closed":  false
+                                      },
+                         "sunday":  {
+                                        "open":  "",
+                                        "close":  "",
+                                        "closed":  true
+                                    }
+                     },
+    "ratings":  {
+                    "distribution":  {
+                                         "1":  2,
+                                         "2":  7,
+                                         "3":  0,
+                                         "4":  34,
+                                         "5":  4
+                                     },
+                    "average":  4,
+                    "count":  68
+                },
+    "stats":  {
+                  "totalProducts":  20,
+                  "totalSales":  177,
+                  "totalRevenue":  41851,
+                  "totalViews":  2541,
+                  "totalOrders":  523,
+                  "averageOrderValue":  139
+              },
+    "returnPolicy":  {
+                         "period":  14,
+                         "conditions":  [
+
+                                        ]
+                     },
+    "seo":  {
+                "keywords":  [
+
+                             ]
+            },
+    "settings":  {
+                     "notifications":  {
+                                           "email":  true,
+                                           "sms":  false,
+                                           "push":  true
+                                       },
+                     "autoAcceptOrders":  false,
+                     "requireApproval":  true
+                 },
+    "_id":  "6875d1867f40145e58a47086",
+    "name":  "ReadMore Świdnik",
+    "description":  "Kompleksowa oferta dla każdego w Świdnik",
+    "category":  "Książki",
+    "owner":  {
+                  "_id":  "687381a46a3a13da8a94177c",
+                  "username":  "testuser1752400289579",
+                  "firstName":  "TestUser1752400289579",
+                  "lastName":  "TestLastName1752400289579"
+              },
+    "email":  "kontakt@readmorewidnik.pl",
+    "phone":  "+48 873279332",
+    "website":  "https://readmorewidnik.pl",
+    "images":  [
+
+               ],
+    "isActive":  true,
+    "isVerified":  false,
+    "isFeatured":  false,
+    "status":  "active",
+    "deliveryOptions":  [
+                            {
+                                "name":  "Odbiór osobisty",
+                                "description":  "Bezpłatny odbiór w sklepie",
+                                "cost":  0,
+                                "estimatedDays":  1,
+                                "_id":  "6875d1867f40145e58a47087"
+                            },
+                            {
+                                "name":  "Dostawa kurierem",
+                                "description":  "Dostawa do domu",
+                                "cost":  15.99,
+                                "estimatedDays":  2,
+                                "_id":  "6875d1867f40145e58a47088"
+                            }
+                        ],
+    "paymentMethods":  [
+                           {
+                               "name":  "Gotówka",
+                               "description":  "Płatność gotówką",
+                               "enabled":  true,
+                               "_id":  "6875d1867f40145e58a47089"
+                           },
+                           {
+                               "name":  "Karta",
+                               "description":  "Płatność kartą",
+                               "enabled":  true,
+                               "_id":  "6875d1867f40145e58a4708a"
+                           },
+                           {
+                               "name":  "Przelew",
+                               "description":  "Płatność przelewem",
+                               "enabled":  true,
+                               "_id":  "6875d1867f40145e58a4708b"
+                           }
+                       ],
+    "tags":  [
+                 "Książki",
+                 "Świdnik",
+                 "Lubelskie"
+             ],
+    "categories":  [
+                       "Książki"
+                   ],
+    "followers":  [
+
+                  ],
+    "reviews":  [
+
+                ],
+    "__v":  0,
+    "createdAt":  "2025-07-15T03:56:54.992Z",
+    "updatedAt":  "2025-07-16T18:23:22.753Z"
+}

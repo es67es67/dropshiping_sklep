@@ -1,0 +1,151 @@
+# FUNKCJE MARKETPLACE I SOCIAL COMMERCE
+
+## 1. Kluczowe funkcje marketplace
+
+### Podstawowe funkcje e-commerce:
+- **Katalog produktów** - wyszukiwanie, filtrowanie, sortowanie
+- **Koszyk zakupów** - dodawanie, edycja, usuwanie produktów
+- **Proces zakupowy** - checkout, płatności, potwierdzenie
+- **Zarządzanie zamówieniami** - historia, status, śledzenie
+- **System ocen i recenzji** - oceny produktów, komentarze
+- **Wishlist** - lista życzeń, zapisywanie produktów
+- **Powiadomienia** - email, push, SMS
+
+### Zaawansowane funkcje:
+- **System rekomendacji** - AI-powered recommendations
+- **Personalizacja** - spersonalizowane treści i oferty
+- **Loyalty program** - program lojalnościowy, punkty
+- **Social sharing** - udostępnianie produktów w mediach społecznościowych
+- **Live chat** - czat z obsługą klienta
+- **AR/VR** - wirtualne przymierzanie, wizualizacja produktów
+
+## 2. Funkcje społecznościowe
+
+### Social features:
+- **User profiles** - profile użytkowników z awatarami
+- **Following system** - obserwowanie innych użytkowników
+- **Social feed** - strumień aktywności społeczności
+- **Groups/Communities** - grupy tematyczne
+- **Events** - wydarzenia, meetupy
+- **Messaging** - prywatne wiadomości
+- **Comments & discussions** - komentarze, dyskusje
+
+### Content creation:
+- **Posts** - posty z tekstem, zdjęciami, filmami
+- **Stories** - krótkie historie (24h)
+- **Live streaming** - transmisje na żywo
+- **User-generated content** - treści tworzone przez użytkowników
+- **Hashtags** - tagi, kategorie treści
+- **Trending topics** - popularne tematy
+
+## 3. Funkcje sprzedawcy
+
+### Seller dashboard:
+- **Product management** - zarządzanie produktami
+- **Order management** - zarządzanie zamówieniami
+- **Inventory management** - zarządzanie zapasami
+- **Analytics** - analityka sprzedaży
+- **Customer support** - obsługa klienta
+- **Promotions** - promocje, kody rabatowe
+
+### Advanced seller features:
+- **Multi-vendor marketplace** - wielu sprzedawców
+- **Commission system** - system prowizji
+- **Escrow system** - system depozytowy
+- **Dispute resolution** - rozwiązywanie sporów
+- **Seller verification** - weryfikacja sprzedawców
+- **Performance metrics** - metryki wydajności
+
+## 4. Funkcje płatności i finansów
+
+### Payment methods:
+- **Credit cards** - karty kredytowe
+- **Digital wallets** - portfele cyfrowe (PayPal, Apple Pay)
+- **Bank transfers** - przelewy bankowe
+- **Cryptocurrency** - kryptowaluty
+- **Buy now, pay later** - kup teraz, zapłać później
+- **Installments** - raty
+
+### Financial features:
+- **Multi-currency** - obsługa wielu walut
+- **Tax calculation** - obliczanie podatków
+- **Invoice generation** - generowanie faktur
+- **Refund system** - system zwrotów
+- **Subscription billing** - płatności subskrypcyjne
+- **Affiliate program** - program partnerski
+
+## 5. Funkcje AI i automatyzacji
+
+### AI-powered features:
+- **Product recommendations** - rekomendacje produktów
+- **Search optimization** - optymalizacja wyszukiwania
+- **Price optimization** - optymalizacja cen
+- **Fraud detection** - wykrywanie oszustw
+- **Customer segmentation** - segmentacja klientów
+- **Predictive analytics** - analityka predykcyjna
+
+### Automation:
+- **Order processing** - automatyczne przetwarzanie zamówień
+- **Inventory alerts** - alerty o zapasach
+- **Email marketing** - automatyczne kampanie email
+- **Customer support** - chatbot, FAQ automation
+- **Review moderation** - moderacja recenzji
+- **Content curation** - kuratorstwo treści
+
+## 6. Funkcje mobilne
+
+### Mobile-first features:
+- **Progressive Web App (PWA)** - aplikacja progresywna
+- **Push notifications** - powiadomienia push
+- **Offline functionality** - działanie offline
+- **Camera integration** - integracja z kamerą
+- **Location services** - usługi lokalizacyjne
+- **Biometric authentication** - uwierzytelnianie biometryczne
+
+### Mobile-specific features:
+- **QR code scanning** - skanowanie kodów QR
+- **Voice search** - wyszukiwanie głosowe
+- **Gesture controls** - sterowanie gestami
+- **Augmented reality** - rzeczywistość rozszerzona
+- **Social login** - logowanie przez media społecznościowe
+- **One-click checkout** - zakup jednym kliknięciem
+
+## 7. Funkcje bezpieczeństwa i compliance
+
+### Security features:
+- **Two-factor authentication** - dwuskładnikowe uwierzytelnianie
+- **Fraud prevention** - zapobieganie oszustwom
+- **Data encryption** - szyfrowanie danych
+- **Secure payment processing** - bezpieczne przetwarzanie płatności
+- **Privacy controls** - kontrola prywatności
+- **Content moderation** - moderacja treści
+
+### Compliance:
+- **GDPR compliance** - zgodność z RODO
+- **PCI DSS compliance** - zgodność z PCI DSS
+- **Tax compliance** - zgodność podatkowa
+- **Consumer protection** - ochrona konsumentów
+- **Age verification** - weryfikacja wieku
+- **Terms of service** - regulamin usługi
+
+## 8. Funkcje analityki i raportowania
+
+### Analytics:
+- **User behavior tracking** - śledzenie zachowań użytkowników
+- **Conversion tracking** - śledzenie konwersji
+- **Revenue analytics** - analityka przychodów
+- **Performance metrics** - metryki wydajności
+- **A/B testing** - testy A/B
+- **Heatmaps** - mapy cieplne
+
+### Reporting:
+- **Sales reports** - raporty sprzedaży
+- **Customer reports** - raporty klientów
+- **Inventory reports** - raporty zapasów
+- **Financial reports** - raporty finansowe
+- **Marketing reports** - raporty marketingowe
+- **Custom dashboards** - niestandardowe dashboardy
+description:
+globs:
+alwaysApply: false
+---

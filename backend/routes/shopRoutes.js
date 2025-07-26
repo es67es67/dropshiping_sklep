@@ -16,15 +16,16 @@ router.post('/', shopController.createShop);
 router.post('/:id/upload', uploadShop, shopController.uploadImages);
 router.get('/user', shopController.getUserShops);
 router.get('/search', shopController.searchShops);
-// Route dla pobierania wszystkich sklepów (musi być przed /:id)
-router.get('/', shopController.getAllShops);
 // Route dla pobierania wszystkich sklepów (włącznie z nieaktywnymi)
 router.get('/all', shopController.getAllShopsIncludingInactive);
 router.put('/:id', shopController.updateShop);
 router.delete('/:id', shopController.deleteShop);
 
 // Publiczne trasy (po autoryzacji, ale przed /:id)
-router.get('/:id', shopController.getShop);
+router.get('/:id', shopController.getShop); // Przeniesione tutaj - publiczny dostęp
+
+// Publiczne trasy (po autoryzacji, ale przed /:id)
+// router.get('/:id', shopController.getShop); // Usunięte stąd
 
 // Recenzje i oceny
 router.post('/:id/review', shopController.addReview);

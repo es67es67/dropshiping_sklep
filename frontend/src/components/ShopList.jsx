@@ -1,7 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
@@ -405,7 +406,8 @@ const EmptyState = styled.div`
 `;
 
 export default function ShopList() {
-  const { user } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -419,6 +421,11 @@ export default function ShopList() {
       setLoading(true);
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
+      
+      // DEBUG: Sprawdź czy użytkownik jest zalogowany
+      console.log('[DEBUG] Użytkownik z AuthContext:', user);
+      console.log('[DEBUG] Token z localStorage:', token);
+      console.log('[DEBUG] isAuthenticated:', isAuthenticated);
       
       // Wybierz endpoint w zależności od filtra
       const endpoint = showAllShops ? '/api/shops' : '/api/shops/user';
@@ -435,7 +442,18 @@ export default function ShopList() {
       console.log('[DEBUG] Status odpowiedzi:', response.status);
       
       if (!response.ok) {
-        throw new Error('Nie udało się pobrać sklepów');
+        const errorText = await response.text();
+        console.log('[DEBUG] Błąd odpowiedzi:', errorText);
+        
+        // Sprawdź czy to błąd wygasłego tokenu
+        if (response.status === 401 && errorText.includes('Token wygasł')) {
+          console.log('[DEBUG] Token wygasł - przekierowuję do logowania');
+          logout(); // Wyczyść dane użytkownika
+          navigate('/login'); // Przekieruj do logowania
+          return;
+        }
+        
+        throw new Error(`Nie udało się pobrać sklepów: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
@@ -480,6 +498,7 @@ export default function ShopList() {
   if (loading) {
     return (
       <Container>
+        <PageTitle title="Sklepy" description="Przeglądaj sklepy" />
         <div style={{ textAlign: 'center', padding: '4rem' }}>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
           <p>Ładowanie sklepów...</p>
@@ -505,6 +524,7 @@ export default function ShopList() {
 
   return (
     <Container>
+      <PageTitle title="Sklepy" description="Przeglądaj sklepy" />
       <div style={{background: 'yellow', color: 'red', fontSize: '2rem', textAlign: 'center', padding: '1rem', marginBottom: '2rem'}}>
         TEST: ShopList.jsx renderuje się! Liczba sklepów: {Array.isArray(shops) ? shops.length : 'BŁĄD: shops nie jest tablicą'}
       </div>

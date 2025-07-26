@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -12,7 +13,9 @@ const Container = styled.div`
   }
 `;
 
-const Title = styled.h1`
+const Title = styled.h1.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 2.5rem;
   font-weight: 800;
   text-align: center;
@@ -39,7 +42,9 @@ const StatsGrid = styled.div`
   }
 `;
 
-const StatCard = styled.div`
+const StatCard = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   background: ${props => props.theme.surface};
   padding: 2rem;
   border-radius: 16px;
@@ -66,7 +71,9 @@ const StatIcon = styled.div`
   }
 `;
 
-const StatValue = styled.div`
+const StatValue = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 2.5rem;
   font-weight: 800;
   color: ${props => props.theme.primary};
@@ -77,7 +84,9 @@ const StatValue = styled.div`
   }
 `;
 
-const StatLabel = styled.div`
+const StatLabel = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 1rem;
   color: ${props => props.theme.textSecondary};
   text-transform: uppercase;
@@ -88,7 +97,9 @@ const StatLabel = styled.div`
   }
 `;
 
-const ProgressBar = styled.div`
+const ProgressBar = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   width: 100%;
   height: 8px;
   background: ${props => props.theme.border};
@@ -97,7 +108,9 @@ const ProgressBar = styled.div`
   margin-top: 1rem;
 `;
 
-const ProgressFill = styled.div`
+const ProgressFill = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['progress', 'theme'].includes(prop)
+})`
   height: 100%;
   background: ${props => props.theme.gradient};
   width: ${props => props.progress}%;
@@ -478,7 +491,7 @@ export default function GamificationPanel() {
 
   if (!isAuthenticated) {
     return (
-      <Container>
+      <Container>        <PageTitle title="Gamifikacja" description="System gamifikacji" />
         <EmptyState>
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔐</div>
           <h3>Zaloguj się</h3>
@@ -505,6 +518,7 @@ export default function GamificationPanel() {
 
   return (
     <Container>
+      <PageTitle title="Gamifikacja" description="Panel gamifikacji i osiągnięć" />
       <Title>Panel Gamifikacji</Title>
       
       {error && <ErrorMessage>{error}</ErrorMessage>}

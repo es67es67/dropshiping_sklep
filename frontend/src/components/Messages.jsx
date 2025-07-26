@@ -36,7 +36,7 @@ const Messages = () => {
   const loadConversations = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/messages/conversations`, {
+      const response = await fetch(`${API_URL}/messaging/conversations/${user._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -44,7 +44,7 @@ const Messages = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setConversations(data.conversations || []);
+        setConversations(data || []);
       }
     } catch (error) {
       console.error('Błąd ładowania konwersacji:', error);
@@ -55,7 +55,7 @@ const Messages = () => {
 
   const loadMessages = async (conversationId) => {
     try {
-      const response = await fetch(`${API_URL}/api/messages/${conversationId}`, {
+      const response = await fetch(`${API_URL}/messaging/messages/${user._id}/${conversationId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -63,7 +63,7 @@ const Messages = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setMessages(data.messages || []);
+        setMessages(data || []);
       }
     } catch (error) {
       console.error('Błąd ładowania wiadomości:', error);
@@ -77,7 +77,7 @@ const Messages = () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/api/users/search?q=${encodeURIComponent(query)}`, {
+      const response = await fetch(`${API_URL}/users/search?q=${encodeURIComponent(query)}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -86,9 +86,7 @@ const Messages = () => {
       if (response.ok) {
         const data = await response.json();
         // Filtruj użytkowników, którzy nie są już w konwersacjach
-        const existingUserIds = conversations.map(conv => 
-          conv.participants.find(p => p._id !== user._id)?._id
-        );
+        const existingUserIds = conversations.map(conv => conv._id);
         const filteredUsers = data.users.filter(u => 
           u._id !== user._id && !existingUserIds.includes(u._id)
         );
@@ -101,21 +99,20 @@ const Messages = () => {
 
   const startConversation = async (userId) => {
     try {
-      const response = await fetch(`${API_URL}/api/messages/conversations`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ participantId: userId })
-      });
+      // W modułu messaging konwersacje są tworzone automatycznie przy pierwszej wiadomości
+      // Więc po prostu ustawiamy wybraną konwersację
+      const newConversation = {
+        _id: userId,
+        user: searchResults.find(u => u._id === userId)
+      };
+      setSelectedConversation(newConversation);
+      setSearchResults([]);
+      setSearchQuery('');
       
-      if (response.ok) {
-        const data = await response.json();
-        setConversations([data.conversation, ...conversations]);
-        setSelectedConversation(data.conversation);
-        setSearchResults([]);
-        setSearchQuery('');
+      // Dodaj do listy konwersacji jeśli nie istnieje
+      const exists = conversations.find(conv => conv._id === userId);
+      if (!exists) {
+        setConversations([newConversation, ...conversations]);
       }
     } catch (error) {
       console.error('Błąd tworzenia konwersacji:', error);
@@ -128,24 +125,28 @@ const Messages = () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/messages/${selectedConversation._id}`, {
+      const response = await fetch(`${API_URL}/messaging/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ content: newMessage })
+        body: JSON.stringify({ 
+          senderId: user._id,
+          receiverId: selectedConversation._id,
+          content: newMessage 
+        })
       });
       
       if (response.ok) {
         const data = await response.json();
-        setMessages([...messages, data.message]);
+        setMessages([...messages, data]);
         setNewMessage('');
         
         // Aktualizuj ostatnią wiadomość w konwersacji
         const updatedConversations = conversations.map(conv => 
           conv._id === selectedConversation._id 
-            ? { ...conv, lastMessage: data.message }
+            ? { ...conv, lastMessage: data }
             : conv
         );
         setConversations(updatedConversations);
@@ -166,7 +167,7 @@ const Messages = () => {
   };
 
   const getOtherParticipant = (conversation) => {
-    return conversation.participants.find(p => p._id !== user._id);
+    return conversation.user || conversation.participants?.find(p => p._id !== user._id);
   };
 
   const formatDate = (date) => {
@@ -182,6 +183,22 @@ const Messages = () => {
       return messageDate.toLocaleDateString();
     }
   };
+
+  // Sprawdź czy użytkownik jest zalogowany
+  if (!user || !token) {
+    return (
+      <div className="messages-container">
+        <div className="messages-login-required">
+          <h2>Wiadomości</h2>
+          <p>Aby korzystać z wiadomości, musisz się zalogować.</p>
+          <div className="login-actions">
+            <a href="/login" className="btn btn-primary">Zaloguj się</a>
+            <a href="/register" className="btn btn-secondary">Zarejestruj się</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="messages-container">

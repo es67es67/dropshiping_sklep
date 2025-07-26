@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import { FaBell, FaComments, FaShoppingCart, FaChevronDown, FaGlobeEurope, FaCity, FaMapMarkedAlt, FaMapSigns, FaMap } from 'react-icons/fa';
+import IntegratedSearch from './IntegratedSearch';
 
 const Nav = styled.nav.withConfig({
   shouldForwardProp: (prop) => !['layout', 'theme'].includes(prop)
@@ -82,7 +83,9 @@ const NavLinks = styled.div.withConfig({
   }
 `;
 
-const NavLink = styled(Link)`
+const NavLink = styled(Link).withConfig({
+  shouldForwardProp: (prop) => !['layout', 'theme'].includes(prop)
+})`
   color: ${props => props.theme.text};
   text-decoration: none;
   font-weight: 500;
@@ -399,7 +402,9 @@ const LocationDropdownLabel = styled.div`
   cursor: default;
 `;
 
-const CartLink = styled(Link)`
+const CartLink = styled(Link).withConfig({
+  shouldForwardProp: (prop) => !['layout', 'theme'].includes(prop)
+})`
   color: ${props => props.theme.text};
   text-decoration: none;
   font-weight: 500;
@@ -483,7 +488,7 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
 
   const fetchCartSummary = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/summary`, {
+      const response = await fetch(`/api/cart/summary`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -576,6 +581,9 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
         🏪 Portal
       </Logo>
       
+      {/* Zintegrowane wyszukiwanie */}
+      <IntegratedSearch theme={theme} />
+      
       <HamburgerButton onClick={toggleMenu} theme={theme}>
         {isMenuOpen ? '✕' : '☰'}
       </HamburgerButton>
@@ -603,6 +611,9 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
           </CartLink>
         )}
         
+        <NavLink to="/feed" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+          📱 Feed
+        </NavLink>
         <NavLink to="/messages" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           💬 Wiadomości
         </NavLink>

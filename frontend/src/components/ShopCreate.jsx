@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import MapSelector from './MapSelector';
@@ -521,7 +522,7 @@ export default function ShopCreate({ theme }) {
   };
 
   return (
-    <Container>
+    <Container>        <PageTitle title="Utwórz sklep" description="Dodaj nowy sklep" />
       <Title>Dodaj nowy sklep</Title>
       
       <Form onSubmit={handleSubmit}>

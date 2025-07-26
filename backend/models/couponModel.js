@@ -303,7 +303,7 @@ couponSchema.statics.findValidCoupon = async function(code, userId, orderValue, 
 };
 
 // Indeksy
-couponSchema.index({ code: 1 });
+// couponSchema.index({ code: 1 }); // USUNIĘTO, bo pole code ma już unique: true
 couponSchema.index({ isActive: 1, validFrom: 1, validUntil: 1 });
 couponSchema.index({ users: 1 });
 couponSchema.index({ products: 1 });

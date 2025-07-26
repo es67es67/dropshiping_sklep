@@ -638,7 +638,12 @@ exports.getShops = async (req, res) => {
     if (municipalityCode) {
       query['teryt.municipalityCode'] = municipalityCode;
     }
-    
+
+    // LOGOWANIE
+    console.log('--- [API] /api/shops ---');
+    console.log('Zapytanie (req.query):', req.query);
+    console.log('Query do bazy:', JSON.stringify(query));
+
     const shops = await Shop.find(query)
       .populate('owner', 'username firstName lastName avatar')
       .sort({ createdAt: -1 })
@@ -646,6 +651,12 @@ exports.getShops = async (req, res) => {
       .limit(parseInt(limit));
     
     const total = await Shop.countDocuments(query);
+
+    console.log('Znaleziono sklepów:', shops.length, '/ Wszystkich:', total);
+    if (shops.length > 0) {
+      console.log('Przykładowy sklep:', shops[0]);
+    }
+    // ---
     
     res.json({
       shops,

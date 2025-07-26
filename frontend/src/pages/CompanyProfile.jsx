@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import PageTitle from '../components/PageTitle';
 
 const Container = styled.div`
   max-width: 900px;
@@ -64,6 +65,7 @@ export default function CompanyProfile({ theme }) {
 
   return (
     <Container>
+      <PageTitle title={`Profil firmy - ${company.name}`} description={`Profil firmy ${company.name}`} />
       <BackButton theme={theme} onClick={() => navigate(-1)}>← Powrót</BackButton>
       <Title>{company.name}</Title>
       <Section>

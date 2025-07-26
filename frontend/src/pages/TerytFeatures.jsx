@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { FiSearch, FiMapPin, FiGlobe, FiSettings, FiInfo } from 'react-icons/fi';
 import TerytSearch from '../components/TerytSearch';
@@ -140,6 +141,7 @@ const TerytFeatures = () => {
       case 'autocomplete':
         return (
           <div>
+      <PageTitle title="Funkcje TERYT" description="Funkcje związane z TERYT" />
             <DemoSection>
               <h3>Autouzupełnianie adresów z kodami TERYT</h3>
               <p style={{ marginBottom: '1rem', color: '#666' }}>
@@ -190,6 +192,7 @@ const TerytFeatures = () => {
 
   return (
     <PageContainer>
+      <PageTitle title="Funkcje TERYT" description="Zaawansowane funkcje TERYT" />
       <PageHeader>
         <h1>🗺️ Funkcjonalności TERYT</h1>
         <p>

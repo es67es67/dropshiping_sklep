@@ -1,0 +1,325 @@
+{
+  "timestamp": "2025-07-23T21:52:41.224Z",
+  "summary": {
+    "totalTests": 7,
+    "successfulTests": 2,
+    "failedTests": 4,
+    "errorTests": 1,
+    "totalErrors": 41,
+    "totalScreenshots": 5
+  },
+  "testResults": [
+    {
+      "test": "home_page",
+      "status": "success",
+      "title": "Portal",
+      "timestamp": "2025-07-23T21:49:22.841Z"
+    },
+    {
+      "test": "login",
+      "status": "error",
+      "error": "Navigation timeout of 30000 ms exceeded",
+      "timestamp": "2025-07-23T21:49:55.321Z"
+    },
+    {
+      "test": "shops_page",
+      "status": "failed",
+      "timestamp": "2025-07-23T21:50:00.022Z"
+    },
+    {
+      "test": "products_page",
+      "status": "failed",
+      "timestamp": "2025-07-23T21:50:04.638Z"
+    },
+    {
+      "test": "cart_page",
+      "status": "failed",
+      "timestamp": "2025-07-23T21:50:06.404Z"
+    },
+    {
+      "test": "shop_details",
+      "status": "failed",
+      "timestamp": "2025-07-23T21:50:10.945Z"
+    },
+    {
+      "test": "navigation",
+      "status": "success",
+      "timestamp": "2025-07-23T21:52:41.223Z"
+    }
+  ],
+  "errors": [
+    {
+      "type": "network_error",
+      "status": 401,
+      "url": "http://localhost:3000/api/users/login",
+      "timestamp": "2025-07-23T21:49:25.431Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "url": "http://localhost:3000/login",
+      "timestamp": "2025-07-23T21:49:25.433Z"
+    },
+    {
+      "type": "network_error",
+      "status": 401,
+      "url": "http://localhost:5000/api/shops/user",
+      "timestamp": "2025-07-23T21:49:56.071Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "url": "http://localhost:3000/shops",
+      "timestamp": "2025-07-23T21:49:56.073Z"
+    },
+    {
+      "type": "console_error",
+      "message": "[DEBUG] Błąd podczas pobierania sklepów: JSHandle@error",
+      "url": "http://localhost:3000/shops",
+      "timestamp": "2025-07-23T21:49:56.074Z"
+    },
+    {
+      "type": "network_error",
+      "status": 401,
+      "url": "http://localhost:5000/api/shops/user",
+      "timestamp": "2025-07-23T21:49:56.775Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "url": "http://localhost:3000/shops",
+      "timestamp": "2025-07-23T21:49:56.775Z"
+    },
+    {
+      "type": "console_error",
+      "message": "[DEBUG] Błąd podczas pobierania sklepów: JSHandle@error",
+      "url": "http://localhost:3000/shops",
+      "timestamp": "2025-07-23T21:49:56.777Z"
+    },
+    {
+      "type": "network_error",
+      "status": 401,
+      "url": "http://localhost:5000/api/shops/user",
+      "timestamp": "2025-07-23T21:49:56.780Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "url": "http://localhost:3000/shops",
+      "timestamp": "2025-07-23T21:49:56.781Z"
+    },
+    {
+      "type": "console_error",
+      "message": "[DEBUG] Błąd podczas pobierania sklepów: JSHandle@error",
+      "url": "http://localhost:3000/shops",
+      "timestamp": "2025-07-23T21:49:56.782Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:50:01.714Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:50:01.716Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:50:01.717Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:50:01.718Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:50:01.719Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:50:01.719Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:50:01.720Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:50:01.721Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:50:01.722Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:50:01.722Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:50:01.723Z"
+    },
+    {
+      "type": "network_error",
+      "status": 401,
+      "url": "http://localhost:3000/api/cart",
+      "timestamp": "2025-07-23T21:50:05.508Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "url": "http://localhost:3000/cart",
+      "timestamp": "2025-07-23T21:50:05.512Z"
+    },
+    {
+      "type": "network_error",
+      "status": 401,
+      "url": "http://localhost:5000/api/shops/user",
+      "timestamp": "2025-07-23T21:50:07.223Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "url": "http://localhost:3000/shops",
+      "timestamp": "2025-07-23T21:50:07.228Z"
+    },
+    {
+      "type": "console_error",
+      "message": "[DEBUG] Błąd podczas pobierania sklepów: JSHandle@error",
+      "url": "http://localhost:3000/shops",
+      "timestamp": "2025-07-23T21:50:07.229Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:51:12.281Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:51:12.285Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:51:12.287Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:51:12.288Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:51:12.293Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:51:12.297Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:51:12.298Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:51:12.299Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:51:12.300Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:51:12.301Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: net::ERR_NAME_NOT_RESOLVED",
+      "url": "http://localhost:3000/products",
+      "timestamp": "2025-07-23T21:51:12.301Z"
+    },
+    {
+      "type": "network_error",
+      "status": 401,
+      "url": "http://localhost:5000/api/shops/user",
+      "timestamp": "2025-07-23T21:51:41.169Z"
+    },
+    {
+      "type": "console_error",
+      "message": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+      "url": "http://localhost:3000/shops",
+      "timestamp": "2025-07-23T21:51:41.170Z"
+    },
+    {
+      "type": "console_error",
+      "message": "[DEBUG] Błąd podczas pobierania sklepów: JSHandle@error",
+      "url": "http://localhost:3000/shops",
+      "timestamp": "2025-07-23T21:51:41.170Z"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "03_home_page",
+      "filepath": "D:\\portal\\test-screenshots\\03_home_page_2025-07-23T21-49-22-309Z.png",
+      "timestamp": "2025-07-23T21-49-22-309Z"
+    },
+    {
+      "name": "01_login_page",
+      "filepath": "D:\\portal\\test-screenshots\\01_login_page_2025-07-23T21-49-24-386Z.png",
+      "timestamp": "2025-07-23T21-49-24-386Z"
+    },
+    {
+      "name": "04_shops_page",
+      "filepath": "D:\\portal\\test-screenshots\\04_shops_page_2025-07-23T21-49-56-745Z.png",
+      "timestamp": "2025-07-23T21-49-56-745Z"
+    },
+    {
+      "name": "05_products_page",
+      "filepath": "D:\\portal\\test-screenshots\\05_products_page_2025-07-23T21-50-01-249Z.png",
+      "timestamp": "2025-07-23T21-50-01-249Z"
+    },
+    {
+      "name": "06_cart_page",
+      "filepath": "D:\\portal\\test-screenshots\\06_cart_page_2025-07-23T21-50-06-124Z.png",
+      "timestamp": "2025-07-23T21-50-06-124Z"
+    }
+  ]
+}

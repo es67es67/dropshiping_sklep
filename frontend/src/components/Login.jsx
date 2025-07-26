@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,7 +19,9 @@ const Container = styled.div`
   }
 `;
 
-const Title = styled.h1`
+const Title = styled.h1.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 2.5rem;
   font-weight: 800;
   text-align: center;
@@ -39,7 +42,9 @@ const Title = styled.h1`
   }
 `;
 
-const Form = styled.form`
+const Form = styled.form.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   background: ${props => props.theme.surface};
   border-radius: 20px;
   padding: 2rem;
@@ -64,7 +69,9 @@ const FormGroup = styled.div`
   }
 `;
 
-const Label = styled.label`
+const Label = styled.label.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   display: block;
   font-weight: 600;
   color: ${props => props.theme.text};
@@ -75,7 +82,9 @@ const Label = styled.label`
   }
 `;
 
-const Input = styled.input`
+const Input = styled.input.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   width: 100%;
   padding: 1rem;
   border: 2px solid ${props => props.theme.border};
@@ -107,7 +116,9 @@ const Input = styled.input`
   }
 `;
 
-const Button = styled.button`
+const Button = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   width: 100%;
   padding: 1rem 2rem;
   background: ${props => props.theme.gradient};
@@ -144,7 +155,9 @@ const Button = styled.button`
   }
 `;
 
-const Divider = styled.div`
+const Divider = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   text-align: center;
   margin: 1.5rem 0;
   position: relative;
@@ -175,7 +188,9 @@ const Divider = styled.div`
   }
 `;
 
-const SocialButton = styled.button`
+const SocialButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   width: 100%;
   padding: 1rem 2rem;
   background: ${props => props.theme.background};
@@ -209,7 +224,9 @@ const SocialButton = styled.button`
   }
 `;
 
-const RegisterLink = styled.div`
+const RegisterLink = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   text-align: center;
   margin-top: 1.5rem;
   color: ${props => props.theme.textSecondary};
@@ -230,7 +247,9 @@ const RegisterLink = styled.div`
   }
 `;
 
-const ErrorMessage = styled.div`
+const ErrorMessage = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   color: ${props => props.theme.error};
   font-size: 0.875rem;
   margin-top: 0.5rem;
@@ -241,7 +260,9 @@ const ErrorMessage = styled.div`
   }
 `;
 
-const SuccessMessage = styled.div`
+const SuccessMessage = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   color: ${props => props.theme.success};
   font-size: 0.875rem;
   margin-top: 0.5rem;
@@ -252,7 +273,9 @@ const SuccessMessage = styled.div`
   }
 `;
 
-const TestCredentials = styled.div`
+const TestCredentials = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   background: ${props => props.theme.background};
   border: 2px solid ${props => props.theme.border};
   border-radius: 12px;
@@ -272,13 +295,17 @@ const TestCredentials = styled.div`
   }
 `;
 
-const TestTitle = styled.div`
+const TestTitle = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-weight: 600;
   color: ${props => props.theme.text};
   margin-bottom: 0.5rem;
 `;
 
-const TestInfo = styled.div`
+const TestInfo = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   color: ${props => props.theme.textSecondary};
   margin-bottom: 0.25rem;
   
@@ -287,7 +314,9 @@ const TestInfo = styled.div`
   }
 `;
 
-const CopyButton = styled.button`
+const CopyButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   background: ${props => props.theme.primary};
   color: white;
   border: none;
@@ -368,11 +397,11 @@ export default function Login() {
     setIsLoading(true);
     
     try {
-      // Sprawdź czy to email czy username
-      const isEmail = /\S+@\S+\.\S+/.test(formData.emailOrUsername);
-      const loginData = isEmail 
-        ? { email: formData.emailOrUsername, password: formData.password }
-        : { username: formData.emailOrUsername, password: formData.password };
+      // Wysyłamy dane w formacie oczekiwanym przez backend
+      const loginData = { 
+        emailOrUsername: formData.emailOrUsername, 
+        password: formData.password 
+      };
       
       const result = await login(loginData);
       
@@ -401,7 +430,7 @@ export default function Login() {
   };
 
   return (
-    <Container>
+    <Container>        <PageTitle title="Logowanie" description="Zaloguj się do portalu" />
       <Title>Logowanie</Title>
       
       <Form onSubmit={handleSubmit}>

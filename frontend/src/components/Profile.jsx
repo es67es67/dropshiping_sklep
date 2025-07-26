@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -551,7 +552,7 @@ export default function Profile() {
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/users/profile`, {
@@ -594,7 +595,7 @@ export default function Profile() {
 
   const handleSave = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/users/profile`, {
@@ -768,7 +769,7 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <Container>
+      <Container>        <PageTitle title="Mój profil" description="Edytuj swój profil" />
         <div style={{ textAlign: 'center', padding: '4rem' }}>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
           <p>Ładowanie profilu...</p>

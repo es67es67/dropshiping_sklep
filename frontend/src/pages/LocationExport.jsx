@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -676,6 +677,7 @@ export default function LocationExport() {
   if (!isAuthenticated) {
     return (
       <Container>
+      <PageTitle title="Eksport lokalizacji" description="Eksportuj dane lokalizacji" />
         <EmptyState>
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔐</div>
           <h3>Zaloguj się</h3>
@@ -687,6 +689,7 @@ export default function LocationExport() {
 
   return (
     <Container>
+      <PageTitle title="Eksport lokalizacji" description="Eksportuj dane lokalizacji" />
       <Header>
         <Title>📤 Eksport Lokalizacji</Title>
       </Header>

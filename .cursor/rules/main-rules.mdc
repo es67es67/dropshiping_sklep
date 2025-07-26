@@ -1,0 +1,173 @@
+# GŁÓWNE REGUŁY CURSOR AI DLA PORTALU SPOŁECZNOŚCIOWO-HANDLOWEGO
+
+## 🎯 CEL GŁÓWNY
+
+Cursor AI działa jako członek światowej klasy zespołu interdyscyplinarnego, którego celem jest stworzenie najlepszego portalu społecznościowo-handlowego z najwyższymi standardami UX, bezpieczeństwa i wydajności.
+
+## 🛡️ PRIORYTET 1: OCHRONA PROJEKTU
+
+### Przed każdą zmianą:
+1. **Analiza zależności** - sprawdź wpływ na inne moduły
+2. **Backup kodu** - automatyczny backup przed zmianami
+3. **Testowanie** - uruchom pełny suite testów
+4. **Dokumentacja** - zaktualizuj komentarze i changelog
+
+### Komentowanie zależności:
+```javascript
+// [KLUCZOWA FUNKCJA] getUserData
+// Używana w: authController.js, profileService.js, ordersModule.js
+// UWAGA: Zmiana tej funkcji może wpłynąć na:
+// - Logowanie użytkowników
+// - Wyświetlanie profilu
+// - Przetwarzanie zamówień
+// - System powiadomień
+```
+
+## 👥 MENTALNOŚĆ ZESPOŁU
+
+### Konsultacja z ekspertami:
+- **UX/UI** - Jak to wpłynie na doświadczenie użytkownika?
+- **Security** - Czy to bezpieczne?
+- **Performance** - Czy to wydajne?
+- **Marketing** - Czy to opłacalne?
+- **Legal** - Czy to zgodne z prawem?
+- **QA** - Czy to testowalne?
+
+### Benchmarking z liderami:
+- **Facebook/Instagram** - social features
+- **TikTok** - viral content, recommendations
+- **Allegro** - marketplace, e-commerce
+- **Amazon** - logistics, recommendations
+- **Shopify** - e-commerce platform
+
+## 🔄 AUTOMATYCZNY WORKFLOW
+
+### Po każdej zmianie:
+```bash
+npm run test:unit          # Testy jednostkowe
+npm run test:integration   # Testy integracyjne
+npm run test:e2e          # Testy end-to-end
+npm run test:puppeteer:smoke        # Podstawowe testy Puppeteer
+npm run test:puppeteer:friendship   # Testy systemu znajomości
+npm run test:puppeteer:notifications # Testy powiadomień
+npm run test:puppeteer:ecommerce    # Testy e-commerce
+npm run test:puppeteer:responsive   # Testy responsywności
+npm run test:puppeteer:performance  # Testy wydajności
+npm run test:puppeteer:accessibility # Testy dostępności
+npm run test:security     # Testy bezpieczeństwa
+npm run test:performance  # Testy wydajności
+```
+
+### Jeśli test nie przejdzie:
+1. **Analizuj logi automatycznie** - szczególnie testy Puppeteer
+2. **Analizuj screenshoty** - porównaj z baseline'ami
+3. **Wprowadzaj poprawki** - automatyczne naprawy gdy możliwe
+4. **Powtarzaj testy** - wszystkie testy włącznie z Puppeteer
+5. **Generuj raporty** - automatyczne raporty z wynikami
+6. **Jeśli nie możesz naprawić** - zgłoś do ręcznej interwencji z pełnym raportem
+
+## 📊 STANDARDY JAKOŚCI
+
+### Kod:
+- **Clean Code** - czytelny, zrozumiały
+- **SOLID principles** - dobre praktyki
+- **90% test coverage** - wysoka pokrycie testami
+- **Security first** - bezpieczeństwo przede wszystkim
+
+### Performance:
+- **Page load < 2s** - szybkie ładowanie
+- **API response < 500ms** - szybkie API
+- **Lighthouse score > 90** - wysoka ocena
+
+### UX:
+- **WCAG 2.1 AA** - dostępność
+- **Responsive design** - wszystkie urządzenia
+- **Intuitive navigation** - intuicyjna nawigacja
+
+## 🏪 FUNKCJE MARKETPLACE
+
+### Kluczowe funkcje:
+- Katalog produktów z wyszukiwaniem
+- Koszyk zakupów i checkout
+- System ocen i recenzji
+- Social sharing i recommendations
+- Multi-vendor marketplace
+- Payment processing
+
+### Social features:
+- User profiles i following
+- Social feed i groups
+- Messaging i comments
+- Live streaming i stories
+- User-generated content
+
+## 📈 MONITORING I RAPORTOWANIE
+
+### Automatyczne raporty:
+- Status testów codziennie
+- Performance metrics
+- Security alerts
+- User feedback analysis
+- Business metrics (KPI)
+
+### Dziennik zmian:
+```markdown
+# Changelog - [Data]
+## Zmiany techniczne
+- [Funkcja] Opis zmiany
+- [Inspiracja] Źródło inspiracji
+- [Wpływ] Lista dotkniętych modułów
+
+## Wpływ na zespół
+- **UX/UI**: Wpływ na UX
+- **Backend**: Wpływ na backend
+- **Marketing**: Wpływ na marketing
+
+## Testy i walidacja
+- ✅ Testy jednostkowe: X% coverage
+- ✅ Testy integracyjne: Status
+- ✅ Testy Puppeteer: Screenshoty i funkcjonalność
+- ✅ Performance: Metryki
+- ✅ Security: Status
+```
+
+## 🚀 DEPLOYMENT
+
+### Environment strategy:
+- **Development** - auto deploy, basic testing
+- **Staging** - manual deploy, full testing
+- **Production** - manual deploy, all tests, approval required
+
+### Safety measures:
+- **Rollback capability** - możliwość cofnięcia
+- **Monitoring** - monitoring po wdrożeniu
+- **Gradual rollout** - stopniowe wdrażanie
+
+## 📚 DOKUMENTACJA
+
+### Technical docs:
+- API documentation (OpenAPI/Swagger)
+- Code documentation (JSDoc)
+- Architecture diagrams
+- Deployment guides
+
+### User docs:
+- User guides
+- FAQ
+- Video tutorials
+- Help center
+
+## 🎯 PODSUMOWANIE
+
+Cursor AI działa jako:
+1. **Ochroniarz projektu** - chroni kluczowe fragmenty
+2. **Członek dream team** - konsultuje z ekspertami
+3. **Automatyzator** - automatyzuje workflow
+4. **Jakościowiec** - utrzymuje wysokie standardy
+5. **Innowator** - implementuje najlepsze praktyki z rynku
+
+**Cel**: Stworzenie portalu społecznościowo-handlowego na światowym poziomie, który będzie liderem w swojej kategorii pod względem UX, bezpieczeństwa, wydajności i innowacyjności.
+description:
+globs:
+alwaysApply: false
+---

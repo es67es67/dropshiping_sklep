@@ -62,9 +62,9 @@ class MessagingModule {
             $group: {
               _id: {
                 $cond: [
-                  { $lt: ['$sender', '$receiver'] },
-                  { sender: '$sender', receiver: '$receiver' },
-                  { sender: '$receiver', receiver: '$sender' }
+                  { $lt: ['$sender', '$recipient'] },
+                  { sender: '$sender', recipient: '$recipient' },
+                  { sender: '$recipient', recipient: '$sender' }
                 ]
               },
               lastMessage: { $first: '$$ROOT' },
@@ -82,16 +82,16 @@ class MessagingModule {
           {
             $lookup: {
               from: 'users',
-              localField: '_id.receiver',
+              localField: '_id.recipient',
               foreignField: '_id',
-              as: 'receiver'
+              as: 'recipient'
             }
           },
           {
             $unwind: '$sender'
           },
           {
-            $unwind: '$receiver'
+            $unwind: '$recipient'
           },
           {
             $project: {
@@ -103,7 +103,7 @@ class MessagingModule {
                 lastName: 1,
                 avatar: 1
               },
-              receiver: {
+              recipient: {
                 _id: 1,
                 username: 1,
                 firstName: 1,
@@ -127,9 +127,9 @@ class MessagingModule {
             $group: {
               _id: {
                 $cond: [
-                  { $lt: ['$sender', '$receiver'] },
-                  { sender: '$sender', receiver: '$receiver' },
-                  { sender: '$receiver', receiver: '$sender' }
+                  { $lt: ['$sender', '$recipient'] },
+                  { sender: '$sender', recipient: '$recipient' },
+                  { sender: '$recipient', recipient: '$sender' }
                 ]
               }
             }
@@ -164,7 +164,7 @@ class MessagingModule {
             $match: {
               $or: [
                 { sender: userId },
-                { receiver: userId }
+                { recipient: userId }
               ]
             }
           },
@@ -176,25 +176,25 @@ class MessagingModule {
               _id: {
                 $cond: [
                   { $eq: ['$sender', userId] },
-                  '$receiver',
+                  '$recipient',
                   '$sender'
                 ]
               },
               lastMessage: { $first: '$$ROOT' },
-              unreadCount: {
-                $sum: {
-                  $cond: [
-                    { 
-                      $and: [
-                        { $eq: ['$receiver', userId] },
-                        { $eq: ['$isRead', false] }
-                      ]
-                    },
-                    1,
-                    0
-                  ]
+                              unreadCount: {
+                  $sum: {
+                    $cond: [
+                      { 
+                        $and: [
+                          { $eq: ['$recipient', userId] },
+                          { $eq: ['$status', 'sent'] }
+                        ]
+                      },
+                      1,
+                      0
+                    ]
+                  }
                 }
-              }
             }
           },
           {
@@ -241,24 +241,24 @@ class MessagingModule {
         
         const messages = await Message.find({
           $or: [
-            { sender: userId, receiver: otherUserId },
-            { sender: otherUserId, receiver: userId }
+            { sender: userId, recipient: otherUserId },
+            { sender: otherUserId, recipient: userId }
           ]
         })
         .sort({ createdAt: -1 })
         .limit(parseInt(limit))
         .skip(skip)
         .populate('sender', 'username firstName lastName avatar')
-        .populate('receiver', 'username firstName lastName avatar');
+        .populate('recipient', 'username firstName lastName avatar');
         
         // Oznacz wiadomości jako przeczytane
         await Message.updateMany(
           {
             sender: otherUserId,
-            receiver: userId,
-            isRead: false
+            recipient: userId,
+            status: 'sent'
           },
-          { isRead: true }
+          { status: 'read', readAt: new Date() }
         );
         
         res.json(messages.reverse()); // Odwróć aby najstarsze były pierwsze
@@ -284,17 +284,17 @@ class MessagingModule {
         
         const message = new Message({
           sender: senderId,
-          receiver: receiverId,
+          recipient: receiverId,
           content,
           messageType,
-          isRead: false
+          status: 'sent'
         });
         
         await message.save();
         
         // Populate dla odpowiedzi
         await message.populate('sender', 'username firstName lastName avatar');
-        await message.populate('receiver', 'username firstName lastName avatar');
+        await message.populate('recipient', 'username firstName lastName avatar');
         
         // Emit event
         eventSystem.emitMessageSent(senderId, receiverId, message._id);
@@ -325,7 +325,7 @@ class MessagingModule {
         
         const message = new Message({
           sender: senderId,
-          receiver: receiverId,
+          recipient: receiverId,
           content: content || `Plik: ${req.file.originalname}`,
           messageType,
           attachments: [{
@@ -334,14 +334,14 @@ class MessagingModule {
             mimetype: req.file.mimetype,
             size: req.file.size
           }],
-          isRead: false
+          status: 'sent'
         });
         
         await message.save();
         
         // Populate dla odpowiedzi
         await message.populate('sender', 'username firstName lastName avatar');
-        await message.populate('receiver', 'username firstName lastName avatar');
+        await message.populate('recipient', 'username firstName lastName avatar');
         
         // Emit event
         eventSystem.emitMessageSent(senderId, receiverId, message._id);
@@ -359,7 +359,7 @@ class MessagingModule {
         
         const message = await Message.findByIdAndUpdate(
           messageId,
-          { isRead: true },
+          { status: 'read', readAt: new Date() },
           { new: true }
         );
         
@@ -432,16 +432,16 @@ class MessagingModule {
           Message.countDocuments({
             $or: [
               { sender: userId },
-              { receiver: userId }
+              { recipient: userId }
             ]
           }),
           Message.countDocuments({
-            receiver: userId,
-            isRead: false
+            recipient: userId,
+            status: 'sent'
           }),
-          Message.distinct('sender', { receiver: userId }).then(senders => 
-            Message.distinct('receiver', { sender: userId }).then(receivers => 
-              new Set([...senders, ...receivers]).size
+          Message.distinct('sender', { recipient: userId }).then(senders => 
+            Message.distinct('recipient', { sender: userId }).then(recipients => 
+              new Set([...senders, ...recipients]).size
             )
           )
         ]);

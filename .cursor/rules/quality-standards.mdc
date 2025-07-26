@@ -1,0 +1,196 @@
+# STANDARDY JAKOŚCI I NAJLEPSZE PRAKTYKI
+
+## 1. Standardy kodowania
+
+### Jakość kodu:
+- **Clean Code** - czytelny, zrozumiały, łatwy w utrzymaniu
+- **SOLID principles** - Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion
+- **DRY** - Don't Repeat Yourself
+- **KISS** - Keep It Simple, Stupid
+- **YAGNI** - You Aren't Gonna Need It
+
+### Dokumentacja kodu:
+```javascript
+/**
+ * @function processUserOrder
+ * @description Przetwarza zamówienie użytkownika z pełną walidacją
+ * @param {Object} orderData - Dane zamówienia
+ * @param {string} orderData.userId - ID użytkownika
+ * @param {Array} orderData.items - Lista produktów
+ * @param {Object} orderData.shipping - Dane dostawy
+ * @returns {Promise<Object>} Wynik przetworzenia zamówienia
+ * @throws {ValidationError} Gdy dane są nieprawidłowe
+ * @throws {PaymentError} Gdy płatność się nie powiedzie
+ * 
+ * @dependencies cartController.js, paymentService.js, notificationService.js
+ * @affectedModules userProfile.js, orderHistory.js, loyaltySystem.js
+ * @lastModified 2024-01-15
+ * @author AI Assistant
+ * @version 2.1.0
+ * 
+ * @example
+ * const result = await processUserOrder({
+ *   userId: 'user123',
+ *   items: [{productId: 'prod1', quantity: 2}],
+ *   shipping: {address: 'Warszawa'}
+ * });
+ */
+```
+
+## 2. Standardy bezpieczeństwa
+
+### Bezpieczeństwo aplikacji:
+- **OWASP Top 10** - ochrona przed najczęstszymi atakami
+- **Input validation** - walidacja wszystkich danych wejściowych
+- **SQL Injection protection** - używanie prepared statements
+- **XSS protection** - sanitizacja danych wyjściowych
+- **CSRF protection** - tokeny CSRF
+- **Authentication & Authorization** - silne mechanizmy uwierzytelniania
+- **Data encryption** - szyfrowanie wrażliwych danych
+- **HTTPS only** - wymuszenie połączeń szyfrowanych
+
+### Bezpieczeństwo danych:
+- **RODO compliance** - zgodność z przepisami o ochronie danych
+- **Data minimization** - minimalizacja zbieranych danych
+- **Privacy by design** - prywatność wbudowana w projekt
+- **Audit trails** - ślady audytowe dla wszystkich operacji
+- **Backup security** - bezpieczne kopie zapasowe
+
+## 3. Standardy wydajności
+
+### Performance optimization:
+- **Lazy loading** - leniwe ładowanie komponentów
+- **Caching strategies** - strategie buforowania
+- **Database optimization** - optymalizacja zapytań
+- **CDN usage** - wykorzystanie Content Delivery Network
+- **Image optimization** - optymalizacja obrazów
+- **Code splitting** - dzielenie kodu na mniejsze części
+- **Bundle optimization** - optymalizacja pakietów
+
+### Monitoring performance:
+```javascript
+// Performance monitoring
+const performanceMetrics = {
+  pageLoadTime: '< 2s',
+  apiResponseTime: '< 500ms',
+  databaseQueryTime: '< 100ms',
+  imageLoadTime: '< 1s',
+  bundleSize: '< 500KB',
+  lighthouseScore: '> 90'
+};
+```
+
+## 4. Standardy testowania
+
+### Test coverage:
+- **Unit tests**: > 90% coverage
+- **Integration tests**: Wszystkie API endpoints
+- **E2E tests**: Główne ścieżki użytkownika
+- **Performance tests**: Load testing, stress testing
+- **Security tests**: Penetration testing, vulnerability scanning
+
+### Test automation:
+```javascript
+// Test automation workflow
+const testWorkflow = {
+  preCommit: ['lint', 'unit-tests', 'security-scan'],
+  preDeploy: ['integration-tests', 'e2e-tests', 'performance-tests'],
+  postDeploy: ['smoke-tests', 'monitoring-alerts'],
+  continuous: ['load-tests', 'vulnerability-scan']
+};
+```
+
+## 5. Standardy UX/UI
+
+### User Experience:
+- **Accessibility** - WCAG 2.1 AA compliance
+- **Responsive design** - działanie na wszystkich urządzeniach
+- **Intuitive navigation** - intuicyjna nawigacja
+- **Fast feedback** - szybka informacja zwrotna
+- **Error handling** - przyjazne komunikaty błędów
+- **Loading states** - stany ładowania
+- **Progressive disclosure** - stopniowe ujawnianie informacji
+
+### Design system:
+```css
+/* Design tokens */
+:root {
+  /* Colors */
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 3rem;
+  
+  /* Breakpoints */
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+}
+```
+
+## 6. Standardy deploymentu
+
+### CI/CD pipeline:
+- **Automated testing** - automatyczne testy
+- **Code review** - przegląd kodu
+- **Security scanning** - skanowanie bezpieczeństwa
+- **Performance testing** - testy wydajności
+- **Rollback capability** - możliwość cofnięcia zmian
+- **Monitoring** - monitoring po wdrożeniu
+
+### Environment management:
+```yaml
+# Deployment environments
+environments:
+  development:
+    auto_deploy: true
+    testing: unit, integration
+    monitoring: basic
+    
+  staging:
+    auto_deploy: false
+    testing: unit, integration, e2e, performance
+    monitoring: full
+    approval: required
+    
+  production:
+    auto_deploy: false
+    testing: all
+    monitoring: full
+    approval: required
+    rollback: enabled
+```
+
+## 7. Standardy dokumentacji
+
+### Technical documentation:
+- **API documentation** - OpenAPI/Swagger
+- **Code documentation** - JSDoc, inline comments
+- **Architecture documentation** - diagramy, opisy
+- **Deployment documentation** - instrukcje wdrożenia
+- **Troubleshooting guides** - przewodniki rozwiązywania problemów
+
+### User documentation:
+- **User guides** - przewodniki użytkownika
+- **FAQ** - często zadawane pytania
+- **Video tutorials** - tutoriale wideo
+- **Help center** - centrum pomocy
+- **Feedback system** - system feedbacku
+description:
+globs:
+alwaysApply: false
+---

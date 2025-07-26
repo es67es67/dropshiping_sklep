@@ -48,4 +48,18 @@ router.put('/notifications/:friendshipId', friendshipController.updateNotificati
 // Statystyki znajomych
 router.get('/stats', friendshipController.getFriendsStats);
 
+// NOWE ENDPOINTY DLA PROFILU UŻYTKOWNIKA
+
+// Pobieranie statusu przyjaźni między użytkownikami
+router.get('/status/:userId', friendshipController.getFriendshipStatus);
+
+// Pobieranie znajomych konkretnego użytkownika
+router.get('/friends/:userId', friendshipController.getUserFriends);
+
+// Akcje przyjaźni (aliasy)
+router.post('/send', friendshipController.send);
+router.post('/accept', friendshipController.accept);
+router.post('/reject', friendshipController.reject);
+router.post('/unfriend', friendshipController.unfriend);
+
 module.exports = router; 

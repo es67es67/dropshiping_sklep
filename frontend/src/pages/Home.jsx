@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styled from 'styled-components';
+import PageTitle from '../components/PageTitle';
 
 const HomeContainer = styled.div`
   max-width: 1200px;
@@ -33,7 +34,9 @@ const Hero = styled.div`
   }
 `;
 
-const Title = styled.h1`
+const Title = styled.h1.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 3rem;
   font-weight: 800;
   margin-bottom: 1rem;
@@ -51,7 +54,9 @@ const Title = styled.h1`
   }
 `;
 
-const Subtitle = styled.p`
+const Subtitle = styled.p.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 1.2rem;
   color: ${props => props.theme.textSecondary};
   margin-bottom: 2rem;
@@ -67,7 +72,9 @@ const Subtitle = styled.p`
   }
 `;
 
-const WelcomeMessage = styled.div`
+const WelcomeMessage = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   background: ${props => props.theme.surface};
   padding: 2rem;
   border-radius: 16px;
@@ -76,7 +83,9 @@ const WelcomeMessage = styled.div`
   text-align: center;
 `;
 
-const UserGreeting = styled.h2`
+const UserGreeting = styled.h2.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 1.5rem;
   margin-bottom: 1rem;
   color: ${props => props.theme.text};
@@ -89,22 +98,28 @@ const UserStats = styled.div`
   margin-top: 1rem;
 `;
 
-const StatCard = styled.div`
+const StatCard = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   background: ${props => props.theme.background};
   padding: 1rem;
   border-radius: 8px;
   text-align: center;
 `;
 
-const StatValue = styled.div`
+const StatValue = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 1.5rem;
-  font-weight: 800;
+  font-weight: bold;
   color: ${props => props.theme.primary};
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
 `;
 
-const StatLabel = styled.div`
-  font-size: 0.875rem;
+const StatLabel = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
+  font-size: 0.9rem;
   color: ${props => props.theme.textSecondary};
 `;
 
@@ -113,13 +128,20 @@ const DashboardGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
   margin-bottom: 3rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 `;
 
-const DashboardCard = styled.div`
+const DashboardCard = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   background: ${props => props.theme.surface};
-  padding: 2rem;
   border-radius: 16px;
   box-shadow: ${props => props.theme.shadow};
+  overflow: hidden;
   transition: all 0.3s ease;
   
   &:hover {
@@ -128,11 +150,15 @@ const DashboardCard = styled.div`
   }
 `;
 
-const CardHeader = styled.div`
+const CardHeader = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
+  background: ${props => props.theme.gradient};
+  color: white;
+  padding: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1.5rem;
 `;
 
 const CardIcon = styled.div`
@@ -140,74 +166,71 @@ const CardIcon = styled.div`
 `;
 
 const CardTitle = styled.h3`
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  color: ${props => props.theme.text};
   margin: 0;
 `;
 
 const CardContent = styled.div`
-  color: ${props => props.theme.textSecondary};
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
+  padding: 1.5rem;
 `;
 
 const ActionButtons = styled.div`
   display: flex;
   gap: 1rem;
+  margin-top: 1rem;
   flex-wrap: wrap;
 `;
 
-const ActionButton = styled(Link)`
-  background: ${props => props.theme.gradient};
+const ActionButton = styled(Link).withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
+  background: ${props => props.theme.primary};
   color: white;
   text-decoration: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 500;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${props => props.theme.gradientHover};
-    transform: translateY(-1px);
+    background: ${props => props.theme.primary}dd;
+    transform: translateY(-2px);
   }
 `;
 
-const SecondaryButton = styled(Link)`
-  background: ${props => props.theme.background};
-  color: ${props => props.theme.text};
+const SecondaryButton = styled(Link).withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
+  background: transparent;
+  color: ${props => props.theme.primary};
   text-decoration: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
-  font-weight: 600;
-  border: 2px solid ${props => props.theme.border};
+  font-weight: 500;
+  border: 2px solid ${props => props.theme.primary};
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${props => props.theme.border};
+    background: ${props => props.theme.primary};
+    color: white;
   }
 `;
 
 const FeaturesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
-  margin-top: 3rem;
   
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-  }
-  
-  @media (max-width: 480px) {
     grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-top: 1.5rem;
+    gap: 1.5rem;
   }
 `;
 
-const FeatureCard = styled.div`
+const FeatureCard = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   background: ${props => props.theme.surface};
   padding: 2rem;
   border-radius: 16px;
@@ -225,118 +248,33 @@ const FeatureIcon = styled.div`
   margin-bottom: 1rem;
 `;
 
-const FeatureTitle = styled.h3`
+const FeatureTitle = styled.h3.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 1.5rem;
   margin-bottom: 1rem;
   color: ${props => props.theme.text};
 `;
 
-const FeatureDescription = styled.p`
+const FeatureDescription = styled.p.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   color: ${props => props.theme.textSecondary};
   line-height: 1.6;
 `;
 
-const LoadingSpinner = styled.div`
-  text-align: center;
-  padding: 2rem;
-  font-size: 1.2rem;
-  color: ${props => props.theme.textSecondary};
-`;
-
-const ErrorMessage = styled.div`
-  background: ${props => props.theme.error}20;
-  color: ${props => props.theme.error};
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-`;
-
 export default function Home() {
   const { user, isAuthenticated } = useAuth();
-  const [stats, setStats] = useState({
-    totalShops: 0,
-    totalProducts: 0,
-    totalUsers: 0,
-    recentActivity: 0
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchDashboardStats();
-    } else {
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
-
-  const fetchDashboardStats = async () => {
-    try {
-      setLoading(true);
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
-      const token = localStorage.getItem('token');
-      
-      const [shopsRes, productsRes, usersRes] = await Promise.allSettled([
-        fetch(`${apiUrl}/api/shops`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch(`${apiUrl}/api/products`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch(`${apiUrl}/api/users`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        })
-      ]);
-
-      let totalShops = 0, totalProducts = 0, totalUsers = 0;
-
-      if (shopsRes.status === 'fulfilled' && shopsRes.value.ok) {
-        const shopsData = await shopsRes.value.json();
-        totalShops = shopsData.length || 0;
-      }
-
-      if (productsRes.status === 'fulfilled' && productsRes.value.ok) {
-        const productsData = await productsRes.value.json();
-        totalProducts = productsData.length || 0;
-      }
-
-      if (usersRes.status === 'fulfilled' && usersRes.value.ok) {
-        const usersData = await usersRes.value.json();
-        totalUsers = usersData.length || 0;
-      }
-
-      setStats({
-        totalShops,
-        totalProducts,
-        totalUsers,
-        recentActivity: Math.floor(Math.random() * 50) + 10 // Symulacja
-      });
-    } catch (err) {
-      console.error('Błąd pobierania statystyk:', err);
-      setError('Nie udało się pobrać statystyk');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <HomeContainer>
-        <LoadingSpinner>Ładowanie dashboardu...</LoadingSpinner>
-      </HomeContainer>
-    );
-  }
 
   return (
     <HomeContainer>
+      <PageTitle title="Strona główna" description="Nowoczesna platforma e-commerce z modułową architekturą" />
       <Hero>
         <Title>Witaj w Portalu</Title>
         <Subtitle>
           Nowoczesna platforma e-commerce z modułową architekturą
         </Subtitle>
       </Hero>
-
-      {error && <ErrorMessage>{error}</ErrorMessage>}
 
       {isAuthenticated && user && (
         <WelcomeMessage>
@@ -354,11 +292,11 @@ export default function Home() {
             </StatCard>
             <StatCard>
               <StatValue>{user.shops?.length || 0}</StatValue>
-              <StatLabel>Twoje sklepy</StatLabel>
+              <StatLabel>Sklepy</StatLabel>
             </StatCard>
             <StatCard>
-              <StatValue>{stats.recentActivity}</StatValue>
-              <StatLabel>Aktywność dziś</StatLabel>
+              <StatValue>{user.products?.length || 0}</StatValue>
+              <StatLabel>Produkty</StatLabel>
             </StatCard>
           </UserStats>
         </WelcomeMessage>
@@ -368,39 +306,13 @@ export default function Home() {
         <DashboardCard>
           <CardHeader>
             <CardIcon>🏪</CardIcon>
-            <CardTitle>Zarządzanie sklepami</CardTitle>
+            <CardTitle>Sklepy i Produkty</CardTitle>
           </CardHeader>
           <CardContent>
-            {isAuthenticated ? (
-              <>
-                <p>Masz {user.shops?.length || 0} sklepów. Zarządzaj produktami, zamówieniami i klientami.</p>
-                <ActionButtons>
-                  <ActionButton to="/shop-management">🏪 Moje sklepy</ActionButton>
-                  <SecondaryButton to="/shop-create">➕ Dodaj sklep</SecondaryButton>
-                </ActionButtons>
-              </>
-            ) : (
-              <>
-                <p>Zakładaj sklepy, dodawaj produkty i rozwijaj swój biznes online.</p>
-                <ActionButtons>
-                  <ActionButton to="/register">📝 Zarejestruj się</ActionButton>
-                  <SecondaryButton to="/login">🔑 Zaloguj się</SecondaryButton>
-                </ActionButtons>
-              </>
-            )}
-          </CardContent>
-        </DashboardCard>
-
-        <DashboardCard>
-          <CardHeader>
-            <CardIcon>📦</CardIcon>
-            <CardTitle>Produkty lokalne</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Odkryj produkty z Twojej okolicy. Wspieraj lokalnych sprzedawców i znajdź unikalne towary.</p>
+            <p>Zarządzaj swoim sklepem, dodawaj produkty i obsługuj klientów w jednym miejscu.</p>
             <ActionButtons>
-              <ActionButton to="/local-products">🏘️ Produkty lokalne</ActionButton>
-              <SecondaryButton to="/products">🔍 Wszystkie produkty</SecondaryButton>
+              <ActionButton to="/shops">🏪 Przeglądaj sklepy</ActionButton>
+              <SecondaryButton to="/products">📦 Produkty</SecondaryButton>
             </ActionButtons>
           </CardContent>
         </DashboardCard>
@@ -411,9 +323,9 @@ export default function Home() {
             <CardTitle>Lokalizacje</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>Przeglądaj województwa, powiaty i gminy. Znajdź sklepy i produkty w swojej okolicy.</p>
+            <p>System lokalizacji oparty na danych TERYT z pełną hierarchią województw, powiatów i gmin.</p>
             <ActionButtons>
-              <ActionButton to="/voivodeships">🏛️ Województwa</ActionButton>
+              <ActionButton to="/location-map">🗺️ Mapa</ActionButton>
               <SecondaryButton to="/location-analytics">📊 Analityka</SecondaryButton>
             </ActionButtons>
           </CardContent>

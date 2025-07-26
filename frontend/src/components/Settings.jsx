@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -561,7 +562,7 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <Container>
+      <Container>        <PageTitle title="Ustawienia" description="Ustawienia konta" />
         <Title>Ustawienia</Title>
         <LoadingSpinner>Ładowanie ustawień...</LoadingSpinner>
       </Container>

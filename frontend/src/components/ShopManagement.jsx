@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styled from 'styled-components';
@@ -456,7 +457,7 @@ export default function ShopManagement() {
 
   if (loading) {
     return (
-      <Container>
+      <Container>        <PageTitle title="Zarządzanie sklepami" description="Zarządzaj swoimi sklepami" />
         <LoadingState>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
           <p>Ładowanie panelu zarządzania...</p>
@@ -467,6 +468,7 @@ export default function ShopManagement() {
 
   return (
     <Container>
+      <PageTitle title="Zarządzanie sklepami" description="Zarządzaj swoimi sklepami" />
       <Header>
         <Title>Zarządzanie sklepami</Title>
         <AddButton to="/shop-create">🏪 Dodaj nowy sklep</AddButton>

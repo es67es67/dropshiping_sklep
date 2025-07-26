@@ -2,6 +2,7 @@ const Friendship = require('../models/friendshipModel');
 const User = require('../models/userModel');
 const Order = require('../models/orderModel');
 const Review = require('../models/reviewModel');
+const Notification = require('../models/notificationModel');
 
 // Wysyłanie zaproszenia do znajomych
 exports.sendFriendRequest = async (req, res) => {
@@ -54,6 +55,28 @@ exports.sendFriendRequest = async (req, res) => {
     });
 
     await friendship.save();
+
+    // Utwórz powiadomienie dla odbiorcy
+    const requester = await User.findById(requesterId).select('firstName lastName username avatar');
+    const notification = new Notification({
+      user: recipientId,
+      type: 'friend_request',
+      title: 'Nowe zaproszenie do znajomych',
+      message: `${requester.firstName} ${requester.lastName} wysłał(a) Ci zaproszenie do znajomych`,
+      priority: 'medium',
+      data: {
+        friendshipId: friendship._id,
+        requesterId: requesterId,
+        url: `/users/${requesterId}`,
+        image: requester.avatar
+      },
+      actions: [
+        { label: 'Akceptuj', action: 'accept', url: `/api/friendships/accept` },
+        { label: 'Odrzuć', action: 'reject', url: `/api/friendships/reject` },
+        { label: 'Zobacz profil', action: 'view', url: `/users/${requesterId}` }
+      ]
+    });
+    await notification.save();
 
     // Pobierz pełne dane
     const fullFriendship = await Friendship.findById(friendship._id)
@@ -617,6 +640,229 @@ exports.getFriendsStats = async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Błąd pobierania statystyk znajomych'
+    });
+  }
+}; 
+
+// Pobieranie statusu przyjaźni między użytkownikami
+exports.getFriendshipStatus = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const currentUserId = req.userId;
+
+    if (currentUserId === userId) {
+      return res.json({
+        success: true,
+        status: 'self',
+        message: 'To jest Twój profil'
+      });
+    }
+
+    const friendship = await Friendship.findOne({
+      $or: [
+        { requester: currentUserId, recipient: userId },
+        { requester: userId, recipient: currentUserId }
+      ]
+    });
+
+    if (!friendship) {
+      return res.json({
+        success: true,
+        status: 'none',
+        message: 'Brak relacji'
+      });
+    }
+
+    let status = friendship.status;
+    if (friendship.status === 'pending') {
+      if (friendship.requester.toString() === currentUserId) {
+        status = 'pending';
+      } else {
+        status = 'received';
+      }
+    }
+
+    res.json({
+      success: true,
+      status,
+      friendship
+    });
+  } catch (error) {
+    console.error('Błąd pobierania statusu przyjaźni:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Błąd pobierania statusu przyjaźni'
+    });
+  }
+};
+
+// Pobieranie znajomych konkretnego użytkownika
+exports.getUserFriends = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const friendships = await Friendship.find({
+      $or: [
+        { requester: userId, status: 'accepted' },
+        { recipient: userId, status: 'accepted' }
+      ]
+    }).populate('requester', 'firstName lastName username avatar')
+      .populate('recipient', 'firstName lastName username avatar');
+
+    const friends = friendships.map(friendship => {
+      if (friendship.requester._id.toString() === userId) {
+        return friendship.recipient;
+      } else {
+        return friendship.requester;
+      }
+    });
+
+    res.json({
+      success: true,
+      friends
+    });
+  } catch (error) {
+    console.error('Błąd pobierania znajomych użytkownika:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Błąd pobierania znajomych'
+    });
+  }
+};
+
+// Wysyłanie zaproszenia (alias dla send-request)
+exports.send = async (req, res) => {
+  return exports.sendFriendRequest(req, res);
+};
+
+// Akceptowanie zaproszenia (alias)
+exports.accept = async (req, res) => {
+  try {
+    const { recipientId } = req.body;
+    const userId = req.userId;
+
+    const friendship = await Friendship.findOne({
+      requester: recipientId,
+      recipient: userId,
+      status: 'pending'
+    });
+
+    if (!friendship) {
+      return res.status(404).json({
+        success: false,
+        error: 'Zaproszenie nie zostało znalezione'
+      });
+    }
+
+    friendship.status = 'accepted';
+    friendship.respondedAt = new Date();
+    await friendship.save();
+
+    // Utwórz powiadomienie dla wysyłającego
+    const recipient = await User.findById(userId).select('firstName lastName username avatar');
+    const notification = new Notification({
+      user: recipientId,
+      type: 'friend_accepted',
+      title: 'Zaproszenie zaakceptowane',
+      message: `${recipient.firstName} ${recipient.lastName} zaakceptował(a) Twoje zaproszenie do znajomych`,
+      priority: 'medium',
+      data: {
+        friendshipId: friendship._id,
+        recipientId: userId,
+        url: `/users/${userId}`,
+        image: recipient.avatar
+      },
+      actions: [
+        { label: 'Zobacz profil', action: 'view', url: `/users/${userId}` },
+        { label: 'Wyślij wiadomość', action: 'message', url: `/messages` }
+      ]
+    });
+    await notification.save();
+
+    res.json({
+      success: true,
+      status: 'accepted',
+      message: 'Zaproszenie zostało zaakceptowane'
+    });
+  } catch (error) {
+    console.error('Błąd akceptowania zaproszenia:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Błąd akceptowania zaproszenia'
+    });
+  }
+};
+
+// Odrzucanie zaproszenia (alias)
+exports.reject = async (req, res) => {
+  try {
+    const { recipientId } = req.body;
+    const userId = req.userId;
+
+    const friendship = await Friendship.findOne({
+      requester: recipientId,
+      recipient: userId,
+      status: 'pending'
+    });
+
+    if (!friendship) {
+      return res.status(404).json({
+        success: false,
+        error: 'Zaproszenie nie zostało znalezione'
+      });
+    }
+
+    friendship.status = 'rejected';
+    friendship.respondedAt = new Date();
+    await friendship.save();
+
+    res.json({
+      success: true,
+      status: 'rejected',
+      message: 'Zaproszenie zostało odrzucone'
+    });
+  } catch (error) {
+    console.error('Błąd odrzucania zaproszenia:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Błąd odrzucania zaproszenia'
+    });
+  }
+};
+
+// Usuwanie znajomego (alias)
+exports.unfriend = async (req, res) => {
+  try {
+    const { recipientId } = req.body;
+    const userId = req.userId;
+
+    const friendship = await Friendship.findOne({
+      $or: [
+        { requester: userId, recipient: recipientId },
+        { requester: recipientId, recipient: userId }
+      ],
+      status: 'accepted'
+    });
+
+    if (!friendship) {
+      return res.status(404).json({
+        success: false,
+        error: 'Relacja przyjaźni nie została znaleziona'
+      });
+    }
+
+    await Friendship.findByIdAndDelete(friendship._id);
+
+    res.json({
+      success: true,
+      status: 'removed',
+      message: 'Znajomy został usunięty'
+    });
+  } catch (error) {
+    console.error('Błąd usuwania znajomego:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Błąd usuwania znajomego'
     });
   }
 }; 

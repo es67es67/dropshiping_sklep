@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { api } from '../utils/api';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -219,20 +220,7 @@ const DataExport = () => {
 
       addLog(`Eksportowanie kolekcji: ${selectedCollections.join(', ')}`, 'info');
 
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
-      const response = await fetch(`${apiUrl}/api/admin/export`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(exportData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await api.post('/admin/export', exportData);
       
       setProgress(100);
       setExportResult(result);

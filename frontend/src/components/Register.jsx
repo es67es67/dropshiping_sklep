@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,7 +19,9 @@ const Container = styled.div`
   }
 `;
 
-const Title = styled.h1`
+const Title = styled.h1.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 2.5rem;
   font-weight: 800;
   text-align: center;
@@ -39,7 +42,9 @@ const Title = styled.h1`
   }
 `;
 
-const Form = styled.form`
+const Form = styled.form.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   background: ${props => props.theme.surface};
   border-radius: 20px;
   padding: 2rem;
@@ -78,7 +83,9 @@ const FormGroup = styled.div`
   }
 `;
 
-const Label = styled.label`
+const Label = styled.label.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   display: block;
   font-weight: 600;
   color: ${props => props.theme.text};
@@ -89,7 +96,9 @@ const Label = styled.label`
   }
 `;
 
-const Input = styled.input`
+const Input = styled.input.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   width: 100%;
   padding: 1rem;
   border: 2px solid ${props => props.theme.border};
@@ -154,7 +163,9 @@ const Select = styled.select`
   }
 `;
 
-const Button = styled.button`
+const Button = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   width: 100%;
   padding: 1rem 2rem;
   background: ${props => props.theme.gradient};
@@ -314,7 +325,9 @@ const StrengthBar = styled.div`
   overflow: hidden;
 `;
 
-const StrengthFill = styled.div`
+const StrengthFill = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['strength', 'theme'].includes(prop)
+})`
   height: 100%;
   background: ${props => props.strength === 'weak' ? props.theme.error :
                 props.strength === 'medium' ? props.theme.warning :
@@ -338,7 +351,9 @@ const Checkbox = styled.input`
   cursor: pointer;
 `;
 
-const CheckboxLabel = styled.label`
+const CheckboxLabel = styled.label.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 0.875rem;
   color: ${props => props.theme.text};
   cursor: pointer;
@@ -500,7 +515,7 @@ export default function Register() {
   };
 
   return (
-    <Container>
+    <Container>        <PageTitle title="Rejestracja" description="Zarejestruj się w portalu" />
       <Title>Rejestracja</Title>
       
       <Form onSubmit={handleSubmit}>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import ShopProducts from '../components/ShopProducts';
@@ -170,6 +171,7 @@ export default function MyProducts() {
   if (loading) {
     return (
       <Container>
+              <PageTitle title="Moje produkty" description="Zarządzaj swoimi produktami" />
         <Title>Moje produkty</Title>
         <LoadingSpinner>Ładowanie sklepów...</LoadingSpinner>
       </Container>
@@ -195,6 +197,7 @@ export default function MyProducts() {
 
   return (
     <Container>
+      <PageTitle title="Moje produkty" description="Zarządzaj swoimi produktami" />
       <Title>📦 Moje produkty</Title>
       
       <Header>

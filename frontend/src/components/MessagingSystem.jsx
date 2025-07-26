@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -575,7 +576,7 @@ export default function MessagingSystem() {
 
   if (!isAuthenticated) {
     return (
-      <Container>
+      <Container>        <PageTitle title="Wiadomości" description="System wiadomości" />
         <EmptyState>
           <div>
             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🔐</div>
@@ -600,6 +601,7 @@ export default function MessagingSystem() {
 
   return (
     <Container>
+      <PageTitle title="Wiadomości" description="System wiadomości" />
       <Sidebar>
         <SidebarHeader>
           <SidebarTitle>Wiadomości</SidebarTitle>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -235,6 +236,7 @@ export default function LocationAnalytics() {
   if (loading) {
     return (
       <Container>
+      <PageTitle title="Analizy lokalizacji" description="Analizy i statystyki lokalizacji" />
         <LoadingSpinner>Ładowanie analityki...</LoadingSpinner>
       </Container>
     );
@@ -242,6 +244,7 @@ export default function LocationAnalytics() {
 
   return (
     <Container>
+      <PageTitle title="Analizy lokalizacji" description="Analizy i statystyki lokalizacji" />
       <Header>
         <Title>📊 Analityka Lokalizacji</Title>
       </Header>

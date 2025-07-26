@@ -1,6 +1,285 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import { FaHeart, FaEye, FaShoppingCart, FaStar, FaMapMarkerAlt, FaTruck, FaShieldAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+
+const Card = styled.div`
+  background: ${props => props.theme.surface};
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+const BadgesContainer = styled.div`
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+const Badge = styled.span`
+  background: ${props => {
+    if (props.type === 'sale') return '#ef4444';
+    if (props.type === 'featured') return '#f59e0b';
+    if (props.type === 'out-of-stock') return '#6b7280';
+    return '#3b82f6';
+  }};
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+`;
+
+const QuickActions = styled.div`
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  
+  ${Card}:hover & {
+    opacity: 1;
+  }
+`;
+
+const ActionButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['hoverColor', 'hoverTextColor'].includes(prop)
+})`
+  width: 2rem;
+  height: 2rem;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.hoverColor || '#f3f4f6'};
+    color: ${props => props.hoverTextColor || '#374151'};
+  }
+`;
+
+const ImageContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+`;
+
+const ProductImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+  
+  ${Card}:hover & {
+    transform: scale(1.05);
+  }
+`;
+
+const ImageNavigation = styled.div`
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.25rem;
+`;
+
+const ImageDot = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active'
+})`
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: ${props => props.active ? 'white' : 'rgba(255, 255, 255, 0.5)'};
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: white;
+  }
+`;
+
+const Content = styled.div`
+  padding: 1rem;
+`;
+
+const ProductName = styled.h3`
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${props => props.theme.text};
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
+
+const PriceContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+`;
+
+const CurrentPrice = styled.span`
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: ${props => props.theme.primary};
+`;
+
+const OriginalPrice = styled.span`
+  font-size: 1rem;
+  color: ${props => props.theme.textSecondary};
+  text-decoration: line-through;
+`;
+
+const Discount = styled.span`
+  background: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-weight: 600;
+`;
+
+const RatingContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+`;
+
+const Stars = styled.div`
+  display: flex;
+  gap: 0.125rem;
+`;
+
+const Star = styled(FaStar).withConfig({
+  shouldForwardProp: (prop) => prop !== 'filled'
+})`
+  color: ${props => props.filled ? '#fbbf24' : '#d1d5db'};
+  width: 0.875rem;
+  height: 0.875rem;
+`;
+
+const RatingText = styled.span`
+  font-size: 0.75rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
+const ShopInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
+const ShopLogo = styled.img`
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+
+const ShopName = styled.span`
+  font-weight: 500;
+  color: ${props => props.theme.text};
+`;
+
+const LocationInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
+const Features = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+`;
+
+const Feature = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: ${props => props.theme.textSecondary};
+`;
+
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
+const AddToCartButton = styled.button`
+  flex: 1;
+  background: ${props => props.theme.primary};
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    background: ${props => props.theme.primary}dd;
+  }
+  
+  &:disabled {
+    background: ${props => props.theme.border};
+    color: ${props => props.theme.textSecondary};
+    cursor: not-allowed;
+  }
+`;
+
+const WishlistButton = styled.button`
+  padding: 0.75rem;
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 8px;
+  background: ${props => props.theme.background};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background: ${props => props.theme.border};
+  }
+`;
 
 const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -56,192 +335,152 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView }) => 
   };
 
   return (
-    <div 
-      className="product-card bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group"
+    <Card
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Badges */}
-      <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+      <BadgesContainer>
         {isOnSale && (
-          <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+          <Badge type="sale">
             -{discount}%
-          </span>
+          </Badge>
         )}
         {isFeatured && (
-          <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+          <Badge type="featured">
             Polecany
-          </span>
+          </Badge>
         )}
         {!isInStock && (
-          <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+          <Badge type="out-of-stock">
             Niedostępny
-          </span>
+          </Badge>
         )}
-      </div>
+      </BadgesContainer>
 
       {/* Quick Actions */}
-      <div className="absolute top-2 right-2 z-10 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
+      <QuickActions>
+        <ActionButton
           onClick={handleAddToWishlist}
-          className="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"
+          hoverColor="#fef2f2"
+          hoverTextColor="#ef4444"
           title="Dodaj do ulubionych"
         >
           <FaHeart className="text-sm" />
-        </button>
-        <button
+        </ActionButton>
+        <ActionButton
           onClick={handleQuickView}
-          className="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-blue-50 hover:text-blue-500 transition-colors"
+          hoverColor="#eff6ff"
+          hoverTextColor="#3b82f6"
           title="Szybki podgląd"
         >
           <FaEye className="text-sm" />
-        </button>
-      </div>
+        </ActionButton>
+      </QuickActions>
 
-      {/* Image Gallery */}
-      <div className="relative aspect-square overflow-hidden">
-        <img
+      {/* Product Image */}
+      <ImageContainer>
+        <ProductImage
           src={displayImage}
           alt={name}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         
-        {/* Image Thumbnails */}
+        {/* Image Navigation Dots */}
         {images.length > 1 && (
-          <div className="absolute bottom-2 left-2 right-2 flex gap-1 justify-center">
-            {images.slice(0, 4).map((image, index) => (
-              <button
+          <ImageNavigation>
+            {images.map((_, index) => (
+              <ImageDot
                 key={index}
+                active={index === currentImageIndex}
                 onClick={() => handleImageChange(index)}
-                className={`w-8 h-8 rounded border-2 transition-all ${
-                  index === currentImageIndex 
-                    ? 'border-blue-500 scale-110' 
-                    : 'border-white hover:border-gray-300'
-                }`}
-              >
-                <img
-                  src={image}
-                  alt={`${name} ${index + 1}`}
-                  className="w-full h-full object-cover rounded"
-                />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
-        {/* Shop Info */}
-        {shop.name && (
-          <div className="flex items-center gap-2 mb-2">
-            {shop.logo && (
-              <img src={shop.logo} alt={shop.name} className="w-4 h-4 rounded" />
-            )}
-            <span className="text-xs text-gray-600 hover:text-blue-600 cursor-pointer">
-              {shop.name}
-            </span>
-          </div>
-        )}
-
-        {/* Product Name */}
-        <Link to={`/product/${_id}`} className="block">
-          <h3 className="font-semibold text-gray-900 hover:text-blue-600 transition-colors line-clamp-2 mb-2">
-            {name}
-          </h3>
-        </Link>
-
-        {/* Rating */}
-        <div className="flex items-center gap-2 mb-2">
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <FaStar
-                key={i}
-                className={`w-3 h-3 ${
-                  i < Math.floor(ratings.average)
-                    ? 'text-yellow-400'
-                    : 'text-gray-300'
-                }`}
               />
             ))}
-          </div>
-          <span className="text-xs text-gray-600">
-            ({ratings.count})
-          </span>
-        </div>
+          </ImageNavigation>
+        )}
+      </ImageContainer>
 
-        {/* Price */}
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xl font-bold text-gray-900">
+      {/* Product Content */}
+      <Content>
+        <ProductName>{name}</ProductName>
+        
+        <PriceContainer>
+          <CurrentPrice>
             {price.toFixed(2)} zł
-          </span>
-          {originalPrice && originalPrice > price && (
-            <span className="text-sm text-gray-500 line-through">
+          </CurrentPrice>
+          {originalPrice && (
+            <OriginalPrice>
               {originalPrice.toFixed(2)} zł
-            </span>
+            </OriginalPrice>
           )}
-        </div>
+          {isOnSale && (
+            <Discount>
+              -{discount}%
+            </Discount>
+          )}
+        </PriceContainer>
 
-        {/* Shipping Info */}
-        {shipping.freeShipping && (
-          <div className="flex items-center gap-1 text-xs text-green-600 mb-2">
-            <FaTruck />
-            <span>Darmowa dostawa</span>
-          </div>
-        )}
-
-        {/* Location */}
-        {shop.address?.city && (
-          <div className="flex items-center gap-1 text-xs text-gray-600 mb-3">
-            <FaMapMarkerAlt />
-            <span>{shop.address.city}</span>
-          </div>
-        )}
-
-        {/* Tags */}
-        {tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {tags.slice(0, 3).map((tag, index) => (
-              <span
-                key={index}
-                className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
-              >
-                {tag}
-              </span>
+        <RatingContainer>
+          <Stars>
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                filled={i < Math.floor(ratings.average)}
+              />
             ))}
-          </div>
-        )}
+          </Stars>
+          <RatingText>
+            ({ratings.count})
+          </RatingText>
+        </RatingContainer>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          <button
+        <ShopInfo>
+          {shop.logo && (
+            <ShopLogo
+              src={shop.logo}
+              alt={shop.name}
+            />
+          )}
+          <ShopName>{shop.name}</ShopName>
+          {shop.address?.city && (
+            <LocationInfo>
+              <FaMapMarkerAlt />
+              {shop.address.city}
+            </LocationInfo>
+          )}
+        </ShopInfo>
+
+        <Features>
+          {shipping.freeShipping && (
+            <Feature>
+              <FaTruck />
+              Darmowa dostawa
+            </Feature>
+          )}
+          {isFeatured && (
+            <Feature>
+              <FaShieldAlt />
+              Gwarancja
+            </Feature>
+          )}
+        </Features>
+
+        <ActionButtons>
+          <AddToCartButton
             onClick={handleAddToCart}
             disabled={!isInStock}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium transition-colors ${
-              isInStock
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
           >
             <FaShoppingCart />
             {isInStock ? 'Dodaj do koszyka' : 'Niedostępny'}
-          </button>
-        </div>
-
-        {/* Stock Info */}
-        {isInStock && stock < 10 && (
-          <div className="mt-2 text-xs text-orange-600">
-            Pozostało tylko {stock} sztuk!
-          </div>
-        )}
-
-        {/* Security Badge */}
-        <div className="flex items-center gap-1 mt-2 text-xs text-gray-500">
-          <FaShieldAlt />
-          <span>Bezpieczne zakupy</span>
-        </div>
-      </div>
-    </div>
+          </AddToCartButton>
+          <WishlistButton
+            onClick={handleAddToWishlist}
+            title="Dodaj do ulubionych"
+          >
+            <FaHeart style={{ color: '#ef4444' }} />
+          </WishlistButton>
+        </ActionButtons>
+      </Content>
+    </Card>
   );
 };
 

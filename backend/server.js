@@ -21,8 +21,11 @@ const recommendationRoutes = require('./routes/recommendationRoutes');
 const loyaltyRoutes = require('./routes/loyaltyRoutes');
 const abTestingRoutes = require('./routes/abTestingRoutes');
 const friendshipRoutes = require('./routes/friendshipRoutes');
+const messageRoutes = require('./routes/messageRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const geocodingRoutes = require('./routes/geocodingRoutes');
+const exportRoutes = require('./routes/exportRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -44,6 +47,7 @@ app.use(cors({
   origin: function (origin, callback) {
     const allowedOrigins = [
       'http://localhost:3000',
+      'http://localhost:8080',
       'https://portal-frontend.onrender.com',
       'https://portal-frontend-igf9.onrender.com',
       'https://portal-frontend-ysqz.onrender.com'
@@ -70,6 +74,7 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   const allowedOrigins = [
     'http://localhost:3000',
+    'http://localhost:8080',
     'https://portal-frontend.onrender.com',
     'https://portal-frontend-igf9.onrender.com',
     'https://portal-frontend-ysqz.onrender.com'
@@ -228,7 +233,34 @@ io.on('connection', (socket) => {
   });
 });
 
-// Uruchom serwer natychmiast, aby uniknąć timeoutu
+// Register routes PRZED uruchomieniem serwera
+function safeUse(path, router, name) {
+  if (!router || typeof router !== 'function' || !router.use) {
+    console.error(`\n❌ Błąd rejestracji tras: ${name} nie jest poprawnym routerem Express! Sprawdź eksport w pliku.`);
+    return;
+  }
+  app.use(path, router);
+}
+
+safeUse('/api/users', userRoutes, 'userRoutes');
+safeUse('/api/shops', shopRoutes, 'shopRoutes');
+safeUse('/api/products', productRoutes, 'productRoutes');
+safeUse('/api/cart', cartRoutes, 'cartRoutes');
+safeUse('/api/orders', orderRoutes, 'orderRoutes');
+safeUse('/api/locations', locationRoutes, 'locationRoutes');
+safeUse('/api/recommendations', recommendationRoutes, 'recommendationRoutes');
+safeUse('/api/loyalty', loyaltyRoutes, 'loyaltyRoutes');
+safeUse('/api/ab-testing', abTestingRoutes, 'abTestingRoutes');
+safeUse('/api/friendships', friendshipRoutes, 'friendshipRoutes');
+safeUse('/api/posts', require('./routes/postRoutes'), 'postRoutes');
+safeUse('/api/messages', messageRoutes, 'messageRoutes');
+safeUse('/api/notifications', notificationRoutes, 'notificationRoutes');
+safeUse('/api/company-profiles', require('./routes/companyProfileRoutes'), 'companyProfileRoutes');
+safeUse('/api/admin', adminRoutes, 'adminRoutes');
+safeUse('/api/geocoding', geocodingRoutes, 'geocodingRoutes');
+safeUse('/api/export', exportRoutes, 'exportRoutes');
+
+// Uruchom serwer po zarejestrowaniu routes
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Serwer działa na porcie ${PORT}`);
@@ -293,29 +325,6 @@ server.listen(PORT, () => {
       console.log('⚠️ Serwer działa bez bazy danych - niektóre funkcje mogą być niedostępne');
     });
 });
-
-// Register routes
-function safeUse(path, router, name) {
-  if (!router || typeof router !== 'function' || !router.use) {
-    console.error(`\n❌ Błąd rejestracji tras: ${name} nie jest poprawnym routerem Express! Sprawdź eksport w pliku.`);
-    return;
-  }
-  app.use(path, router);
-}
-
-safeUse('/api/users', userRoutes, 'userRoutes');
-safeUse('/api/shops', shopRoutes, 'shopRoutes');
-safeUse('/api/products', productRoutes, 'productRoutes');
-safeUse('/api/cart', cartRoutes, 'cartRoutes');
-safeUse('/api/orders', orderRoutes, 'orderRoutes');
-safeUse('/api/locations', locationRoutes, 'locationRoutes');
-safeUse('/api/recommendations', recommendationRoutes, 'recommendationRoutes');
-safeUse('/api/loyalty', loyaltyRoutes, 'loyaltyRoutes');
-safeUse('/api/ab-testing', abTestingRoutes, 'abTestingRoutes');
-safeUse('/api/friendships', friendshipRoutes, 'friendshipRoutes');
-safeUse('/api/company-profiles', require('./routes/companyProfileRoutes'), 'companyProfileRoutes');
-safeUse('/api/admin', adminRoutes, 'adminRoutes');
-safeUse('/api/geocoding', geocodingRoutes, 'geocodingRoutes');
 
 // Middleware anty-XSS/NoSQL injection dla wyszukiwania produktów
 app.use('/api/products', (req, res, next) => {

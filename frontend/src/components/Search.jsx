@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -707,7 +708,7 @@ export default function Search() {
   const totalResults = results.products.length + results.shops.length;
 
   return (
-    <Container>
+    <Container>        <PageTitle title="Wyszukiwanie" description="Wyszukuj w portalu" />
       <Title>🔍 Wyszukiwanie</Title>
       
       <SearchSection>

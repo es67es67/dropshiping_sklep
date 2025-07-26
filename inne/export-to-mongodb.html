@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eksport danych GUS do MongoDB - Osobne tabele</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .config-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .progress-container {
+            margin: 20px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .log-container {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+        }
+        .log-error {
+            color: #ff6b6b;
+        }
+        .log-success {
+            color: #51cf66;
+        }
+        .log-warning {
+            color: #ffd43b;
+        }
+        .log-info {
+            color: #74c0fc;
+        }
+        .file-input {
+            margin-bottom: 20px;
+        }
+        .file-input input[type="file"] {
+            display: none;
+        }
+        .file-input label {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .file-input label:hover {
+            background: #218838;
+        }
+        .selected-files {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .error-handling {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .table-structure {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Eksport danych GUS do MongoDB - Osobne tabele</h1>
+        
+        <div class="info-box">
+            <h3>🔄 Bezpieczeństwo eksportu:</h3>
+            <p><strong>Skrypt automatycznie wykrywa i aktualizuje istniejące wpisy</strong> na podstawie typu i kodu TERYT. Możesz bezpiecznie przerwać i wznowić eksport bez duplikowania danych.</p>
+        </div>
+
+        <div class="table-structure">
+            <h3>📊 Struktura tabel:</h3>
+            <p><strong>TERC:</strong> województwa, powiaty, gminy (kod TERC)</p>
+            <p><strong>SIMC:</strong> miejscowości (kod SIMC)</p>
+            <p><strong>ULIC:</strong> ulice (kod ULIC)</p>
+            <p><em>Zalety osobnych tabel: szybsze wyszukiwanie, lepsza czytelność, łatwiejsze zarządzanie</em></p>
+        </div>
+
+        <div class="error-handling">
+            <h3>🛠️ Inteligentna obsługa błędów:</h3>
+            <p><strong>1.</strong> Sprawdza czy dane istnieją w bazie</p>
+            <p><strong>2.</strong> Jeśli istnieją ale są niekompletne - aktualizuje</p>
+            <p><strong>3.</strong> Jeśli nie istnieją - wysyła ponownie</p>
+            <p><strong>4.</strong> Automatyczne ponowne próby z opóźnieniem</p>
+        </div>
+        
+        <div class="config-section">
+            <h3>⚙️ Konfiguracja MongoDB</h3>
+            <div class="form-group">
+                <label for="mongoUri">MongoDB URI:</label>
+                <input type="text" id="mongoUri" value="mongodb+srv://es67jw:xlnepf0D4JXZtGwT@cluster0.hku8kvd.mongodb.net/portal?retryWrites=true&w=majority&appName=Cluster0" placeholder="mongodb://localhost:27017/portal">
+            </div>
+            <div class="form-group">
+                <label for="databaseName">Nazwa bazy danych:</label>
+                <input type="text" id="databaseName" value="portal" placeholder="portal">
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h3>📁 Pliki CSV</h3>
+            <div class="file-input">
+                <label for="tercFile">📋 Wybierz plik TERC (województwa, powiaty, gminy)</label>
+                <input type="file" id="tercFile" accept=".csv">
+            </div>
+            <div class="file-input">
+                <label for="simcFile">🏘️ Wybierz plik SIMC (miejscowości)</label>
+                <input type="file" id="simcFile" accept=".csv">
+            </div>
+            <div class="file-input">
+                <label for="ulicFile">🛣️ Wybierz plik ULIC (ulice)</label>
+                <input type="file" id="ulicFile" accept=".csv">
+            </div>
+            <div class="selected-files" id="selectedFiles"></div>
+        </div>
+
+        <div class="config-section">
+            <h3>⚡ Ustawienia wydajności</h3>
+            <div class="form-group">
+                <label for="requestsPerSecond">Zapytania na sekundę:</label>
+                <input type="number" id="requestsPerSecond" value="50" min="1" max="1000">
+            </div>
+            <div class="form-group">
+                <label for="batchSize">Rozmiar batch:</label>
+                <input type="number" id="batchSize" value="100" min="1" max="1000">
+            </div>
+            <div class="form-group">
+                <label for="maxRetries">Maksymalne próby ponowienia:</label>
+                <input type="number" id="maxRetries" value="3" min="1" max="10">
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="btn btn-success" id="startBtn" onclick="startExport()">🚀 Rozpocznij eksport</button>
+            <button class="btn btn-danger" id="stopBtn" onclick="stopExport()" disabled>⏹️ Zatrzymaj</button>
+            <button class="btn" id="clearBtn" onclick="clearLog()">🗑️ Wyczyść log</button>
+            <button class="btn" id="statusBtn" onclick="checkStatus()">📊 Status bazy</button>
+            <button class="btn" id="duplicatesBtn" onclick="checkDuplicates()">🔍 Sprawdź duplikaty</button>
+            <button class="btn btn-danger" id="clearDbBtn" onclick="clearDatabase()">🗑️ Wyczyść bazę</button>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div style="text-align: center; margin-top: 10px;">
+                <span id="progressText">0%</span>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalProcessed">0</div>
+                <div class="stat-label">Przetworzone</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalImported">0</div>
+                <div class="stat-label">Zaimportowane</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalUpdated">0</div>
+                <div class="stat-label">Zaktualizowane</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalErrors">0</div>
+                <div class="stat-label">Błędy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="requestsPerSec">0</div>
+                <div class="stat-label">Zapytania/s</div>
+            </div>
+        </div>
+
+        <div class="log-container" id="logContainer">
+            <div class="log-entry">System gotowy. Wybierz pliki CSV i rozpocznij eksport.</div>
+        </div>
+    </div>
+
+    <script>
+        let isExporting = false;
+        let shouldStop = false;
+        let stats = {
+            processed: 0,
+            imported: 0,
+            updated: 0,
+            errors: 0,
+            requestsThisSecond: 0,
+            lastSecond: Date.now()
+        };
+
+        // Obsługa wyboru plików
+        document.getElementById('tercFile').addEventListener('change', updateSelectedFiles);
+        document.getElementById('simcFile').addEventListener('change', updateSelectedFiles);
+        document.getElementById('ulicFile').addEventListener('change', updateSelectedFiles);
+
+        function updateSelectedFiles() {
+            const files = [];
+            const tercFile = document.getElementById('tercFile').files[0];
+            const simcFile = document.getElementById('simcFile').files[0];
+            const ulicFile = document.getElementById('ulicFile').files[0];
+
+            if (tercFile) files.push(`📋 TERC: ${tercFile.name}`);
+            if (simcFile) files.push(`🏘️ SIMC: ${simcFile.name}`);
+            if (ulicFile) files.push(`🛣️ ULIC: ${ulicFile.name}`);
+
+            document.getElementById('selectedFiles').innerHTML = files.join('<br>');
+        }
+
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('logContainer').innerHTML = '';
+            log('Log wyczyszczony.');
+        }
+
+        function updateStats() {
+            document.getElementById('totalProcessed').textContent = stats.processed;
+            document.getElementById('totalImported').textContent = stats.imported;
+            document.getElementById('totalUpdated').textContent = stats.updated;
+            document.getElementById('totalErrors').textContent = stats.errors;
+            document.getElementById('requestsPerSec').textContent = stats.requestsThisSecond;
+        }
+
+        function updateProgress(current, total) {
+            const percentage = Math.round((current / total) * 100);
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = percentage + '%';
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function processCsvFile(file, type) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const csv = e.target.result;
+                    const lines = csv.split('\n');
+                    const headers = lines[0].split(';');
+                    const data = [];
+
+                    for (let i = 1; i < lines.length; i++) {
+                        if (lines[i].trim()) {
+                            const values = lines[i].split(';');
+                            const row = {};
+                            headers.forEach((header, index) => {
+                                row[header.trim()] = values[index] ? values[index].trim() : '';
+                            });
+                            data.push(row);
+                        }
+                    }
+
+                    resolve(data);
+                };
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        }
+
+        async function checkRecordExists(record, type) {
+            try {
+                const backendUrl = 'http://localhost:5000/api/export/check-record';
+                const response = await fetch(backendUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        record: record,
+                        type: type
+                    })
+                });
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                log(`❌ Błąd sprawdzania rekordu: ${error.message}`, 'error');
+                return { exists: false, isComplete: false };
+            }
+        }
+
+        async function sendToMongoDB(data, type) {
+            const requestsPerSecond = parseInt(document.getElementById('requestsPerSecond').value);
+            const batchSize = parseInt(document.getElementById('batchSize').value);
+            const maxRetries = parseInt(document.getElementById('maxRetries').value);
+            const delayBetweenRequests = 1000 / requestsPerSecond;
+            const backendUrl = 'http://localhost:5000/api/export/gus-data-separate';
+
+            for (let i = 0; i < data.length; i += batchSize) {
+                if (shouldStop) {
+                    log('Eksport zatrzymany przez użytkownika.', 'warning');
+                    break;
+                }
+
+                const batch = data.slice(i, i + batchSize);
+                let retryCount = 0;
+                let success = false;
+                
+                while (retryCount < maxRetries && !success) {
+                    try {
+                        // Sprawdź każdy rekord w batchu
+                        const processedBatch = [];
+                        for (const record of batch) {
+                            const checkResult = await checkRecordExists(record, type);
+                            
+                            if (checkResult.exists && checkResult.isComplete) {
+                                // Rekord istnieje i jest kompletny - pomiń
+                                log(`⏭️ Pomijam istniejący rekord: ${record.NAZWA || record.name}`, 'info');
+                                stats.processed++;
+                            } else if (checkResult.exists && !checkResult.isComplete) {
+                                // Rekord istnieje ale jest niekompletny - dodaj do aktualizacji
+                                processedBatch.push({
+                                    ...record,
+                                    action: 'update',
+                                    existingId: checkResult.recordId
+                                });
+                                log(`🔄 Aktualizuję niekompletny rekord: ${record.NAZWA || record.name}`, 'warning');
+                            } else {
+                                // Rekord nie istnieje - dodaj do wstawienia
+                                processedBatch.push({
+                                    ...record,
+                                    action: 'insert'
+                                });
+                                log(`➕ Dodaję nowy rekord: ${record.NAZWA || record.name}`, 'info');
+                            }
+                        }
+
+                        if (processedBatch.length === 0) {
+                            // Wszystkie rekordy już istnieją
+                            success = true;
+                            continue;
+                        }
+
+                        const response = await fetch(backendUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                data: processedBatch,
+                                type: type
+                            })
+                        });
+
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            stats.processed += batch.length;
+                            stats.imported += result.inserted || 0;
+                            stats.updated += result.updated || 0;
+                            stats.errors += result.errors || 0;
+                            stats.requestsThisSecond += 1;
+                            success = true;
+
+                            if (result.inserted > 0) {
+                                log(`✅ Batch ${i/batchSize + 1}: ${result.inserted} nowych rekordów`, 'success');
+                            }
+                            if (result.updated > 0) {
+                                log(`🔄 Batch ${i/batchSize + 1}: ${result.updated} zaktualizowanych rekordów`, 'warning');
+                            }
+                            if (result.errors > 0) {
+                                log(`⚠️ Batch ${i/batchSize + 1}: ${result.errors} błędów`, 'error');
+                            }
+                        } else {
+                            throw new Error(result.error || 'Nieznany błąd serwera');
+                        }
+
+                    } catch (error) {
+                        retryCount++;
+                        
+                        if (retryCount < maxRetries) {
+                            log(`❌ Błąd batch ${i/batchSize + 1} (próba ${retryCount}/${maxRetries}): ${error.message}`, 'error');
+                            log(`⏳ Wstrzymanie na ${retryCount * 2} sekund przed ponowną próbą...`, 'info');
+                            await delay(retryCount * 2000); // Progresywne opóźnienie
+                        } else {
+                            stats.errors += batch.length;
+                            log(`❌ Ostateczny błąd batch ${i/batchSize + 1} po ${maxRetries} próbach: ${error.message}`, 'error');
+                        }
+                    }
+                }
+
+                // Reset licznika zapytań na sekundę
+                const now = Date.now();
+                if (now - stats.lastSecond >= 1000) {
+                    stats.requestsThisSecond = 0;
+                    stats.lastSecond = now;
+                }
+
+                updateStats();
+                updateProgress(stats.processed, data.length);
+
+                if (i % (batchSize * 10) === 0) {
+                    log(`Przetworzono ${stats.processed}/${data.length} rekordów (${type})`);
+                }
+
+                // Opóźnienie między batchami
+                await delay(delayBetweenRequests * batchSize);
+            }
+        }
+
+        async function startExport() {
+            const tercFile = document.getElementById('tercFile').files[0];
+            const simcFile = document.getElementById('simcFile').files[0];
+            const ulicFile = document.getElementById('ulicFile').files[0];
+            const mongoUri = document.getElementById('mongoUri').value;
+            const databaseName = document.getElementById('databaseName').value;
+
+            if (!tercFile && !simcFile && !ulicFile) {
+                log('Wybierz przynajmniej jeden plik CSV!', 'error');
+                return;
+            }
+
+            if (!mongoUri) {
+                log('Podaj MongoDB URI!', 'error');
+                return;
+            }
+
+            isExporting = true;
+            shouldStop = false;
+            stats = { processed: 0, imported: 0, updated: 0, errors: 0, requestsThisSecond: 0, lastSecond: Date.now() };
+
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+
+            log('🚀 Rozpoczynam eksport danych do osobnych tabel...', 'success');
+
+            try {
+                let totalRecords = 0;
+
+                // Przetwarzaj TERC
+                if (tercFile) {
+                    log('📋 Przetwarzanie pliku TERC...', 'info');
+                    const tercData = await processCsvFile(tercFile, 'TERC');
+                    totalRecords += tercData.length;
+                    log(`📊 Znaleziono ${tercData.length} rekordów TERC`, 'info');
+                    
+                    await sendToMongoDB(tercData, 'TERC');
+                }
+
+                // Przetwarzaj SIMC
+                if (simcFile) {
+                    log('🏘️ Przetwarzanie pliku SIMC...', 'info');
+                    const simcData = await processCsvFile(simcFile, 'SIMC');
+                    totalRecords += simcData.length;
+                    log(`📊 Znaleziono ${simcData.length} rekordów SIMC`, 'info');
+                    
+                    await sendToMongoDB(simcData, 'SIMC');
+                }
+
+                // Przetwarzaj ULIC
+                if (ulicFile) {
+                    log('🛣️ Przetwarzanie pliku ULIC...', 'info');
+                    const ulicData = await processCsvFile(ulicFile, 'ULIC');
+                    totalRecords += ulicData.length;
+                    log(`📊 Znaleziono ${ulicData.length} rekordów ULIC`, 'info');
+                    
+                    await sendToMongoDB(ulicData, 'ULIC');
+                }
+
+                if (!shouldStop) {
+                    log('✅ Eksport zakończony pomyślnie!', 'success');
+                    log(`📊 Podsumowanie: ${stats.imported} nowych, ${stats.updated} zaktualizowanych, ${stats.errors} błędów`, 'success');
+                }
+
+            } catch (error) {
+                log(`❌ Błąd podczas eksportu: ${error.message}`, 'error');
+                stats.errors++;
+            } finally {
+                isExporting = false;
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+        }
+
+        function stopExport() {
+            shouldStop = true;
+            log('⏹️ Zatrzymywanie eksportu...', 'warning');
+        }
+
+        async function checkStatus() {
+            try {
+                const response = await fetch('http://localhost:5000/api/export/status-separate');
+                const result = await response.json();
+                
+                if (result.success) {
+                    log('📊 Status bazy danych (osobne tabele):', 'info');
+                    log(`   TERC: ${result.terc} rekordów`, 'info');
+                    log(`   SIMC: ${result.simc} rekordów`, 'info');
+                    log(`   ULIC: ${result.ulic} rekordów`, 'info');
+                    log(`   Łącznie: ${result.terc + result.simc + result.ulic} rekordów`, 'info');
+                } else {
+                    log(`❌ Błąd sprawdzania statusu: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Błąd sieci: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkDuplicates() {
+            try {
+                const response = await fetch('http://localhost:5000/api/export/duplicates-separate');
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (result.totalDuplicates === 0) {
+                        log('✅ Brak duplikatów w bazie danych', 'success');
+                    } else {
+                        log(`⚠️ Znaleziono ${result.totalDuplicates} grup duplikatów:`, 'warning');
+                        result.duplicates.forEach((dup, index) => {
+                            log(`   ${index + 1}. ${dup._id.type} (${dup._id.code}): ${dup.count} wpisów`, 'warning');
+                        });
+                    }
+                } else {
+                    log(`❌ Błąd sprawdzania duplikatów: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Błąd sieci: ${error.message}`, 'error');
+            }
+        }
+
+        async function clearDatabase() {
+            if (!confirm('Czy na pewno chcesz wyczyścić całą bazę danych? Tej operacji nie można cofnąć!')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/export/clear-separate', {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    log('🗑️ Baza danych wyczyszczona', 'success');
+                    stats.processed = 0;
+                    stats.imported = 0;
+                    stats.updated = 0;
+                    stats.errors = 0;
+                    updateStats();
+                    updateProgress(0, 1);
+                } else {
+                    log(`❌ Błąd czyszczenia: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Błąd sieci: ${error.message}`, 'error');
+            }
+        }
+
+        // Aktualizuj statystyki co sekundę
+        setInterval(updateStats, 1000);
+    </script>
+</body>
+</html> 

@@ -13,6 +13,13 @@ const messageSchema = new mongoose.Schema({
     required: true
   },
   
+  // ID konwersacji
+  conversationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Conversation',
+    required: true
+  },
+  
   // Typ konwersacji
   conversationType: {
     type: String,
@@ -151,6 +158,7 @@ messageSchema.methods.removeReaction = function(userId) {
 // Indeksy
 messageSchema.index({ sender: 1, recipient: 1, createdAt: -1 });
 messageSchema.index({ recipient: 1, status: 1 });
+messageSchema.index({ conversationId: 1, createdAt: -1 });
 messageSchema.index({ 'relatedData.orderId': 1 });
 messageSchema.index({ 'relatedData.shopId': 1 });
 messageSchema.index({ createdAt: -1 });

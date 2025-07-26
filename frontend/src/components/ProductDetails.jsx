@@ -319,7 +319,7 @@ const Notification = styled.div`
   }
 `;
 
-export default function ProductDetails() {
+export default function ProductDetails({ theme }) {
   const { productId } = useParams();
   const { user, isAuthenticated } = useAuth();
   const [product, setProduct] = useState(null);
@@ -444,7 +444,7 @@ export default function ProductDetails() {
 
     setAddingToCart(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/add`, {
+      const response = await fetch(`/api/cart/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -611,25 +611,25 @@ export default function ProductDetails() {
   if (!product) return <Container>Nie znaleziono produktu.</Container>;
 
   return (
-    <Container>
+    <Container theme={theme}>
       {notification && (
         <Notification className={notification.type}>
           {notification.message}
         </Notification>
       )}
       
-      <BackButton to={product.shop ? `/shop/${product.shop}` : '/shops'}>← Wróć do sklepu</BackButton>
+      <BackButton theme={theme} to={product.shop ? `/shop/${product.shop}` : '/shops'}>← Wróć do sklepu</BackButton>
       
-      <ProductBox>
+      <ProductBox theme={theme}>
         <Image src={product.mainImage || (product.images && product.images[0]) || 'https://via.placeholder.com/400x300'} alt={product.name} />
         <Info>
           <Name>{product.name}</Name>
-          <Price>{product.price} zł</Price>
-          <Description>{product.description}</Description>
-          <div><Label>Kategoria:</Label> {product.category}</div>
-          <div><Label>Marka:</Label> {product.brand}</div>
-          <div><Label>Dostępność:</Label> {product.isActive ? 'Dostępny' : 'Niedostępny'} ({product.stock} szt.)</div>
-          <div><Label>Tagi:</Label> {product.tags && product.tags.join(', ')}</div>
+          <Price theme={theme}>{product.price} zł</Price>
+          <Description theme={theme}>{product.description}</Description>
+          <div><Label theme={theme}>Kategoria:</Label> {product.category}</div>
+          <div><Label theme={theme}>Marka:</Label> {product.brand}</div>
+          <div><Label theme={theme}>Dostępność:</Label> {product.isActive ? 'Dostępny' : 'Niedostępny'} ({product.stock} szt.)</div>
+          <div><Label theme={theme}>Tagi:</Label> {product.tags && product.tags.join(', ')}</div>
           
           {product.isActive && product.stock > 0 && (
             <>
@@ -656,6 +656,7 @@ export default function ProductDetails() {
               </QuantitySelector>
               
               <AddToCartButton 
+                theme={theme}
                 onClick={addToCart}
                 disabled={addingToCart || !isAuthenticated}
               >

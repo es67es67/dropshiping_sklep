@@ -314,9 +314,14 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
     fetchProducts();
   }, [shopId]);
 
+  // Dodaj logowanie produktów do konsoli
+  useEffect(() => {
+    console.log('Produkty pobrane z API:', products);
+  }, [products]);
+
   const fetchShopDetails = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/shops/${shopId}`, {
@@ -337,7 +342,7 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
 
   const fetchProducts = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/products/shop/${shopId}`, {
@@ -370,7 +375,7 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
     e.preventDefault();
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
       
       const productData = {
@@ -429,7 +434,7 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
     if (!window.confirm('Czy na pewno chcesz usunąć ten produkt?')) return;
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
       
       const response = await fetch(`${apiUrl}/api/products/${productId}`, {
@@ -481,7 +486,7 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/cart/add`, {
+      const response = await fetch(`/api/cart/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -517,10 +522,6 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
     }
   }, [notification]);
 
-  if (loading) {
-    return <div>Ładowanie produktów...</div>;
-  }
-
   return (
     <Container>
       {notification && (
@@ -540,13 +541,9 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
         )}
       </Header>
 
-      {products.length === 0 ? (
-        <EmptyState>
-          <EmptyIcon>📦</EmptyIcon>
-          <h3>Brak produktów</h3>
-          <p>Dodaj swój pierwszy produkt, aby rozpocząć sprzedaż!</p>
-        </EmptyState>
-      ) : (
+      {loading ? (
+        <div>Ładowanie produktów...</div>
+      ) : products && products.length > 0 ? (
         <ProductGrid>
           {products.map(product => (
             <Link to={`/product/${product._id}`} key={product._id} style={{ textDecoration: 'none' }}>
@@ -587,6 +584,11 @@ export default function ShopProducts({ shopId, theme, isOwner: propIsOwner }) {
             </Link>
           ))}
         </ProductGrid>
+      ) : (
+        <EmptyState>
+          <EmptyIcon>🛒</EmptyIcon>
+          Brak produktów w tym sklepie.
+        </EmptyState>
       )}
 
       {showAddModal && (

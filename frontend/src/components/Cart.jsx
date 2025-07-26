@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { FaShoppingCart, FaTrash, FaMinus, FaPlus, FaStore, FaTruck, FaCreditCard } from 'react-icons/fa';
 
@@ -479,6 +480,7 @@ const Cart = () => {
   if (loading) {
     return (
       <CartContainer>
+        <PageTitle title="Koszyk" description="Twój koszyk zakupów" />
         <LoadingSpinner>Ładowanie koszyka...</LoadingSpinner>
       </CartContainer>
     );
@@ -511,6 +513,7 @@ const Cart = () => {
 
   return (
     <CartContainer>
+      <PageTitle title="Koszyk" description="Twój koszyk zakupów" />
       <CartHeader>
         <FaShoppingCart className="cart-icon" />
         <h1>Koszyk zakupów</h1>

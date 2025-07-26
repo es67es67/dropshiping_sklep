@@ -13,7 +13,9 @@ const Container = styled.div`
   }
 `;
 
-const Title = styled.h1`
+const Title = styled.h1.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 2.5rem;
   font-weight: 800;
   text-align: center;
@@ -35,7 +37,9 @@ const TabContainer = styled.div`
   border-bottom: 2px solid ${props => props.theme.border};
 `;
 
-const Tab = styled.button`
+const Tab = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['active', 'theme'].includes(prop)
+})`
   padding: 1rem 2rem;
   border: none;
   background: ${props => props.active ? props.theme.primary : 'transparent'};
@@ -61,7 +65,9 @@ const PaymentCard = styled.div`
   }
 `;
 
-const PaymentMethod = styled.div`
+const PaymentMethod = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['selected', 'theme'].includes(prop)
+})`
   display: flex;
   align-items: center;
   gap: 1rem;

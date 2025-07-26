@@ -1,197 +1,286 @@
-const puppeteer = require('puppeteer');
-const fs = require('fs');
-const path = require('path');
+const fetch = require('node-fetch');
 
-async function testFriendshipSystem() {
-  console.log('🧪 Testowanie systemu znajomych...');
-  
-  const browser = await puppeteer.launch({
-    headless: false,
-    defaultViewport: { width: 1920, height: 1080 },
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+const API_URL = 'http://localhost:5000/api';
 
-  const page = await browser.newPage();
-  
+// Funkcja do logowania
+const log = (message) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${message}`);
+};
+
+// Funkcja do logowania użytkownika
+const loginUser = async (email, password) => {
   try {
-    // Przejdź do strony głównej
-    console.log('🌐 Przechodzę do strony głównej...');
-    await page.goto('http://localhost:3000', { waitUntil: 'networkidle2' });
+    log(`🔐 Logowanie użytkownika: ${email}`);
     
-    // Zarejestruj pierwszego użytkownika
-    console.log('👤 Rejestracja pierwszego użytkownika...');
-    await page.click('a[href="/register"]');
-    await page.waitForSelector('form');
-    
-    await page.type('input[name="firstName"]', 'Jan');
-    await page.type('input[name="lastName"]', 'Kowalski');
-    await page.type('input[name="username"]', 'jankowalski');
-    await page.type('input[name="email"]', 'jan.kowalski@example.com');
-    await page.type('input[name="password"]', 'test123');
-    await page.type('input[name="dateOfBirth"]', '1990-01-01');
-    
-    await page.click('button[type="submit"]');
-    await page.waitForNavigation();
-    
-    // Zaloguj się
-    console.log('🔑 Logowanie...');
-    await page.click('a[href="/login"]');
-    await page.waitForSelector('form');
-    
-    await page.type('input[name="email"]', 'jan.kowalski@example.com');
-    await page.type('input[name="password"]', 'test123');
-    
-    await page.click('button[type="submit"]');
-    await page.waitForNavigation();
-    
-    // Przejdź do systemu znajomych
-    console.log('👥 Przechodzę do systemu znajomych...');
-    await page.click('a[href="/friends"]');
-    await page.waitForTimeout(2000);
-    
-    // Screenshot pustego systemu znajomych
-    await page.screenshot({ 
-      path: 'friendship-system-empty.png',
-      fullPage: true 
+    const response = await fetch(`${API_URL}/users/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ emailOrUsername: email, password })
     });
-    console.log('📸 Screenshot: friendship-system-empty.png');
-    
-    // Otwórz nową kartę dla drugiego użytkownika
-    const page2 = await browser.newPage();
-    
-    // Zarejestruj drugiego użytkownika
-    console.log('👤 Rejestracja drugiego użytkownika...');
-    await page2.goto('http://localhost:3000/register', { waitUntil: 'networkidle2' });
-    await page2.waitForSelector('form');
-    
-    await page2.type('input[name="firstName"]', 'Anna');
-    await page2.type('input[name="lastName"]', 'Nowak');
-    await page2.type('input[name="username"]', 'annanowak');
-    await page2.type('input[name="email"]', 'anna.nowak@example.com');
-    await page2.type('input[name="password"]', 'test123');
-    await page2.type('input[name="dateOfBirth"]', '1992-05-15');
-    
-    await page2.click('button[type="submit"]');
-    await page2.waitForNavigation();
-    
-    // Zaloguj drugiego użytkownika
-    console.log('🔑 Logowanie drugiego użytkownika...');
-    await page2.click('a[href="/login"]');
-    await page2.waitForSelector('form');
-    
-    await page2.type('input[name="email"]', 'anna.nowak@example.com');
-    await page2.type('input[name="password"]', 'test123');
-    
-    await page2.click('button[type="submit"]');
-    await page2.waitForNavigation();
-    
-    // Przejdź do systemu znajomych drugiego użytkownika
-    await page2.click('a[href="/friends"]');
-    await page2.waitForTimeout(2000);
-    
-    // Wróć do pierwszego użytkownika i wyślij zaproszenie
-    console.log('📨 Wysyłanie zaproszenia do znajomych...');
-    await page.bringToFront();
-    
-    // Przejdź do zakładki sugestii
-    await page.click('button:contains("Sugestie")');
-    await page.waitForTimeout(1000);
-    
-    // Jeśli są sugestie, wyślij zaproszenie
-    const suggestions = await page.$$('[data-testid="friend-suggestion"]');
-    if (suggestions.length > 0) {
-      await page.click('[data-testid="friend-suggestion"] button:contains("Dodaj")');
-      await page.waitForTimeout(2000);
+
+    if (response.ok) {
+      const data = await response.json();
+      log(`✅ Logowanie udane dla: ${email}`);
+      return data.token;
+    } else {
+      const errorText = await response.text();
+      log(`❌ Błąd logowania dla ${email}: ${errorText}`);
+      return null;
     }
-    
-    // Screenshot z zaproszeniem
-    await page.screenshot({ 
-      path: 'friendship-system-sent-request.png',
-      fullPage: true 
-    });
-    console.log('📸 Screenshot: friendship-system-sent-request.png');
-    
-    // Przejdź do drugiego użytkownika i zaakceptuj zaproszenie
-    console.log('✅ Akceptowanie zaproszenia...');
-    await page2.bringToFront();
-    
-    // Przejdź do zakładki oczekujących
-    await page2.click('button:contains("Oczekujące")');
-    await page2.waitForTimeout(1000);
-    
-    // Akceptuj zaproszenie
-    const pendingRequests = await page2.$$('[data-testid="pending-request"]');
-    if (pendingRequests.length > 0) {
-      await page2.click('[data-testid="pending-request"] button:contains("Akceptuj")');
-      await page2.waitForTimeout(2000);
-    }
-    
-    // Screenshot po akceptacji
-    await page2.screenshot({ 
-      path: 'friendship-system-accepted.png',
-      fullPage: true 
-    });
-    console.log('📸 Screenshot: friendship-system-accepted.png');
-    
-    // Wróć do pierwszego użytkownika i sprawdź listę znajomych
-    console.log('👥 Sprawdzanie listy znajomych...');
-    await page.bringToFront();
-    
-    // Przejdź do zakładki znajomych
-    await page.click('button:contains("Znajomi")');
-    await page.waitForTimeout(2000);
-    
-    // Screenshot listy znajomych
-    await page.screenshot({ 
-      path: 'friendship-system-friends-list.png',
-      fullPage: true 
-    });
-    console.log('📸 Screenshot: friendship-system-friends-list.png');
-    
-    // Test wyszukiwania znajomych
-    console.log('🔍 Test wyszukiwania znajomych...');
-    const searchInput = await page.$('input[placeholder*="Szukaj"]');
-    if (searchInput) {
-      await searchInput.type('Anna');
-      await page.waitForTimeout(1000);
-      
-      await page.screenshot({ 
-        path: 'friendship-system-search.png',
-        fullPage: true 
-      });
-      console.log('📸 Screenshot: friendship-system-search.png');
-    }
-    
-    // Test blokowania użytkownika
-    console.log('🚫 Test blokowania użytkownika...');
-    const friendCards = await page.$$('[data-testid="friend-card"]');
-    if (friendCards.length > 0) {
-      await page.click('[data-testid="friend-card"] button:contains("Usuń")');
-      await page.waitForTimeout(1000);
-      
-      // Potwierdź usunięcie
-      await page.click('button:contains("Tak")');
-      await page.waitForTimeout(2000);
-      
-      await page.screenshot({ 
-        path: 'friendship-system-removed.png',
-        fullPage: true 
-      });
-      console.log('📸 Screenshot: friendship-system-removed.png');
-    }
-    
-    console.log('✅ Test systemu znajomych zakończony pomyślnie!');
-    
   } catch (error) {
-    console.error('❌ Błąd podczas testowania systemu znajomych:', error);
-    await page.screenshot({ 
-      path: 'friendship-system-error.png',
-      fullPage: true 
-    });
-  } finally {
-    await browser.close();
+    log(`❌ Błąd podczas logowania ${email}: ${error.message}`);
+    return null;
   }
-}
+};
+
+// Funkcja do wyszukiwania użytkowników
+const searchUsers = async (query) => {
+  try {
+    log(`🔍 Wyszukiwanie użytkowników: ${query}`);
+    
+    const response = await fetch(`${API_URL}/users/search?q=${encodeURIComponent(query)}`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      log(`✅ Znaleziono ${data.users.length} użytkowników`);
+      return data.users;
+    } else {
+      const errorText = await response.text();
+      log(`❌ Błąd wyszukiwania: ${errorText}`);
+      return [];
+    }
+  } catch (error) {
+    log(`❌ Błąd podczas wyszukiwania: ${error.message}`);
+    return [];
+  }
+};
+
+// Funkcja do wysłania zaproszenia do znajomych
+const sendFriendRequest = async (token, recipientId, message = '') => {
+  try {
+    log(`👥 Wysyłanie zaproszenia do znajomych: ${recipientId}`);
+    
+    const response = await fetch(`${API_URL}/friendships/send-request`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        recipientId: recipientId,
+        message: message
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      log(`✅ Zaproszenie wysłane pomyślnie`);
+      return data;
+    } else {
+      const errorText = await response.text();
+      log(`❌ Błąd wysyłania zaproszenia: ${errorText}`);
+      return null;
+    }
+  } catch (error) {
+    log(`❌ Błąd podczas wysyłania zaproszenia: ${error.message}`);
+    return null;
+  }
+};
+
+// Funkcja do pobierania listy znajomych
+const getFriends = async (token) => {
+  try {
+    log(`👥 Pobieranie listy znajomych`);
+    
+    const response = await fetch(`${API_URL}/friendships/friends`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      log(`✅ Pobrano ${data.friends.length} znajomych`);
+      return data.friends;
+    } else {
+      const errorText = await response.text();
+      log(`❌ Błąd pobierania znajomych: ${errorText}`);
+      return [];
+    }
+  } catch (error) {
+    log(`❌ Błąd podczas pobierania znajomych: ${error.message}`);
+    return [];
+  }
+};
+
+// Funkcja do pobierania oczekujących zaproszeń
+const getPendingRequests = async (token) => {
+  try {
+    log(`📨 Pobieranie oczekujących zaproszeń`);
+    
+    const response = await fetch(`${API_URL}/friendships/pending-requests`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      log(`✅ Pobrano ${data.requests.length} oczekujących zaproszeń`);
+      return data.requests;
+    } else {
+      const errorText = await response.text();
+      log(`❌ Błąd pobierania zaproszeń: ${errorText}`);
+      return [];
+    }
+  } catch (error) {
+    log(`❌ Błąd podczas pobierania zaproszeń: ${error.message}`);
+    return [];
+  }
+};
+
+// Funkcja do akceptowania zaproszenia
+const acceptFriendRequest = async (token, friendshipId) => {
+  try {
+    log(`✅ Akceptowanie zaproszenia: ${friendshipId}`);
+    
+    const response = await fetch(`${API_URL}/friendships/accept/${friendshipId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      log(`✅ Zaproszenie zaakceptowane pomyślnie`);
+      return data;
+    } else {
+      const errorText = await response.text();
+      log(`❌ Błąd akceptowania zaproszenia: ${errorText}`);
+      return null;
+    }
+  } catch (error) {
+    log(`❌ Błąd podczas akceptowania zaproszenia: ${error.message}`);
+    return null;
+  }
+};
+
+// Funkcja do pobierania sugestii znajomych
+const getFriendSuggestions = async (token) => {
+  try {
+    log(`💡 Pobieranie sugestii znajomych`);
+    
+    const response = await fetch(`${API_URL}/friendships/suggestions`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      log(`✅ Pobrano ${data.suggestions.length} sugestii znajomych`);
+      return data.suggestions;
+    } else {
+      const errorText = await response.text();
+      log(`❌ Błąd pobierania sugestii: ${errorText}`);
+      return [];
+    }
+  } catch (error) {
+    log(`❌ Błąd podczas pobierania sugestii: ${error.message}`);
+    return [];
+  }
+};
+
+// Główna funkcja testowa
+const runFriendshipTest = async () => {
+  log('🚀 Rozpoczynam test systemu znajomych...');
+  
+  // 1. Wyszukaj użytkowników
+  const users = await searchUsers('admin');
+  if (users.length === 0) {
+    log('❌ Nie znaleziono użytkowników do testowania');
+    return;
+  }
+  
+  const adminUser = users.find(u => u.email === 'admin@test.com');
+  if (!adminUser) {
+    log('❌ Nie znaleziono użytkownika admin@test.com');
+    return;
+  }
+  
+  // 2. Wyszukaj innych użytkowników
+  const otherUsers = await searchUsers('jan');
+  if (otherUsers.length === 0) {
+    log('❌ Nie znaleziono innych użytkowników do testowania');
+    return;
+  }
+  
+  const recipientUser = otherUsers.find(u => u.email !== 'admin@test.com');
+  if (!recipientUser) {
+    log('❌ Nie znaleziono odbiorcy zaproszenia');
+    return;
+  }
+  
+  log(`👤 Nadawca: ${adminUser.firstName} ${adminUser.lastName} (${adminUser.email})`);
+  log(`👤 Odbiorca: ${recipientUser.firstName} ${recipientUser.lastName} (${recipientUser.email})`);
+  
+  // 3. Zaloguj się jako admin
+  const adminToken = await loginUser('admin@test.com', 'admin123');
+  if (!adminToken) {
+    log('❌ Nie można zalogować się jako admin');
+    return;
+  }
+  
+  // 4. Sprawdź obecnych znajomych
+  const currentFriends = await getFriends(adminToken);
+  log(`👥 Obecni znajomi: ${currentFriends.length}`);
+  
+  // 5. Sprawdź sugestie znajomych
+  const suggestions = await getFriendSuggestions(adminToken);
+  log(`💡 Sugestie znajomych: ${suggestions.length}`);
+  
+  // 6. Wyślij zaproszenie do znajomych
+  const friendRequestMessage = `Cześć ${recipientUser.firstName}! Chciałbym dodać Cię do znajomych.`;
+  const sentRequest = await sendFriendRequest(adminToken, recipientUser._id, friendRequestMessage);
+  
+  if (!sentRequest) {
+    log('❌ Nie udało się wysłać zaproszenia');
+    return;
+  }
+  
+  // 7. Zaloguj się jako odbiorca i sprawdź zaproszenia
+  const recipientToken = await loginUser(recipientUser.email, 'admin123');
+  if (recipientToken) {
+    const pendingRequests = await getPendingRequests(recipientToken);
+    log(`📨 Oczekujące zaproszenia dla ${recipientUser.firstName}: ${pendingRequests.length}`);
+    
+    // 8. Akceptuj zaproszenie
+    if (pendingRequests.length > 0) {
+      const requestToAccept = pendingRequests[0];
+      const acceptedRequest = await acceptFriendRequest(recipientToken, requestToAccept._id);
+      
+      if (acceptedRequest) {
+        log('✅ Zaproszenie zostało zaakceptowane');
+        
+        // 9. Sprawdź zaktualizowaną listę znajomych
+        const updatedFriends = await getFriends(recipientToken);
+        log(`👥 Zaktualizowana lista znajomych: ${updatedFriends.length}`);
+        
+        // 10. Sprawdź zaktualizowaną listę znajomych admina
+        const updatedAdminFriends = await getFriends(adminToken);
+        log(`👥 Zaktualizowana lista znajomych admina: ${updatedAdminFriends.length}`);
+      }
+    }
+  } else {
+    log('⚠️ Nie można zalogować się jako odbiorca - sprawdź hasło');
+  }
+  
+  log('✅ Test systemu znajomych zakończony pomyślnie!');
+};
 
 // Uruchom test
-testFriendshipSystem().catch(console.error); 
+runFriendshipTest().catch(console.error); 

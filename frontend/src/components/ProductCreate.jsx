@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -16,7 +17,9 @@ const Container = styled.div`
   }
 `;
 
-const Title = styled.h1`
+const Title = styled.h1.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   font-size: 2.5rem;
   font-weight: 800;
   text-align: center;
@@ -37,7 +40,9 @@ const Title = styled.h1`
   }
 `;
 
-const Form = styled.form`
+const Form = styled.form.withConfig({
+  shouldForwardProp: (prop) => !['theme'].includes(prop)
+})`
   background: ${props => props.theme.surface};
   border-radius: 20px;
   padding: 2rem;
@@ -634,7 +639,7 @@ export default function ProductCreate() {
   };
 
   return (
-    <Container>
+    <Container>        <PageTitle title="Utwórz produkt" description="Dodaj nowy produkt" />
       <Title>Dodaj nowy produkt</Title>
       
       {!loadingShops && userShops.length > 0 ? (

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import AIProductAssistant from '../components/AIProductAssistant';
 import VoiceSearch from '../components/VoiceSearch';
@@ -287,6 +288,7 @@ const AdvancedFeatures = ({ theme }) => {
 
   return (
     <PageContainer>
+      <PageTitle title="Zaawansowane funkcje" description="Zaawansowane funkcje portalu" />
       <Header>
         <Title theme={theme}>🚀 Zaawansowane Funkcje</Title>
         <Subtitle theme={theme}>

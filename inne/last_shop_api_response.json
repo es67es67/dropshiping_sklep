@@ -1,0 +1,24 @@
+﻿
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : {"address":{"street":"ul. Przykładowa 59","houseNumber":"44","postalCode":"99-23
+                    6","city":"Świdnik","voivodeship":"Lubelskie"},"teryt":{"countyCode":"01","fullC
+                    ode":"0601010665011","municipalityCode":...
+RawContent        : HTTP/1.1 200 OK
+                    Vary: Origin
+                    Access-Control-Allow-Credentials: true
+                    Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH
+                    Access-Control-Allow-Headers: Origin, X-Requested-With, Con...
+Forms             : {}
+Headers           : {[Vary, Origin], [Access-Control-Allow-Credentials, true], [Access-Control-Allow
+                    -Methods, GET, POST, PUT, DELETE, OPTIONS, PATCH], [Access-Control-Allow-Headers
+                    , Origin, X-Requested-With, Content-Type, Accept, Authorization]...}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : System.__ComObject
+RawContentLength  : 2441
+
+
+

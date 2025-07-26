@@ -3,9 +3,134 @@ const router = express.Router();
 const locationController = require('../controllers/locationController');
 const authMiddleware = require('../middleware/authMiddleware');
 const Location = require('../models/locationModel');
+const Simc = require('../models/simcModel');
+const Terc = require('../models/tercModel');
+const Ulic = require('../models/ulicModel');
+const mongoose = require('mongoose'); // Dodane dla debug-simc
+
+// Tymczasowy endpoint do sprawdzenia danych SIMC (musi być na początku)
+router.get('/debug-simc', async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    console.log('🔍 Debug SIMC - sprawdzam dane...');
+    
+    // Sprawdź wszystkie kolekcje
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    console.log('📊 Dostępne kolekcje:', collections.map(c => c.name));
+    
+    // Sprawdź liczbę dokumentów w SIMC
+    const simcCount = await Simc.countDocuments();
+    console.log(`📊 Liczba dokumentów w SIMC: ${simcCount}`);
+    
+    // Sprawdź pierwsze 3 dokumenty
+    const firstDocs = await Simc.find().limit(3);
+    console.log('📊 Pierwsze dokumenty:', firstDocs.map(doc => ({ name: doc.name, code: doc.code })));
+    
+    // Sprawdź czy istnieje dokument z nazwą zawierającą "Warszawa"
+    if (q) {
+      const searchResults = await Simc.find({
+        name: { $regex: q, $options: 'i' }
+      }).limit(5);
+      console.log(`📊 Wyniki wyszukiwania "${q}":`, searchResults.map(doc => ({ name: doc.name, code: doc.code })));
+    }
+    
+    res.json({
+      collections: collections.map(c => c.name),
+      simcCount,
+      firstDocs: firstDocs.map(doc => ({ name: doc.name, code: doc.code })),
+      searchResults: q ? await Simc.find({ name: { $regex: q, $options: 'i' } }).limit(5).lean() : []
+    });
+  } catch (error) {
+    console.error('Błąd debug SIMC:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Publiczne routes
 router.get('/', locationController.getLocations);
+
+// 🎯 Publiczne endpointy wyszukiwania (bez autoryzacji) - MUSZĄ BYĆ PRZED /search
+// Wyszukiwanie miejscowości
+router.get('/search/cities', async (req, res) => {
+  try {
+    const { query, limit = 10 } = req.query;
+    
+    if (!query || query.length < 2) {
+      return res.json({ cities: [] });
+    }
+    
+    console.log(`🔍 Wyszukiwanie miejscowości: ${query}`);
+    
+    const cities = await Location.find({
+      type: 'miejscowość',
+      name: { $regex: query, $options: 'i' },
+      isActive: true
+    })
+    .populate('hierarchy.wojewodztwo', 'name code')
+    .populate('hierarchy.powiat', 'name code')
+    .populate('hierarchy.gmina', 'name code')
+    .limit(parseInt(limit))
+    .sort({ name: 1 });
+    
+    const formattedCities = cities.map(city => ({
+      code: city.code,
+      name: city.name,
+      voivodeshipCode: city.hierarchy?.wojewodztwo?.code,
+      voivodeshipName: city.hierarchy?.wojewodztwo?.name,
+      countyCode: city.hierarchy?.powiat?.code,
+      countyName: city.hierarchy?.powiat?.name,
+      municipalityCode: city.hierarchy?.gmina?.code,
+      municipalityName: city.hierarchy?.gmina?.name,
+      population: city.population,
+      coordinates: city.coordinates
+    }));
+    
+    res.json({ cities: formattedCities });
+  } catch (error) {
+    console.error('Błąd wyszukiwania miejscowości:', error);
+    res.status(500).json({ message: 'Błąd serwera' });
+  }
+});
+
+// Wyszukiwanie gmin
+router.get('/search/municipalities', async (req, res) => {
+  try {
+    const { query, limit = 10 } = req.query;
+    
+    if (!query || query.length < 2) {
+      return res.json({ municipalities: [] });
+    }
+    
+    console.log(`🔍 Wyszukiwanie gmin: ${query}`);
+    
+    const municipalities = await Location.find({
+      type: { $in: ['gmina miejska', 'gmina wiejska', 'gmina miejsko-wiejska'] },
+      name: { $regex: query, $options: 'i' },
+      isActive: true
+    })
+    .populate('hierarchy.wojewodztwo', 'name code')
+    .populate('hierarchy.powiat', 'name code')
+    .limit(parseInt(limit))
+    .sort({ name: 1 });
+    
+    const formattedMunicipalities = municipalities.map(municipality => ({
+      code: municipality.code,
+      name: municipality.name,
+      voivodeshipCode: municipality.hierarchy?.wojewodztwo?.code,
+      voivodeshipName: municipality.hierarchy?.wojewodztwo?.name,
+      countyCode: municipality.hierarchy?.powiat?.code,
+      countyName: municipality.hierarchy?.powiat?.name,
+      type: municipality.type,
+      coordinates: municipality.coordinates
+    }));
+    
+    res.json({ municipalities: formattedMunicipalities });
+  } catch (error) {
+    console.error('Błąd wyszukiwania gmin:', error);
+    res.status(500).json({ message: 'Błąd serwera' });
+  }
+});
 
 // GET /api/locations/search - Wyszukaj miejscowości (musi być przed /:id)
 router.get('/search', async (req, res) => {
@@ -16,18 +141,95 @@ router.get('/search', async (req, res) => {
       return res.json({ locations: [] });
     }
     
-    // Wyszukaj miejscowości z pełną hierarchią
-    const locations = await Location.find({
-      type: type,
-      name: { $regex: q, $options: 'i' },
-      isActive: true
-    })
-    .populate('wojewodztwo', 'name')
-    .populate('powiat', 'name')
-    .populate('gmina', 'name')
-    .limit(parseInt(limit))
-    .sort({ name: 1 });
+    console.log(`🔍 Wyszukiwanie: ${q}, typ: ${type}`);
     
+    let locations = [];
+    
+    // Mapowanie typów na kolekcje
+    const typeMapping = {
+      'miejscowość': 'simc',
+      'gmina': 'terc', 
+      'powiat': 'terc',
+      'wojewodztwo': 'terc',
+      'ulica': 'ulic'
+    };
+    
+    const collection = typeMapping[type] || 'simc';
+    
+    console.log(`📊 Używam kolekcji: ${collection}`);
+    
+    // Wyszukiwanie w odpowiedniej kolekcji
+    switch (collection) {
+      case 'simc':
+        console.log(`🔍 Wyszukuję w SIMC: ${q}`);
+        const simcResults = await Simc.find({
+          name: { $regex: q, $options: 'i' }
+        })
+        .limit(parseInt(limit))
+        .sort({ name: 1 });
+        
+        console.log(`📊 Znaleziono ${simcResults.length} wyników w SIMC`);
+        
+        locations = simcResults.map(item => ({
+          _id: item._id,
+          code: item.code,
+          name: item.name,
+          type: 'miejscowość',
+          wojewodztwo: { code: item.wojewodztwoCode },
+          powiat: { code: item.powiatCode },
+          gmina: { code: item.gminaCode },
+          tercCode: item.tercCode
+        }));
+        break;
+        
+      case 'terc':
+        let tercQuery = { name: { $regex: q, $options: 'i' } };
+        
+        // Filtrowanie według typu dla TERC
+        if (type === 'gmina') {
+          tercQuery.type = { $in: ['gmina miejska', 'gmina wiejska', 'gmina miejsko-wiejska'] };
+        } else if (type === 'powiat') {
+          tercQuery.type = 'powiat';
+        } else if (type === 'wojewodztwo') {
+          tercQuery.type = 'województwo';
+        }
+        
+        const tercResults = await Terc.find(tercQuery)
+        .limit(parseInt(limit))
+        .sort({ name: 1 });
+        
+        locations = tercResults.map(item => ({
+          _id: item._id,
+          code: item.code,
+          name: item.name,
+          type: item.type,
+          wojewodztwo: { code: item.wojewodztwoCode },
+          powiat: { code: item.powiatCode },
+          gmina: { code: item.gminaCode }
+        }));
+        break;
+        
+      case 'ulic':
+        const ulicResults = await Ulic.find({
+          name: { $regex: q, $options: 'i' }
+        })
+        .limit(parseInt(limit))
+        .sort({ name: 1 });
+        
+        locations = ulicResults.map(item => ({
+          _id: item._id,
+          code: item.code,
+          name: item.name,
+          type: 'ulica',
+          wojewodztwo: { code: item.wojewodztwoCode },
+          powiat: { code: item.powiatCode },
+          gmina: { code: item.gminaCode },
+          miejscowosc: { code: item.simcCode }
+        }));
+        break;
+    }
+    
+    console.log(`✅ Znaleziono ${locations.length} wyników`);
     res.json({ locations });
   } catch (error) {
     console.error('Błąd wyszukiwania lokalizacji:', error);
@@ -55,7 +257,7 @@ router.get('/hierarchy', async (req, res) => {
     
     const hierarchy = {
       location: {
-        id: location._id,
+        _id: location._id,
         name: location.name,
         type: location.type,
         code: location.code
@@ -135,16 +337,30 @@ router.get('/by-coordinates', locationController.getLocationByCoordinates);
 // Pobierz wszystkie województwa
 router.get('/voivodeships', locationController.getVoivodeships);
 
+// Pobierz konkretne województwo według kodu GUS
+router.get('/voivodeships/:voivodeshipCode', locationController.getVoivodeshipByCode);
+
 // Pobierz powiaty dla województwa
 router.get('/voivodeships/:voivodeshipCode/counties', locationController.getCountiesForVoivodeship);
+
+// Pobierz konkretny powiat według kodu GUS
+router.get('/counties/:countyCode', locationController.getCountyByCode);
 
 // Pobierz gminy dla powiatu
 router.get('/counties/:countyCode/municipalities', locationController.getMunicipalitiesForCounty);
 
+// Pobierz konkretną gminę według kodu GUS
+router.get('/municipalities/:municipalityCode', locationController.getMunicipalityByCode);
+
 // Pobierz miejscowości dla gminy
 router.get('/municipalities/:municipalityCode/towns', locationController.getTownsForMunicipality);
 
-// Pobierz szczegóły konkretnej lokalizacji
+// Pobierz konkretne miasto/miejscowość według kodu GUS
+router.get('/cities/:cityCode', locationController.getCityByCode);
+
+
+
+// Pobierz szczegóły konkretnej lokalizacji (tymczasowo wyłączony)
 router.get('/:id', locationController.getLocation);
 
 // 🏪 Nowe endpointy dla sklepów i firm według lokalizacji
@@ -188,5 +404,7 @@ router.get('/export/download/:token', authMiddleware.authenticateToken, (req, re
   // TODO: Implementacja pobierania pliku
   res.json({ message: 'Plik eksportu' });
 });
+
+
 
 module.exports = router; 

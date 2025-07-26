@@ -12,6 +12,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -21,12 +22,14 @@ export const AuthProvider = ({ children }) => {
       try {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
         const userData = localStorage.getItem('user');
+        const storedToken = localStorage.getItem('token');
         
-        if (isLoggedIn === 'true' && userData) {
+        if (isLoggedIn === 'true' && userData && storedToken) {
           const parsedUser = JSON.parse(userData);
           console.log('Restored user from localStorage:', parsedUser);
           console.log('User ID from localStorage:', parsedUser._id);
           setUser(parsedUser);
+          setToken(storedToken);
           setIsAuthenticated(true);
         }
       } catch (error) {
@@ -45,7 +48,7 @@ export const AuthProvider = ({ children }) => {
       console.log('Logowanie użytkownika:', credentials);
       
       // Wyślij dane do backendu
-      const response = await fetch(`http://localhost:5000/api/users/login`, {
+      const response = await fetch(`/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,12 +82,17 @@ export const AuthProvider = ({ children }) => {
       
       console.log('Login successful, user data:', userData);
       console.log('User ID:', userData._id);
+      console.log('User roles:', userData.roles);
+      console.log('Raw backend response:', data);
+      console.log('Backend user object:', data.user);
+      console.log('Backend response JSON:', JSON.stringify(data));
       
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('token', data.token);
       
       setUser(userData);
+      setToken(data.token);
       setIsAuthenticated(true);
       
       return { success: true, user: userData };
@@ -150,11 +158,24 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('token');
     setUser(null);
+    setToken(null);
     setIsAuthenticated(false);
   };
 
   const updateUser = (updates) => {
     const updatedUser = { ...user, ...updates };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
+  };
+
+  // Nowa funkcja do aktualizacji danych lokalizacyjnych
+  const updateUserLocation = (locationData) => {
+    const updatedUser = { 
+      ...user, 
+      location: locationData.location,
+      teryt: locationData.teryt,
+      address: locationData.address
+    };
     localStorage.setItem('user', JSON.stringify(updatedUser));
     setUser(updatedUser);
   };
@@ -197,31 +218,71 @@ export const AuthProvider = ({ children }) => {
 
   const hasRole = (requiredRole) => {
     if (!user) return false;
+    // Sprawdź czy użytkownik ma role jako tablicę
+    if (user.roles && Array.isArray(user.roles)) {
+      return user.roles.includes(requiredRole) || user.roles.includes('admin');
+    }
+    // Fallback dla starego formatu (pole role jako string)
     return user.role === requiredRole || user.role === 'admin';
   };
 
   const isAdmin = () => {
-    return hasRole('admin');
+    if (!user) return false;
+    // Sprawdź czy użytkownik ma role jako tablicę
+    if (user.roles && Array.isArray(user.roles)) {
+      return user.roles.includes('admin');
+    }
+    // Fallback dla starego formatu
+    return user.role === 'admin';
   };
 
   const isModerator = () => {
-    return hasRole('moderator') || isAdmin();
+    if (!user) return false;
+    // Sprawdź czy użytkownik ma role jako tablicę
+    if (user.roles && Array.isArray(user.roles)) {
+      return user.roles.includes('moderator') || user.roles.includes('admin');
+    }
+    // Fallback dla starego formatu
+    return user.role === 'moderator' || user.role === 'admin';
+  };
+
+  // Funkcje pomocnicze do danych lokalizacyjnych
+  const getUserLocation = () => {
+    return user?.location || null;
+  };
+
+  const getUserTeryt = () => {
+    return user?.teryt || null;
+  };
+
+  const getUserAddress = () => {
+    return user?.address || null;
+  };
+
+  const hasLocationData = () => {
+    return !!(user?.location || user?.teryt || user?.address);
   };
 
   const value = {
     user,
+    token,
     isAuthenticated,
     isLoading,
     login,
     register,
     logout,
     updateUser,
+    updateUserLocation,
     updateUserLevel,
     addExperience,
     getUserStats,
     hasRole,
     isAdmin,
-    isModerator
+    isModerator,
+    getUserLocation,
+    getUserTeryt,
+    getUserAddress,
+    hasLocationData
   };
 
   return (

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PageTitle from '../components/PageTitle';
 import { FaBell, FaCheck, FaTimes, FaTrash, FaEye, FaEyeSlash, FaCog } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -23,8 +24,8 @@ const Notifications = () => {
   const fetchNotifications = async () => {
     try {
       const url = filter === 'all' 
-        ? `${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications`
-        : `${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications?type=${filter}`;
+        ? `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications`
+        : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications?type=${filter}`;
       
       const response = await fetch(url, {
         headers: {
@@ -45,7 +46,7 @@ const Notifications = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/${notificationId}/read`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -64,7 +65,7 @@ const Notifications = () => {
 
   const markAllAsRead = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/read-all`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/read-all`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -81,7 +82,7 @@ const Notifications = () => {
 
   const deleteNotification = async (notificationId) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com'}/api/notifications/${notificationId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/${notificationId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -190,7 +191,7 @@ const Notifications = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div>        <PageTitle title="Powiadomienia" description="Centrum powiadomień" /> className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <FaBell className="text-6xl text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-700 mb-2">Zaloguj się</h2>
@@ -212,6 +213,7 @@ const Notifications = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      <PageTitle title="Powiadomienia" description="Zarządzaj powiadomieniami" />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">

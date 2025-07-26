@@ -1,0 +1,159 @@
+{
+  "timestamp": "2025-07-25T18:12:52.293Z",
+  "summary": {
+    "total": 27,
+    "passed": 7,
+    "failed": 20,
+    "successRate": "25.93%"
+  },
+  "errors": [
+    {
+      "link": "Logowanie",
+      "url": "/login",
+      "error": "Waiting for selector `input[name=\"emailOrUsername\"]` failed: Waiting failed: 10000ms exceeded"
+    },
+    {
+      "link": "Sklepy",
+      "url": "http://localhost:3000/shops",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Koszyk",
+      "url": "http://localhost:3000/cart",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Feed",
+      "url": "http://localhost:3000/feed",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Wiadomości",
+      "url": "http://localhost:3000/messages",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Gamifikacja",
+      "url": "http://localhost:3000/gamification",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Firmy",
+      "url": "http://localhost:3000/company-profiles",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Zaawansowane",
+      "url": "http://localhost:3000/advanced-features",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "TERYT",
+      "url": "http://localhost:3000/teryt-features",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Mapa Lokalizacji",
+      "url": "http://localhost:3000/location-map",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Kraj",
+      "url": "http://localhost:3000/country",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Województwa",
+      "url": "http://localhost:3000/voivodeships",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Powiaty",
+      "url": "http://localhost:3000/counties",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Gminy",
+      "url": "http://localhost:3000/municipalities",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Miasta",
+      "url": "http://localhost:3000/cities",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Panel Admina",
+      "url": "http://localhost:3000/admin-panel",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Zarządzaj sklepami",
+      "url": "http://localhost:3000/shop-management",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Zarządzaj produktami",
+      "url": "http://localhost:3000/product-management",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Utwórz sklep",
+      "url": "http://localhost:3000/shop-create",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    },
+    {
+      "link": "Utwórz produkt",
+      "url": "http://localhost:3000/product-create",
+      "error": "Nieoczekiwany tytuł strony: Portal"
+    }
+  ],
+  "screenshots": [
+    "D:\\portal\\test-screenshots\\01_Strona_główna_2025-07-25T18-10-46-448Z.png",
+    "D:\\portal\\test-screenshots\\02_login_page_2025-07-25T18-10-47-401Z.png",
+    "D:\\portal\\test-screenshots\\01_Strona_główna_2025-07-25T18-11-01-176Z.png",
+    "D:\\portal\\test-screenshots\\01_Produkty_2025-07-25T18-11-05-866Z.png",
+    "D:\\portal\\test-screenshots\\01_Sklepy_2025-07-25T18-11-10-618Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Sklepy_2025-07-25T18-11-10-884Z.png",
+    "D:\\portal\\test-screenshots\\01_Koszyk_2025-07-25T18-11-15-483Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Koszyk_2025-07-25T18-11-15-619Z.png",
+    "D:\\portal\\test-screenshots\\01_Feed_2025-07-25T18-11-20-102Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Feed_2025-07-25T18-11-20-243Z.png",
+    "D:\\portal\\test-screenshots\\01_Wiadomości_2025-07-25T18-11-24-491Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Wiadomości_2025-07-25T18-11-24-720Z.png",
+    "D:\\portal\\test-screenshots\\01_Gamifikacja_2025-07-25T18-11-29-118Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Gamifikacja_2025-07-25T18-11-29-254Z.png",
+    "D:\\portal\\test-screenshots\\01_Powiadomienia_2025-07-25T18-11-33-709Z.png",
+    "D:\\portal\\test-screenshots\\01_Firmy_2025-07-25T18-11-38-268Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Firmy_2025-07-25T18-11-38-493Z.png",
+    "D:\\portal\\test-screenshots\\01_Zaawansowane_2025-07-25T18-11-42-752Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Zaawansowane_2025-07-25T18-11-42-891Z.png",
+    "D:\\portal\\test-screenshots\\01_TERYT_2025-07-25T18-11-47-327Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_TERYT_2025-07-25T18-11-47-470Z.png",
+    "D:\\portal\\test-screenshots\\01_Mapa_Lokalizacji_2025-07-25T18-11-51-633Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Mapa_Lokalizacji_2025-07-25T18-11-51-757Z.png",
+    "D:\\portal\\test-screenshots\\01_Kraj_2025-07-25T18-11-55-926Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Kraj_2025-07-25T18-11-56-082Z.png",
+    "D:\\portal\\test-screenshots\\01_Województwa_2025-07-25T18-12-00-558Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Województwa_2025-07-25T18-12-00-702Z.png",
+    "D:\\portal\\test-screenshots\\01_Powiaty_2025-07-25T18-12-04-897Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Powiaty_2025-07-25T18-12-05-047Z.png",
+    "D:\\portal\\test-screenshots\\01_Gminy_2025-07-25T18-12-09-213Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Gminy_2025-07-25T18-12-09-371Z.png",
+    "D:\\portal\\test-screenshots\\01_Miasta_2025-07-25T18-12-13-518Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Miasta_2025-07-25T18-12-13-652Z.png",
+    "D:\\portal\\test-screenshots\\01_Panel_Admina_2025-07-25T18-12-20-269Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Panel_Admina_2025-07-25T18-12-20-390Z.png",
+    "D:\\portal\\test-screenshots\\01_Zarządzaj_sklepami_2025-07-25T18-12-24-594Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Zarządzaj_sklepami_2025-07-25T18-12-24-730Z.png",
+    "D:\\portal\\test-screenshots\\01_Zarządzaj_produktami_2025-07-25T18-12-28-893Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Zarządzaj_produktami_2025-07-25T18-12-29-062Z.png",
+    "D:\\portal\\test-screenshots\\01_Utwórz_sklep_2025-07-25T18-12-33-556Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Utwórz_sklep_2025-07-25T18-12-33-695Z.png",
+    "D:\\portal\\test-screenshots\\01_Utwórz_produkt_2025-07-25T18-12-38-190Z.png",
+    "D:\\portal\\test-screenshots\\ERROR_Utwórz_produkt_2025-07-25T18-12-38-350Z.png",
+    "D:\\portal\\test-screenshots\\responsive_desktop_2025-07-25T18-12-41-799Z.png",
+    "D:\\portal\\test-screenshots\\responsive_tablet_2025-07-25T18-12-44-644Z.png",
+    "D:\\portal\\test-screenshots\\responsive_mobile_2025-07-25T18-12-47-367Z.png"
+  ]
+}

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
@@ -250,6 +251,7 @@ export default function MyShops() {
   if (loading) {
     return (
       <Container>
+              <PageTitle title="Moje sklepy" description="Zarządzaj swoimi sklepami" />
         <LoadingSpinner>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
           <p>Ładowanie Twoich sklepów...</p>
@@ -275,6 +277,7 @@ export default function MyShops() {
 
   return (
     <Container>
+      <PageTitle title="Moje sklepy" description="Zarządzaj swoimi sklepami" />
       <Header>
         <Title>Moje sklepy</Title>
         <AddButton to="/shop-create">

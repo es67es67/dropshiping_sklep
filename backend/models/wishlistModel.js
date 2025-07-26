@@ -256,7 +256,7 @@ wishlistSchema.statics.searchWishlists = async function(query, limit = 10) {
 };
 
 // Indeksy
-wishlistSchema.index({ user: 1 });
+// wishlistSchema.index({ user: 1 }); // USUNIĘTO, bo pole user ma już unique: true
 wishlistSchema.index({ isPublic: 1 });
 wishlistSchema.index({ 'items.product': 1 });
 wishlistSchema.index({ 'metadata.lastUpdated': -1 });

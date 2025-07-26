@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { FaStore, FaComments, FaBuilding, FaBox, FaUsers, FaStar, FaMapMarkerAlt, FaCalendar } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -31,7 +33,9 @@ const TabContainer = styled.div`
   border-bottom: 2px solid ${props => props.theme.border};
 `;
 
-const Tab = styled.button`
+const Tab = styled.button.attrs(props => ({
+  'data-active': props.active ? 'true' : undefined
+}))`
   padding: 1rem 2rem;
   margin: 0 0.5rem;
   border: none;
@@ -204,9 +208,37 @@ export default function Country({ theme }) {
       setLoading(true);
       setError(null);
 
-      // Symulacja pobierania danych z API
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const token = localStorage.getItem('token');
+      
+      // Pobierz sklepy z bazy danych
+      const shopsResponse = await fetch(`${apiUrl}/api/shops`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!shopsResponse.ok) {
+        throw new Error('Nie udało się pobrać sklepów z bazy danych');
+      }
+
+      const shopsData = await shopsResponse.json();
+      const shops = shopsData.shops || shopsData; // Obsługa różnych formatów odpowiedzi
+
+      // Przekształć dane sklepów do formatu używanego w tabeli
+      const transformedShops = shops.map((shop, index) => ({
+        id: shop._id || shop.id || index + 1,
+        name: shop.name || 'Brak nazwy',
+        location: shop.address?.city || shop.location?.name || 'Brak lokalizacji',
+        rating: shop.ratings?.average || shop.rating || 0,
+        products: shop.stats?.totalProducts || 0,
+        created: shop.createdAt ? new Date(shop.createdAt).toISOString().split('T')[0] : 'Brak daty'
+      }));
+
+      // Użyj przykładowych danych dla pozostałych kategorii (posts, companies, products, users)
       const mockData = {
-        shops: { count: 1250, items: sampleData.shops },
+        shops: { count: transformedShops.length, items: transformedShops },
         posts: { count: 3400, items: sampleData.posts },
         companies: { count: 890, items: sampleData.companies },
         products: { count: 15600, items: sampleData.products },
@@ -215,8 +247,18 @@ export default function Country({ theme }) {
 
       setData(mockData);
     } catch (err) {
-      setError('Błąd podczas pobierania danych');
+      setError('Błąd podczas pobierania danych z bazy');
       console.error('Błąd pobierania danych kraju:', err);
+      
+      // W przypadku błędu, użyj przykładowych danych
+      const fallbackData = {
+        shops: { count: 1250, items: sampleData.shops },
+        posts: { count: 3400, items: sampleData.posts },
+        companies: { count: 890, items: sampleData.companies },
+        products: { count: 15600, items: sampleData.products },
+        users: { count: 8900, items: sampleData.users }
+      };
+      setData(fallbackData);
     } finally {
       setLoading(false);
     }
@@ -243,7 +285,8 @@ export default function Country({ theme }) {
     switch (activeTab) {
       case 'shops':
         return [
-          item.name,
+          // Dodaj link do szczegółów sklepu
+          <Link to={`/shop/${item.id}`}>{item.name}</Link>,
           item.location,
           `${item.rating} ⭐`,
           item.products,
@@ -299,6 +342,7 @@ export default function Country({ theme }) {
 
     return (
       <div>
+      <PageTitle title="Kraj" description="Dane na poziomie kraju" />
         <StatsGrid>
           <StatCard theme={theme}>
             <StatNumber theme={theme}>{currentData?.count || 0}</StatNumber>
@@ -335,6 +379,7 @@ export default function Country({ theme }) {
 
   return (
     <Container>
+      <PageTitle title="Kraj" description="Dane na poziomie kraju" />
       <Header>
         <Title theme={theme}>🇵🇱 Polska</Title>
         <Subtitle theme={theme}>Dane z całego kraju</Subtitle>

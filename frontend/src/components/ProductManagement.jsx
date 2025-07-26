@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import PageTitle from '../components/PageTitle';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styled from 'styled-components';
@@ -377,7 +378,7 @@ export default function ProductManagement() {
 
   if (loading) {
     return (
-      <Container>
+      <Container>        <PageTitle title="Zarządzanie produktami" description="Zarządzaj swoimi produktami" />
         <LoadingState>
           <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⏳</div>
           <p>Ładowanie produktów...</p>
@@ -388,6 +389,7 @@ export default function ProductManagement() {
 
   return (
     <Container>
+      <PageTitle title="Zarządzanie produktami" description="Zarządzaj swoimi produktami" />
       <Header>
         <Title>Zarządzanie produktami</Title>
         <AddButton to="/product-create">📦 Dodaj nowy produkt</AddButton>

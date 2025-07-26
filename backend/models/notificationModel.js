@@ -20,7 +20,11 @@ const notificationSchema = new mongoose.Schema({
       'chat',              // Wiadomość czatu
       'review',            // Prośba o recenzję
       'stock',             // Stan magazynowy
-      'return'             // Zwrot
+      'return',            // Zwrot
+      'friend_request',    // Zaproszenie do znajomych
+      'friend_accepted',   // Akceptacja zaproszenia
+      'post_like',         // Polubienie posta
+      'post_comment'       // Komentarz do posta
     ],
     required: true
   },

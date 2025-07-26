@@ -608,7 +608,7 @@ class LocationModule {
       
       const analytics = {
         location: {
-          id: location._id,
+          _id: location._id,
           name: location.name,
           type: location.type
         },
