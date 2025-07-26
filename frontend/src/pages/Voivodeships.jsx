@@ -167,13 +167,120 @@ export default function Voivodeships({ theme }) {
         return;
       }
     }
-
-    // Fallback: ustaw domyślne województwo (Mazowieckie)
-    if (!selectedVoivodeship) {
-      const defaultVoivodeship = voivodeshipsData.find(v => v.code === '14') || voivodeshipsData[0];
-      setSelectedVoivodeship(defaultVoivodeship);
+    // Sprawdź czy jest state z nawigacji
+    if (location.state?.selectedVoivodeship) {
+      const voivodeshipFromState = voivodeships.find(v => v.id === location.state.selectedVoivodeship.code);
+      if (voivodeshipFromState) {
+        setSelectedVoivodeship(voivodeshipFromState);
+        fetchVoivodeshipData(voivodeshipFromState.id);
+        return;
+      }
     }
-  }, [userTeryt, selectedVoivodeship]);
+    // Fallback do domyślnego województwa
+    const defaultVoivodeship = voivodeships.find(v => v.id === '14') || voivodeships[0];
+    setSelectedVoivodeship(defaultVoivodeship);
+    fetchVoivodeshipData(defaultVoivodeship.id);
+  }, [location.state, voivodeshipCode, voivodeships]);
+
+  const fetchVoivodeshipData = async (voivodeshipId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Ustaw dane przykładowe na początku, aby uniknąć migania
+      const fallbackData = {
+        shops: { count: sampleData.shops.length, items: sampleData.shops },
+        posts: { count: sampleData.posts.length, items: sampleData.posts },
+        companies: { count: sampleData.companies.length, items: sampleData.companies },
+        products: { count: sampleData.products.length, items: sampleData.products },
+        users: { count: sampleData.users.length, items: sampleData.users }
+      };
+      setData(fallbackData);
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const token = localStorage.getItem('token');
+
+      // Pobierz prawdziwe dane z backendu
+      let companies = [];
+      let shops = [];
+      let posts = [];
+      let products = [];
+      let users = [];
+
+      // Pobierz firmy z backendu
+      try {
+        const companiesResponse = await fetch(`${apiUrl}/api/company-profiles/list?limit=10`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (companiesResponse.ok) {
+          const companiesData = await companiesResponse.json();
+          companies = companiesData.companyProfiles || companiesData.companies || [];
+        } else {
+          console.warn('Nie udało się pobrać firm z backendu, używam danych przykładowych');
+          companies = sampleData.companies;
+        }
+      } catch (error) {
+        console.warn('Błąd pobierania firm:', error);
+        companies = sampleData.companies;
+      }
+
+      // Pobierz sklepy z backendu (jeśli endpoint istnieje)
+      try {
+        const shopsResponse = await fetch(`${apiUrl}/api/shops?limit=10`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : '',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (shopsResponse.ok) {
+          const shopsData = await shopsResponse.json();
+          shops = shopsData.shops || shopsData.data || [];
+        } else {
+          console.warn('Nie udało się pobrać sklepów z backendu, używam danych przykładowych');
+          shops = sampleData.shops;
+        }
+      } catch (error) {
+        console.warn('Błąd pobierania sklepów:', error);
+        shops = sampleData.shops;
+      }
+
+      // Użyj danych przykładowych dla pozostałych kategorii
+      posts = sampleData.posts;
+      products = sampleData.products;
+      users = sampleData.users;
+
+      const mockData = {
+        shops: { count: shops.length, items: shops },
+        posts: { count: posts.length, items: posts },
+        companies: { count: companies.length, items: companies },
+        products: { count: products.length, items: products },
+        users: { count: users.length, items: users }
+      };
+
+      setData(mockData);
+    } catch (err) {
+      setError('Błąd podczas pobierania danych województwa');
+      console.error('Błąd pobierania danych województwa:', err);
+      
+      // Fallback do danych przykładowych
+      const fallbackData = {
+        shops: { count: sampleData.shops.length, items: sampleData.shops },
+        posts: { count: sampleData.posts.length, items: sampleData.posts },
+        companies: { count: sampleData.companies.length, items: sampleData.companies },
+        products: { count: sampleData.products.length, items: sampleData.products },
+        users: { count: sampleData.users.length, items: sampleData.users }
+      };
+      setData(fallbackData);
+    } finally {
+      setLoading(false);
+    }
+  };
+>>>>>>> 2aa7d5eefe6f72527b0c8ae57358b805b5120e47
 
   const handleVoivodeshipSelect = (voivodeship) => {
     setSelectedVoivodeship(voivodeship);
@@ -198,8 +305,90 @@ export default function Voivodeships({ theme }) {
     }
   };
 
-  // Jeśli nie wybrano województwa, pokaż listę do wyboru
-  if (!selectedVoivodeship) {
+  const handleVoivodeshipSearchSelect = (voivodeship) => {
+    setSelectedVoivodeship(voivodeship);
+    fetchVoivodeshipData(voivodeship.id);
+  };
+
+  const renderTableHeaders = () => {
+    switch (activeTab) {
+      case 'shops':
+        return ['Nazwa sklepu', 'Lokalizacja', 'Ocena', 'Produkty', 'Utworzono'];
+      case 'posts':
+        return ['Tytuł postu', 'Autor', 'Lokalizacja', 'Polubienia', 'Data'];
+      case 'companies':
+        return ['Nazwa firmy', 'Branża', 'Lokalizacja', 'Pracownicy', 'Ocena'];
+      case 'products':
+        return ['Nazwa produktu', 'Kategoria', 'Cena', 'Ocena', 'Lokalizacja'];
+      case 'users':
+        return ['Nazwa użytkownika', 'Lokalizacja', 'Posty', 'Obserwujący', 'Dołączył'];
+      default:
+        return [];
+    }
+  };
+
+  const renderTableRow = (item) => {
+    switch (activeTab) {
+      case 'shops':
+        return [
+          item.name,
+          item.location,
+          `${item.rating} ⭐`,
+          item.products,
+          item.created
+        ];
+      case 'posts':
+        return [
+          item.title,
+          item.author,
+          item.location,
+          item.likes,
+          item.created
+        ];
+      case 'companies':
+        return [
+          item.name,
+          item.industry,
+          item.location,
+          item.employees,
+          `${item.rating} ⭐`
+        ];
+      case 'products':
+        return [
+          item.name,
+          item.category,
+          item.price,
+          `${item.rating} ⭐`,
+          item.location
+        ];
+      case 'users':
+        return [
+          item.name,
+          item.location,
+          item.posts,
+          item.followers,
+          item.joined
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const renderTabContent = () => {
+    if (loading) {
+      return <LoadingSpinner theme={theme}>Ładowanie danych...</LoadingSpinner>;
+    }
+
+    if (error) {
+      return <ErrorMessage theme={theme}>{error}</ErrorMessage>;
+    }
+
+    const currentData = data[activeTab];
+
+    // Sprawdź czy currentData istnieje
+    if (!currentData || !currentData.items) {
+      return <LoadingSpinner theme={theme}>Ładowanie danych...</LoadingSpinner>;
+    }
     return (
       <Container>
               <PageTitle title="Województwa" description="Przeglądaj województwa i ich dane" />
@@ -208,38 +397,21 @@ export default function Voivodeships({ theme }) {
           <Subtitle>Wybierz województwo, aby zobaczyć szczegółowe dane</Subtitle>
         </Header>
 
-        <LocationSelector 
-          theme={theme}
-          onLocationChange={handleLocationChange}
-        />
-
-        <VoivodeshipSelector>
-          <SelectorLabel>Wybierz województwo:</SelectorLabel>
-          <VoivodeshipDropdown>
-            <VoivodeshipButton onClick={toggleDropdown}>
-              <FaMapMarkerAlt />
-              Wybierz województwo
-              <FaChevronDown />
-            </VoivodeshipButton>
-            <VoivodeshipDropdownContent isOpen={isDropdownOpen} theme={theme}>
-              {voivodeshipsData.map((voivodeship) => (
-                <VoivodeshipOption
-                  key={voivodeship.code}
-                  onClick={() => handleVoivodeshipSelect(voivodeship)}
-                  theme={theme}
-                >
-                  {voivodeship.name} ({voivodeship.code})
-                </VoivodeshipOption>
+        <DataTable>
+          <TableHeader theme={theme}>
+            {renderTableHeaders().map((header, index) => (
+              <div key={index}>{header}</div>
+            ))}
+          </TableHeader>
+          
+          {currentData.items.map((item, index) => (
+            <TableRow key={item._id || index} theme={theme}>
+              {renderTableRow(item).map((cell, cellIndex) => (
+                <TableCell key={cellIndex} theme={theme}>{cell}</TableCell>
               ))}
-            </VoivodeshipDropdownContent>
-          </VoivodeshipDropdown>
-        </VoivodeshipSelector>
-
-        {/* Nowy komponent wyszukiwania alfabetycznego */}
-        <AlphabeticalCitySelector theme={theme} />
-
-        {loading && <LoadingSpinner>Ładowanie...</LoadingSpinner>}
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+            </TableRow>
+          ))}
+        </DataTable>
       </Container>
     );
   }

@@ -1122,8 +1122,16 @@ const getLocationShops = async (req, res) => {
     const { locationId } = req.params;
     const { page = 1, limit = 20, search, category, sort = 'name' } = req.query;
     
-    // Znajdź lokalizację
-    const location = await Location.findById(locationId);
+    // Znajdź lokalizację - obsługuj zarówno ObjectId jak i kod TERYT
+    let location;
+    if (locationId.match(/^[0-9a-fA-F]{24}$/)) {
+      // To jest ObjectId
+      location = await Location.findById(locationId);
+    } else {
+      // To jest kod TERYT
+      location = await Location.findOne({ code: locationId });
+    }
+    
     if (!location) {
       return res.status(404).json({ error: 'Lokalizacja nie znaleziona' });
     }
@@ -1210,8 +1218,16 @@ const getLocationCompanies = async (req, res) => {
     const { locationId } = req.params;
     const { page = 1, limit = 20, search, industry, sort = 'name' } = req.query;
     
-    // Znajdź lokalizację
-    const location = await Location.findById(locationId);
+    // Znajdź lokalizację - obsługuj zarówno ObjectId jak i kod TERYT
+    let location;
+    if (locationId.match(/^[0-9a-fA-F]{24}$/)) {
+      // To jest ObjectId
+      location = await Location.findById(locationId);
+    } else {
+      // To jest kod TERYT
+      location = await Location.findOne({ code: locationId });
+    }
+    
     if (!location) {
       return res.status(404).json({ error: 'Lokalizacja nie znaleziona' });
     }
@@ -1297,8 +1313,16 @@ const getLocationStats = async (req, res) => {
   try {
     const { locationId } = req.params;
     
-    // Znajdź lokalizację
-    const location = await Location.findById(locationId);
+    // Znajdź lokalizację - obsługuj zarówno ObjectId jak i kod TERYT
+    let location;
+    if (locationId.match(/^[0-9a-fA-F]{24}$/)) {
+      // To jest ObjectId
+      location = await Location.findById(locationId);
+    } else {
+      // To jest kod TERYT
+      location = await Location.findOne({ code: locationId });
+    }
+    
     if (!location) {
       return res.status(404).json({ error: 'Lokalizacja nie znaleziona' });
     }
