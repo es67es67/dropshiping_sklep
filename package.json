@@ -15,22 +15,13 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "monitor": "node monitoring/portal-monitor.js",
     "monitor-render": "node monitoring/render-monitor.js",
-    "monitor-portal": "node monitoring/portal-tests.js",
-    "test:puppeteer:smoke": "node test-portal-simple.js",
-    "test:puppeteer:friendship": "node test-friendship-puppeteer.js",
-    "test:puppeteer:notifications": "node test-notifications-puppeteer.js",
-    "test:puppeteer:ecommerce": "node test-portal.js",
-    "test:puppeteer:responsive": "node test-browser.js",
-    "test:puppeteer:performance": "node test-portal.js",
-    "test:puppeteer:accessibility": "node test-portal.js",
-    "test:puppeteer:all": "npm run test:puppeteer:smoke && npm run test:puppeteer:friendship && npm run test:puppeteer:notifications && npm run test:puppeteer:ecommerce"
+    "monitor-portal": "node monitoring/portal-tests.js"
   },
   "dependencies": {
     "axios": "^1.10.0",
     "concurrently": "^8.2.2",
     "fs-extra": "^11.0.0",
-    "nodemailer": "^6.9.0",
-    "puppeteer": "^24.15.0"
+    "nodemailer": "^6.9.0"
   },
   "keywords": [
     "monitoring",
