@@ -1,0 +1,153 @@
+{
+  "timestamp": "2025-07-12T13:56:08.093Z",
+  "duration": 7266,
+  "summary": {
+    "totalTests": 23,
+    "totalScreenshots": 5,
+    "totalErrors": 2,
+    "successRate": "91.30"
+  },
+  "features": {
+    "enhancedProductCards": "✅ Zaimplementowane",
+    "advancedFilters": "✅ Zaimplementowane",
+    "reviewSystem": "✅ Zaimplementowane",
+    "liveChat": "✅ Zaimplementowane",
+    "responsiveDesign": "✅ Zaimplementowane",
+    "quickActions": "✅ Zaimplementowane",
+    "sortingPagination": "✅ Zaimplementowane"
+  },
+  "screenshots": [
+    "demo-screenshots/06-responsive-desktop.png",
+    "demo-screenshots/06-responsive-tablet.png",
+    "demo-screenshots/06-responsive-mobile.png",
+    "demo-screenshots/07-quick-actions.png",
+    "demo-screenshots/08-sorting-pagination.png"
+  ],
+  "tests": [
+    {
+      "timestamp": "2025-07-12T13:56:01.530Z",
+      "type": "info",
+      "message": "🚀 Rozpoczęcie demonstracji ulepszonego portalu..."
+    },
+    {
+      "timestamp": "2025-07-12T13:56:01.532Z",
+      "type": "info",
+      "message": "🏷️ Demonstracja ulepszonych kart produktów..."
+    },
+    {
+      "timestamp": "2025-07-12T13:56:03.879Z",
+      "type": "error",
+      "message": "❌ Błąd podczas demonstracji kart produktów: net::ERR_CONNECTION_REFUSED at http://localhost:3000/products"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:03.881Z",
+      "type": "info",
+      "message": "🔍 Demonstracja zaawansowanych filtrów..."
+    },
+    {
+      "timestamp": "2025-07-12T13:56:04.011Z",
+      "type": "info",
+      "message": "⭐ Demonstracja systemu ocen i recenzji..."
+    },
+    {
+      "timestamp": "2025-07-12T13:56:04.021Z",
+      "type": "error",
+      "message": "❌ Błąd podczas demonstracji systemu recenzji: No element found for selector: [data-testid=\"product-card\"]:first-child"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:04.022Z",
+      "type": "info",
+      "message": "💬 Demonstracja chatu w czasie rzeczywistym..."
+    },
+    {
+      "timestamp": "2025-07-12T13:56:04.026Z",
+      "type": "info",
+      "message": "📱 Demonstracja responsywnego designu..."
+    },
+    {
+      "timestamp": "2025-07-12T13:56:05.288Z",
+      "type": "info",
+      "message": "📸 Screenshot: 06-responsive-desktop"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:05.289Z",
+      "type": "info",
+      "message": "✅ Screenshot dla desktop (1920x1080)"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:06.445Z",
+      "type": "info",
+      "message": "📸 Screenshot: 06-responsive-tablet"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:06.445Z",
+      "type": "info",
+      "message": "✅ Screenshot dla tablet (1024x768)"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:07.551Z",
+      "type": "info",
+      "message": "📸 Screenshot: 06-responsive-mobile"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:07.551Z",
+      "type": "info",
+      "message": "✅ Screenshot dla mobile (375x667)"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:07.557Z",
+      "type": "info",
+      "message": "✅ Demonstracja responsywnego designu zakończona pomyślnie"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:07.558Z",
+      "type": "info",
+      "message": "⚡ Demonstracja szybkich akcji..."
+    },
+    {
+      "timestamp": "2025-07-12T13:56:07.570Z",
+      "type": "info",
+      "message": "✅ Znaleziono 0 przycisków szybkich akcji"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:07.827Z",
+      "type": "info",
+      "message": "📸 Screenshot: 07-quick-actions"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:07.828Z",
+      "type": "info",
+      "message": "✅ Demonstracja szybkich akcji zakończona pomyślnie"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:07.829Z",
+      "type": "info",
+      "message": "📊 Demonstracja sortowania i paginacji..."
+    },
+    {
+      "timestamp": "2025-07-12T13:56:08.092Z",
+      "type": "info",
+      "message": "📸 Screenshot: 08-sorting-pagination"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:08.092Z",
+      "type": "info",
+      "message": "✅ Demonstracja sortowania i paginacji zakończona pomyślnie"
+    },
+    {
+      "timestamp": "2025-07-12T13:56:08.093Z",
+      "type": "info",
+      "message": "📋 Generowanie raportu demonstracji..."
+    }
+  ],
+  "errors": [
+    {
+      "message": "net::ERR_CONNECTION_REFUSED at http://localhost:3000/products",
+      "stack": "Error: net::ERR_CONNECTION_REFUSED at http://localhost:3000/products\n    at navigate (D:\\portal\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\Frame.js:170:27)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Deferred.race (D:\\portal\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\util\\Deferred.js:31:20)\n    at async CdpFrame.goto (D:\\portal\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\cdp\\Frame.js:136:25)\n    at async CdpPage.goto (D:\\portal\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\Page.js:603:20)\n    at async PortalDemo.demoEnhancedProductCards (D:\\portal\\demo-enhanced-portal.js:81:7)\n    at async PortalDemo.run (D:\\portal\\demo-enhanced-portal.js:603:7)"
+    },
+    {
+      "message": "No element found for selector: [data-testid=\"product-card\"]:first-child",
+      "stack": "Error: No element found for selector: [data-testid=\"product-card\"]:first-child\n    at assert (D:\\portal\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\util\\assert.js:18:15)\n    at CdpFrame.click (D:\\portal\\node_modules\\puppeteer-core\\lib\\cjs\\puppeteer\\api\\Frame.js:725:40)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async PortalDemo.demoReviewSystem (D:\\portal\\demo-enhanced-portal.js:156:7)\n    at async PortalDemo.run (D:\\portal\\demo-enhanced-portal.js:605:7)"
+    }
+  ]
+}
