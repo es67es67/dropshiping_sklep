@@ -87,8 +87,8 @@ const FilterTabs = styled.div`
 
 const FilterTab = styled.button`
   flex: 1;
-  background: ${({ active, theme }) => active ? theme.primary || '#00D4AA' : 'transparent'};
-  color: ${({ active }) => active ? 'white' : '#666'};
+  background: ${({ $active, theme }) => $active ? theme.primary || '#00D4AA' : 'transparent'};
+  color: ${({ $active }) => $active ? 'white' : '#666'};
   border: none;
   border-radius: 10px;
   padding: 0.75rem 1rem;
@@ -97,7 +97,7 @@ const FilterTab = styled.button`
   transition: all 0.3s ease;
   
   &:hover {
-    background: ${({ active, theme }) => active ? theme.primary || '#00D4AA' : '#f8f9fa'};
+    background: ${({ $active, theme }) => $active ? theme.primary || '#00D4AA' : '#f8f9fa'};
   }
 `;
 
@@ -260,21 +260,21 @@ const Feed = ({ theme }) => {
 
       <FilterTabs>
         <FilterTab 
-          active={filter === 'all'} 
+          $active={filter === 'all'} 
           onClick={() => setFilter('all')}
           theme={theme}
         >
           🌍 Wszystkie
         </FilterTab>
         <FilterTab 
-          active={filter === 'friends'} 
+          $active={filter === 'friends'} 
           onClick={() => setFilter('friends')}
           theme={theme}
         >
           👥 Znajomi
         </FilterTab>
         <FilterTab 
-          active={filter === 'trending'} 
+          $active={filter === 'trending'} 
           onClick={() => setFilter('trending')}
           theme={theme}
         >

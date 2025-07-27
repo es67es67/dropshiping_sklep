@@ -45,13 +45,19 @@ const io = socketIo(server, {
 // Dynamic CORS configuration
 app.use(cors({
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:8080',
-      'https://portal-frontend.onrender.com',
-      'https://portal-frontend-igf9.onrender.com',
-      'https://portal-frontend-ysqz.onrender.com'
-    ];
+      const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    'http://localhost:3004',
+    'http://localhost:3005',
+    'http://localhost:3006',
+    'http://localhost:8080',
+    'https://portal-frontend.onrender.com',
+    'https://portal-frontend-igf9.onrender.com',
+    'https://portal-frontend-ysqz.onrender.com'
+  ];
     
     // Allow requests without origin (like mobile apps or Postman)
     if (!origin) return callback(null, true);
@@ -74,6 +80,12 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   const allowedOrigins = [
     'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3003',
+    'http://localhost:3004',
+    'http://localhost:3005',
+    'http://localhost:3006',
     'http://localhost:8080',
     'https://portal-frontend.onrender.com',
     'https://portal-frontend-igf9.onrender.com',

@@ -1,9 +1,16 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+
+// 🟡 SHARED COMPONENT: ShopList
+// Zależności: AuthContext, React Router, /api/shops endpoints
+// Wpływ: lista wszystkich sklepów
+// Jeśli się zepsuje: strona /shops nie działa
+// Używane w: App.jsx (route /shops)
+// API: /api/shops (publiczny), /api/shops/user (wymaga autoryzacji)
 
 const Container = styled.div`
   max-width: 1200px;
@@ -414,7 +421,11 @@ export default function ShopList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('all');
   const [status, setStatus] = useState('all');
-  const [showAllShops, setShowAllShops] = useState(false); // Domyślnie false - tylko sklepy użytkownika
+  const [showAllShops, setShowAllShops] = useState(true); // Domyślnie true - wszystkie sklepy (publiczny endpoint)
+
+  // 🔧 BEZPIECZNA ZMIANA: Domyślnie pokazujemy wszystkie sklepy zamiast sklepów użytkownika
+  // Powód: /api/shops jest publiczny, /api/shops/user wymaga autoryzacji
+  // Wpływ: Strona /shops będzie działać bez logowania, ale użytkownik może przełączyć na swoje sklepy
 
   const fetchShops = async () => {
     try {

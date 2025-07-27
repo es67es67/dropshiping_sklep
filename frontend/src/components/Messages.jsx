@@ -1,6 +1,219 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { API_URL } from '../config';
+import styled from 'styled-components';
+
+const MessagesContainer = styled.div`
+  display: flex;
+  height: 80vh;
+  max-width: 1200px;
+  margin: 0 auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+`;
+
+const MessagesSidebar = styled.div`
+  width: 300px;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+`;
+
+const SidebarHeader = styled.div`
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  h3 {
+    margin: 0;
+  }
+`;
+
+const SearchSection = styled.div`
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+  
+  input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+`;
+
+const SearchResults = styled.div`
+  margin-top: 10px;
+`;
+
+const SearchResult = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 5px;
+  border-radius: 4px;
+`;
+
+const ConversationsList = styled.div`
+  flex: 1;
+  overflow-y: auto;
+`;
+
+const ConversationItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover,
+  &.active {
+    background-color: #f8f9fa;
+  }
+`;
+
+const Avatar = styled.div`
+  margin-right: 10px;
+  
+  img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+`;
+
+const AvatarPlaceholder = styled.div`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+`;
+
+const MessagesMain = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
+const MessagesHeader = styled.div`
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  
+  h3 {
+    margin: 0;
+  }
+`;
+
+const MessagesList = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+`;
+
+const Message = styled.div`
+  display: flex;
+  margin-bottom: 10px;
+  
+  &.sent {
+    justify-content: flex-end;
+  }
+  
+  &.received {
+    justify-content: flex-start;
+  }
+`;
+
+const MessageContent = styled.div`
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 18px;
+  position: relative;
+  
+  ${props => props.sent ? `
+    background: #007bff;
+    color: white;
+  ` : `
+    background: #e9ecef;
+    color: #333;
+  `}
+  
+  p {
+    margin: 0 0 5px 0;
+  }
+  
+  small {
+    font-size: 11px;
+    opacity: 0.7;
+  }
+`;
+
+const MessageForm = styled.form`
+  padding: 20px;
+  border-top: 1px solid #ddd;
+  display: flex;
+  gap: 10px;
+  
+  input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+  }
+  
+  button {
+    padding: 12px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  }
+`;
+
+const NoConversation = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+`;
+
+const Button = styled.button`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  
+  &.btn-primary {
+    background: #007bff;
+    color: white;
+  }
+  
+  &.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+`;
 
 const Messages = () => {
   const { user, token } = useAuth();
@@ -201,19 +414,19 @@ const Messages = () => {
   }
 
   return (
-    <div className="messages-container">
-      <div className="messages-sidebar">
-        <div className="sidebar-header">
+    <MessagesContainer>
+      <MessagesSidebar>
+        <SidebarHeader>
           <h3>Wiadomości</h3>
-          <button 
-            className="btn btn-primary"
+          <Button 
+            className="btn-primary"
             onClick={() => document.getElementById('search-users').focus()}
           >
             Nowa wiadomość
-          </button>
-        </div>
+          </Button>
+        </SidebarHeader>
 
-        <div className="search-section">
+        <SearchSection>
           <input
             id="search-users"
             type="text"
@@ -223,35 +436,35 @@ const Messages = () => {
           />
           
           {searchResults.length > 0 && (
-            <div className="search-results">
+            <SearchResults>
               {searchResults.map(user => (
-                <div key={user._id} className="search-result">
-                  <div className="user-avatar">
+                <SearchResult key={user._id}>
+                  <Avatar>
                     {user.avatar ? (
                       <img src={user.avatar} alt={user.firstName} />
                     ) : (
-                      <div className="avatar-placeholder">
+                      <AvatarPlaceholder>
                         {user.firstName.charAt(0)}{user.lastName.charAt(0)}
-                      </div>
+                      </AvatarPlaceholder>
                     )}
-                  </div>
+                  </Avatar>
                   <div className="user-info">
                     <h4>{user.firstName} {user.lastName}</h4>
                     <p>@{user.username}</p>
                   </div>
-                  <button 
-                    className="btn btn-sm btn-primary"
+                  <Button 
+                    className="btn-sm btn-primary"
                     onClick={() => startConversation(user._id)}
                   >
                     Napisz
-                  </button>
-                </div>
+                  </Button>
+                </SearchResult>
               ))}
-            </div>
+            </SearchResults>
           )}
-        </div>
+        </SearchSection>
 
-        <div className="conversations-list">
+        <ConversationsList>
           {loading ? (
             <p>Ładowanie konwersacji...</p>
           ) : conversations.length === 0 ? (
@@ -260,20 +473,20 @@ const Messages = () => {
             conversations.map(conversation => {
               const otherUser = getOtherParticipant(conversation);
               return (
-                <div 
+                <ConversationItem 
                   key={conversation._id} 
-                  className={`conversation-item ${selectedConversation?._id === conversation._id ? 'active' : ''}`}
+                  className={selectedConversation?._id === conversation._id ? 'active' : ''}
                   onClick={() => setSelectedConversation(conversation)}
                 >
-                  <div className="conversation-avatar">
+                  <Avatar>
                     {otherUser.avatar ? (
                       <img src={otherUser.avatar} alt={otherUser.firstName} />
                     ) : (
-                      <div className="avatar-placeholder">
+                      <AvatarPlaceholder>
                         {otherUser.firstName.charAt(0)}{otherUser.lastName.charAt(0)}
-                      </div>
+                      </AvatarPlaceholder>
                     )}
-                  </div>
+                  </Avatar>
                   <div className="conversation-info">
                     <h4>{otherUser.firstName} {otherUser.lastName}</h4>
                     {conversation.lastMessage && (
@@ -286,31 +499,31 @@ const Messages = () => {
                     )}
                     <small>{conversation.lastMessage ? formatDate(conversation.lastMessage.createdAt) : ''}</small>
                   </div>
-                </div>
+                </ConversationItem>
               );
             })
           )}
-        </div>
-      </div>
+        </ConversationsList>
+      </MessagesSidebar>
 
-      <div className="messages-main">
+      <MessagesMain>
         {selectedConversation ? (
           <>
-            <div className="chat-header">
+            <MessagesHeader>
               {(() => {
                 const otherUser = getOtherParticipant(selectedConversation);
                 return (
                   <>
                     <div className="chat-user-info">
-                      <div className="user-avatar">
+                      <Avatar>
                         {otherUser.avatar ? (
                           <img src={otherUser.avatar} alt={otherUser.firstName} />
                         ) : (
-                          <div className="avatar-placeholder">
+                          <AvatarPlaceholder>
                             {otherUser.firstName.charAt(0)}{otherUser.lastName.charAt(0)}
-                          </div>
+                          </AvatarPlaceholder>
                         )}
-                      </div>
+                      </Avatar>
                       <div>
                         <h3>{otherUser.firstName} {otherUser.lastName}</h3>
                         <small>@{otherUser.username}</small>
@@ -319,24 +532,24 @@ const Messages = () => {
                   </>
                 );
               })()}
-            </div>
+            </MessagesHeader>
 
-            <div className="messages-list">
+            <MessagesList>
               {messages.map(message => (
-                <div 
+                <Message 
                   key={message._id} 
-                  className={`message ${message.sender._id === user._id ? 'sent' : 'received'}`}
+                  className={message.sender._id === user._id ? 'sent' : 'received'}
                 >
-                  <div className="message-content">
+                  <MessageContent sent={message.sender._id === user._id}>
                     <p>{message.content}</p>
                     <small>{formatDate(message.createdAt)}</small>
-                  </div>
-                </div>
+                  </MessageContent>
+                </Message>
               ))}
               <div ref={messagesEndRef} />
-            </div>
+            </MessagesList>
 
-            <form onSubmit={sendMessage} className="message-form">
+            <MessageForm onSubmit={sendMessage}>
               <input
                 type="text"
                 value={newMessage}
@@ -347,266 +560,16 @@ const Messages = () => {
               <button type="submit" disabled={!newMessage.trim()}>
                 Wyślij
               </button>
-            </form>
+            </MessageForm>
           </>
         ) : (
-          <div className="no-conversation">
+          <NoConversation>
             <h3>Wybierz konwersację</h3>
             <p>Wybierz konwersację z listy po lewej stronie, aby rozpocząć czat.</p>
-          </div>
+          </NoConversation>
         )}
-      </div>
-
-      <style jsx>{`
-        .messages-container {
-          display: flex;
-          height: 80vh;
-          max-width: 1200px;
-          margin: 0 auto;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          overflow: hidden;
-        }
-
-        .messages-sidebar {
-          width: 300px;
-          border-right: 1px solid #ddd;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .sidebar-header {
-          padding: 20px;
-          border-bottom: 1px solid #ddd;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .sidebar-header h3 {
-          margin: 0;
-        }
-
-        .search-section {
-          padding: 15px;
-          border-bottom: 1px solid #ddd;
-        }
-
-        .search-section input {
-          width: 100%;
-          padding: 8px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-        }
-
-        .search-results {
-          margin-top: 10px;
-        }
-
-        .search-result {
-          display: flex;
-          align-items: center;
-          padding: 10px;
-          border: 1px solid #ddd;
-          margin-bottom: 5px;
-          border-radius: 4px;
-        }
-
-        .conversations-list {
-          flex: 1;
-          overflow-y: auto;
-        }
-
-        .conversation-item {
-          display: flex;
-          align-items: center;
-          padding: 15px;
-          border-bottom: 1px solid #eee;
-          cursor: pointer;
-          transition: background-color 0.2s;
-        }
-
-        .conversation-item:hover,
-        .conversation-item.active {
-          background-color: #f8f9fa;
-        }
-
-        .conversation-avatar,
-        .user-avatar {
-          margin-right: 10px;
-        }
-
-        .conversation-avatar img,
-        .user-avatar img {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          object-fit: cover;
-        }
-
-        .avatar-placeholder {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background: #007bff;
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-          font-size: 14px;
-        }
-
-        .conversation-info {
-          flex: 1;
-        }
-
-        .conversation-info h4 {
-          margin: 0 0 5px 0;
-          font-size: 14px;
-        }
-
-        .last-message {
-          margin: 0 0 5px 0;
-          color: #666;
-          font-size: 12px;
-        }
-
-        .conversation-info small {
-          color: #999;
-          font-size: 11px;
-        }
-
-        .messages-main {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .chat-header {
-          padding: 20px;
-          border-bottom: 1px solid #ddd;
-          background: #f8f9fa;
-        }
-
-        .chat-user-info {
-          display: flex;
-          align-items: center;
-        }
-
-        .chat-user-info h3 {
-          margin: 0 0 5px 0;
-        }
-
-        .chat-user-info small {
-          color: #666;
-        }
-
-        .messages-list {
-          flex: 1;
-          padding: 20px;
-          overflow-y: auto;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .message {
-          display: flex;
-          margin-bottom: 10px;
-        }
-
-        .message.sent {
-          justify-content: flex-end;
-        }
-
-        .message.received {
-          justify-content: flex-start;
-        }
-
-        .message-content {
-          max-width: 70%;
-          padding: 10px 15px;
-          border-radius: 18px;
-          position: relative;
-        }
-
-        .message.sent .message-content {
-          background: #007bff;
-          color: white;
-        }
-
-        .message.received .message-content {
-          background: #e9ecef;
-          color: #333;
-        }
-
-        .message-content p {
-          margin: 0 0 5px 0;
-        }
-
-        .message-content small {
-          font-size: 11px;
-          opacity: 0.7;
-        }
-
-        .message-form {
-          padding: 20px;
-          border-top: 1px solid #ddd;
-          display: flex;
-          gap: 10px;
-        }
-
-        .message-form input {
-          flex: 1;
-          padding: 12px;
-          border: 1px solid #ddd;
-          border-radius: 20px;
-          outline: none;
-        }
-
-        .message-form button {
-          padding: 12px 20px;
-          background: #007bff;
-          color: white;
-          border: none;
-          border-radius: 20px;
-          cursor: pointer;
-        }
-
-        .message-form button:disabled {
-          background: #ccc;
-          cursor: not-allowed;
-        }
-
-        .no-conversation {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          color: #666;
-        }
-
-        .btn {
-          padding: 8px 16px;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 14px;
-        }
-
-        .btn-primary {
-          background: #007bff;
-          color: white;
-        }
-
-        .btn-sm {
-          padding: 4px 8px;
-          font-size: 12px;
-        }
-      `}</style>
-    </div>
+      </MessagesMain>
+    </MessagesContainer>
   );
 };
 

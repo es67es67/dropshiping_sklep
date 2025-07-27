@@ -1,6 +1,132 @@
 import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import { API_URL } from '../config';
+
+// Styled components
+const FriendsContainer = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+`;
+
+const FriendsTabs = styled.div`
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+`;
+
+const TabButton = styled.button`
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  
+  &.active {
+    border-bottom-color: #007bff;
+    color: #007bff;
+  }
+`;
+
+const FriendItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  border-radius: 8px;
+`;
+
+const Avatar = styled.div`
+  margin-right: 15px;
+  
+  img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+`;
+
+const AvatarPlaceholder = styled.div`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+`;
+
+const Info = styled.div`
+  flex: 1;
+  
+  h4 {
+    margin: 0 0 5px 0;
+  }
+  
+  p {
+    margin: 0 0 5px 0;
+    color: #666;
+  }
+`;
+
+const Actions = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const Button = styled.button`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  
+  &.btn-primary {
+    background: #007bff;
+    color: white;
+  }
+  
+  &.btn-success {
+    background: #28a745;
+    color: white;
+  }
+  
+  &.btn-danger {
+    background: #dc3545;
+    color: white;
+  }
+  
+  &.btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  margin-bottom: 20px;
+`;
+
+const RequestMessage = styled.p`
+  font-style: italic;
+  color: #666;
+  margin: 5px 0;
+`;
+
+const UserBio = styled.p`
+  font-size: 14px;
+  color: #666;
+  margin: 5px 0;
+`;
 
 const Friends = () => {
   const { user, token } = useAuth();
@@ -166,289 +292,161 @@ const Friends = () => {
   };
 
   return (
-    <div className="friends-container">
+    <FriendsContainer>
       <h2>Znajomi</h2>
       
-      <div className="friends-tabs">
-        <button 
+      <FriendsTabs>
+        <TabButton 
           className={activeTab === 'friends' ? 'active' : ''} 
           onClick={() => setActiveTab('friends')}
         >
           Znajomi ({friends.length})
-        </button>
-        <button 
+        </TabButton>
+        <TabButton 
           className={activeTab === 'requests' ? 'active' : ''} 
           onClick={() => setActiveTab('requests')}
         >
           Zaproszenia ({pendingRequests.length})
-        </button>
-        <button 
+        </TabButton>
+        <TabButton 
           className={activeTab === 'search' ? 'active' : ''} 
           onClick={() => setActiveTab('search')}
         >
           Znajdź znajomych
-        </button>
-      </div>
+        </TabButton>
+      </FriendsTabs>
 
       {activeTab === 'friends' && (
-        <div className="friends-list">
+        <div>
           {loading ? (
             <p>Ładowanie znajomych...</p>
           ) : friends.length === 0 ? (
             <p>Nie masz jeszcze znajomych. Dodaj ich w zakładce "Znajdź znajomych"!</p>
           ) : (
             friends.map(friend => (
-              <div key={friend._id} className="friend-item">
-                <div className="friend-avatar">
+              <FriendItem key={friend._id}>
+                <Avatar>
                   {friend.avatar ? (
                     <img src={friend.avatar} alt={friend.firstName} />
                   ) : (
-                    <div className="avatar-placeholder">
+                    <AvatarPlaceholder>
                       {friend.firstName.charAt(0)}{friend.lastName.charAt(0)}
-                    </div>
+                    </AvatarPlaceholder>
                   )}
-                </div>
-                <div className="friend-info">
+                </Avatar>
+                <Info>
                   <h4>{friend.firstName} {friend.lastName}</h4>
                   <p>@{friend.username}</p>
                   <small>Znajomi od: {new Date(friend.friendsSince).toLocaleDateString()}</small>
-                </div>
-                <div className="friend-actions">
-                  <button 
-                    className="btn btn-primary"
+                </Info>
+                <Actions>
+                  <Button 
+                    className="btn-primary"
                     onClick={() => window.location.href = `/profile/${friend._id}`}
                   >
                     Profil
-                  </button>
-                  <button 
-                    className="btn btn-danger"
+                  </Button>
+                  <Button 
+                    className="btn-danger"
                     onClick={() => removeFriend(friend.friendshipId)}
                   >
                     Usuń
-                  </button>
-                </div>
-              </div>
+                  </Button>
+                </Actions>
+              </FriendItem>
             ))
           )}
         </div>
       )}
 
       {activeTab === 'requests' && (
-        <div className="requests-list">
+        <div>
           {pendingRequests.length === 0 ? (
             <p>Brak oczekujących zaproszeń.</p>
           ) : (
             pendingRequests.map(request => (
-              <div key={request._id} className="request-item">
-                <div className="request-avatar">
+              <FriendItem key={request._id}>
+                <Avatar>
                   {request.requester.avatar ? (
                     <img src={request.requester.avatar} alt={request.requester.firstName} />
                   ) : (
-                    <div className="avatar-placeholder">
+                    <AvatarPlaceholder>
                       {request.requester.firstName.charAt(0)}{request.requester.lastName.charAt(0)}
-                    </div>
+                    </AvatarPlaceholder>
                   )}
-                </div>
-                <div className="request-info">
+                </Avatar>
+                <Info>
                   <h4>{request.requester.firstName} {request.requester.lastName}</h4>
                   <p>@{request.requester.username}</p>
-                  {request.message && <p className="request-message">"{request.message}"</p>}
+                  {request.message && <RequestMessage>"{request.message}"</RequestMessage>}
                   <small>{new Date(request.requestedAt).toLocaleDateString()}</small>
-                </div>
-                <div className="request-actions">
-                  <button 
-                    className="btn btn-success"
+                </Info>
+                <Actions>
+                  <Button 
+                    className="btn-success"
                     onClick={() => acceptFriendRequest(request._id)}
                   >
                     Akceptuj
-                  </button>
-                  <button 
-                    className="btn btn-danger"
+                  </Button>
+                  <Button 
+                    className="btn-danger"
                     onClick={() => rejectFriendRequest(request._id)}
                   >
                     Odrzuć
-                  </button>
-                </div>
-              </div>
+                  </Button>
+                </Actions>
+              </FriendItem>
             ))
           )}
         </div>
       )}
 
       {activeTab === 'search' && (
-        <div className="search-section">
-          <div className="search-input">
-            <input
-              type="text"
-              placeholder="Wyszukaj użytkowników..."
-              value={searchQuery}
-              onChange={handleSearch}
-            />
-          </div>
+        <div>
+          <SearchInput
+            type="text"
+            placeholder="Wyszukaj użytkowników..."
+            value={searchQuery}
+            onChange={handleSearch}
+          />
           
-          <div className="search-results">
+          <div>
             {searchResults.map(user => (
-              <div key={user._id} className="search-result-item">
-                <div className="result-avatar">
+              <FriendItem key={user._id}>
+                <Avatar>
                   {user.avatar ? (
                     <img src={user.avatar} alt={user.firstName} />
                   ) : (
-                    <div className="avatar-placeholder">
+                    <AvatarPlaceholder>
                       {user.firstName.charAt(0)}{user.lastName.charAt(0)}
-                    </div>
+                    </AvatarPlaceholder>
                   )}
-                </div>
-                <div className="result-info">
+                </Avatar>
+                <Info>
                   <h4>{user.firstName} {user.lastName}</h4>
                   <p>@{user.username}</p>
-                  {user.bio && <p className="user-bio">{user.bio}</p>}
-                </div>
-                <div className="result-actions">
-                  <button 
-                    className="btn btn-primary"
+                  {user.bio && <UserBio>{user.bio}</UserBio>}
+                </Info>
+                <Actions>
+                  <Button 
+                    className="btn-primary"
                     onClick={() => sendFriendRequest(user._id)}
                   >
                     Dodaj znajomego
-                  </button>
-                  <button 
-                    className="btn btn-secondary"
+                  </Button>
+                  <Button 
+                    className="btn-secondary"
                     onClick={() => window.location.href = `/profile/${user._id}`}
                   >
                     Zobacz profil
-                  </button>
-                </div>
-              </div>
+                  </Button>
+                </Actions>
+              </FriendItem>
             ))}
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        .friends-container {
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-
-        .friends-tabs {
-          display: flex;
-          margin-bottom: 20px;
-          border-bottom: 1px solid #ddd;
-        }
-
-        .friends-tabs button {
-          padding: 10px 20px;
-          border: none;
-          background: none;
-          cursor: pointer;
-          border-bottom: 2px solid transparent;
-        }
-
-        .friends-tabs button.active {
-          border-bottom-color: #007bff;
-          color: #007bff;
-        }
-
-        .friend-item, .request-item, .search-result-item {
-          display: flex;
-          align-items: center;
-          padding: 15px;
-          border: 1px solid #ddd;
-          margin-bottom: 10px;
-          border-radius: 8px;
-        }
-
-        .friend-avatar, .request-avatar, .result-avatar {
-          margin-right: 15px;
-        }
-
-        .friend-avatar img, .request-avatar img, .result-avatar img {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          object-fit: cover;
-        }
-
-        .avatar-placeholder {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          background: #007bff;
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-        }
-
-        .friend-info, .request-info, .result-info {
-          flex: 1;
-        }
-
-        .friend-info h4, .request-info h4, .result-info h4 {
-          margin: 0 0 5px 0;
-        }
-
-        .friend-info p, .request-info p, .result-info p {
-          margin: 0 0 5px 0;
-          color: #666;
-        }
-
-        .friend-actions, .request-actions, .result-actions {
-          display: flex;
-          gap: 10px;
-        }
-
-        .btn {
-          padding: 8px 16px;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 14px;
-        }
-
-        .btn-primary {
-          background: #007bff;
-          color: white;
-        }
-
-        .btn-success {
-          background: #28a745;
-          color: white;
-        }
-
-        .btn-danger {
-          background: #dc3545;
-          color: white;
-        }
-
-        .btn-secondary {
-          background: #6c757d;
-          color: white;
-        }
-
-        .search-input input {
-          width: 100%;
-          padding: 12px;
-          border: 1px solid #ddd;
-          border-radius: 4px;
-          font-size: 16px;
-          margin-bottom: 20px;
-        }
-
-        .request-message {
-          font-style: italic;
-          color: #666;
-          margin: 5px 0;
-        }
-
-        .user-bio {
-          font-size: 14px;
-          color: #666;
-          margin: 5px 0;
-        }
-      `}</style>
-    </div>
+    </FriendsContainer>
   );
 };
 

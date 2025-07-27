@@ -3,6 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 
+// 🟡 SHARED ROUTING PATTERN: useParams + useNavigate
+// Zależności: React Router, dynamic routes, AuthContext
+// Wpływ: szczegóły użytkownika
+// Jeśli się zepsuje: strona szczegółów użytkownika nie działa
+// Wzorzec używany w: User, Shop, Product, Post, CompanyProfile
+
 // Styled Components
 const Container = styled.div`
   max-width: 1200px;

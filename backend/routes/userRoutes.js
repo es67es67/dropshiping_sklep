@@ -3,6 +3,12 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const authMiddleware = require('../middleware/authMiddleware');
 
+// 🔴 SHARED API ROUTES: /api/users
+// Zależności: MongoDB users collection, JWT tokens, bcrypt
+// Wpływ: WSZYSTKIE komponenty wymagające autoryzacji (45+ komponentów)
+// Jeśli się zepsuje: cała autoryzacja nie działa
+// Używane w: AuthContext, Login, Register, Profile, Settings, Navbar, etc.
+
 // Publiczne trasy (bez autoryzacji)
 router.post('/register', userController.register);
 router.post('/login', userController.login);

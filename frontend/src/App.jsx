@@ -239,7 +239,11 @@ function App() {
         <Route path="/messages" element={<Messages />} />
         <Route path="/payment" element={<PaymentSystem />} />
         <Route path="/location" element={<LocationSelector />} />
-        <Route path="/gamification" element={<GamificationPanel />} />
+        <Route path="/gamification" element={
+          <ProtectedRoute>
+            <GamificationPanel />
+          </ProtectedRoute>
+        } />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/product-create" element={<ProductCreate />} />
         <Route path="/products/create" element={<ProductCreate />} />
@@ -264,8 +268,16 @@ function App() {
         <Route path="/location-analytics" element={<LocationAnalytics />} />
         <Route path="/location-import" element={<LocationImport />} />
         <Route path="/location-export" element={<LocationExport />} />
-        <Route path="/admin-panel" element={<AdminPanel />} />
-        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/admin-panel" element={
+          <ProtectedRoute>
+            <AdminPanel />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <AdminPanel />
+          </ProtectedRoute>
+        } />
         <Route path="/local-products" element={<LocalProducts />} />
         <Route path="/my-products" element={<MyProducts />} />
         <Route path="/my-shops" element={<MyShops />} />

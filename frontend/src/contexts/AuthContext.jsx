@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+// 🔴 CRITICAL COMPONENT: AuthContext
+// Zależności: localStorage, JWT tokens, /api/users endpoints
+// Wpływ: WSZYSTKIE komponenty wymagające autoryzacji (45+ komponentów)
+// Jeśli się zepsuje: CAŁA APLIKACJA NIE DZIAŁA
+// Używane w: Navbar, ProtectedRoute, Login, Register, Profile, Settings, ShopManagement, ProductManagement, etc.
 const AuthContext = createContext();
 
 export const useAuth = () => {

@@ -2,6 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
+
+// 🔴 CRITICAL COMPONENT: Navbar
+// Zależności: AuthContext, React Router, wszystkie linki nawigacyjne
+// Wpływ: CAŁA NAWIGACJA APLIKACJI
+// Jeśli się zepsuje: BRAK NAWIGACJI W CAŁEJ APLIKACJI
+// Używane w: App.jsx (globalnie)
+// Zawiera: wszystkie linki do /products, /shops, /feed, /messages, etc.
 import { FaBell, FaComments, FaShoppingCart, FaChevronDown, FaGlobeEurope, FaCity, FaMapMarkedAlt, FaMapSigns, FaMap } from 'react-icons/fa';
 import IntegratedSearch from './IntegratedSearch';
 
@@ -479,7 +486,7 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
       if (response.ok) {
         const data = await response.json();
         setNotifications(data.notifications);
-        setUnreadCount(data.notifications.filter(n => n.status === 'unread').length);
+        setUnreadCount(Array.isArray(data.notifications) ? data.notifications.filter(n => n.status === 'unread').length : 0);
       }
     } catch (error) {
       console.error('Błąd pobierania powiadomień:', error);

@@ -3,6 +3,12 @@ const router = express.Router();
 const productController = require('../controllers/productController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
+// 🟡 SHARED API ROUTES: /api/products
+// Zależności: MongoDB products collection, auth middleware
+// Wpływ: WSZYSTKIE operacje na produktach (12+ komponentów)
+// Jeśli się zepsuje: wszystkie listy i szczegóły produktów nie działają
+// Używane w: Products, ProductList, ProductDetails, ShopProducts, ProductManagement, etc.
+
 // Publiczne trasy (bez parametrów)
 router.get('/', productController.getProducts);
 router.get('/search', productController.searchProducts);

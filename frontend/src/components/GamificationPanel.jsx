@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
@@ -163,7 +163,9 @@ const AchievementsGrid = styled.div`
   }
 `;
 
-const Achievement = styled.div`
+const Achievement = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['unlocked', 'theme'].includes(prop)
+})`
   text-align: center;
   padding: 1rem;
   border-radius: 12px;
@@ -188,7 +190,9 @@ const Achievement = styled.div`
   }
 `;
 
-const AchievementIcon = styled.div`
+const AchievementIcon = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['unlocked'].includes(prop)
+})`
   font-size: 2rem;
   margin-bottom: 0.5rem;
   filter: ${props => props.unlocked ? 'none' : 'grayscale(100%)'};
@@ -224,7 +228,9 @@ const BadgesList = styled.div`
   gap: 1rem;
 `;
 
-const Badge = styled.div`
+const Badge = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['earned', 'theme'].includes(prop)
+})`
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -251,7 +257,9 @@ const Badge = styled.div`
   }
 `;
 
-const BadgeIcon = styled.div`
+const BadgeIcon = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['earned'].includes(prop)
+})`
   font-size: 2rem;
   filter: ${props => props.earned ? 'none' : 'grayscale(100%)'};
   
@@ -405,7 +413,7 @@ export default function GamificationPanel() {
       setLoading(true);
       setError(null);
       
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
       
       const [statsRes, achievementsRes, badgesRes] = await Promise.allSettled([

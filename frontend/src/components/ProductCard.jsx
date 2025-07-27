@@ -3,6 +3,13 @@ import styled from 'styled-components';
 import { FaHeart, FaEye, FaShoppingCart, FaStar, FaMapMarkerAlt, FaTruck, FaShieldAlt } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
+// 🟡 SHARED COMPONENT: ProductCard
+// Zależności: product data, React Router Link
+// Wpływ: WSZYSTKIE LISTY PRODUKTÓW
+// Jeśli się zepsuje: wszystkie listy produktów nie działają
+// Używane w: Products.jsx, ProductsEnhanced.jsx, ProductList.jsx, ProductRecommendations.jsx, ShopProducts.jsx
+// Zawiera: Link do /product/${_id}
+
 const Card = styled.div`
   background: ${props => props.theme.surface};
   border-radius: 12px;

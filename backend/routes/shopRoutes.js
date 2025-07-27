@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const shopController = require('../controllers/shopController');
 const authMiddleware = require('../middleware/authMiddleware');
+
+// 🟡 SHARED API ROUTES: /api/shops
+// Zależności: MongoDB shops collection, auth middleware
+// Wpływ: WSZYSTKIE operacje na sklepach (15+ komponentów)
+// Jeśli się zepsuje: wszystkie listy i szczegóły sklepów nie działają
+// Używane w: ShopList, ShopDetails, MyShops, ShopManagement, Country, TerytSearch, etc.
 const { uploadShop } = require('../middleware/uploadMiddleware');
 
 // Publiczne trasy (bez autoryzacji)

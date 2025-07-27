@@ -16,7 +16,7 @@ class GamificationModule {
 
   setupRoutes() {
     // Pobieranie profilu użytkownika z statusami
-    router.get('/profile/:userId', async (req, res) => {
+    this.router.get('/profile/:userId', async (req, res) => {
       try {
         const { userId } = req.params;
         
@@ -46,7 +46,7 @@ class GamificationModule {
     });
 
     // Pobieranie wszystkich odznak
-    router.get('/badges', async (req, res) => {
+    this.router.get('/badges', async (req, res) => {
       try {
         const badges = await Badge.find().sort({ requiredPoints: 1 });
         res.json(badges);
@@ -56,7 +56,7 @@ class GamificationModule {
     });
 
     // Pobieranie wszystkich osiągnięć
-    router.get('/achievements', async (req, res) => {
+    this.router.get('/achievements', async (req, res) => {
       try {
         const achievements = await Achievement.find().sort({ requiredPoints: 1 });
         res.json(achievements);
@@ -65,8 +65,48 @@ class GamificationModule {
       }
     });
 
+    // Pobieranie statystyk użytkownika
+    this.router.get('/stats', async (req, res) => {
+      try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+          return res.status(401).json({ error: 'Brak tokenu autoryzacji' });
+        }
+
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.userId;
+
+        const user = await User.findById(userId);
+        if (!user) {
+          return res.status(404).json({ error: 'Użytkownik nie znaleziony' });
+        }
+
+        const stats = await this.calculateUserStats(userId);
+        const nextLevelExp = this.calculateLevel(user.points + 1) > user.level ? 
+          this.calculateLevel(user.points + 1) : user.level + 1;
+
+        res.json({
+          level: user.level,
+          experience: user.points,
+          nextLevelExp: nextLevelExp * 100, // Przykładowe obliczenie
+          achievements: user.achievements?.length || 0,
+          totalAchievements: 20,
+          badges: user.badges?.length || 0,
+          totalBadges: 25,
+          orders: stats.orders || 0,
+          reviews: stats.reviews || 0,
+          daysActive: stats.daysActive || 0,
+          shops: stats.shops || 0,
+          products: stats.products || 0
+        });
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
     // Ranking użytkowników
-    router.get('/leaderboard', async (req, res) => {
+    this.router.get('/leaderboard', async (req, res) => {
       try {
         const { type = 'points', limit = 50 } = req.query;
         
@@ -88,7 +128,7 @@ class GamificationModule {
     });
 
     // Dodawanie punktów użytkownikowi
-    router.post('/points/add', async (req, res) => {
+    this.router.post('/points/add', async (req, res) => {
       try {
         const { userId, points, reason } = req.body;
         
@@ -129,7 +169,7 @@ class GamificationModule {
     });
 
     // Nadawanie roli użytkownikowi (admin)
-    router.post('/roles/assign', async (req, res) => {
+    this.router.post('/roles/assign', async (req, res) => {
       try {
         const { userId, role, assignedBy } = req.body;
         
@@ -164,7 +204,7 @@ class GamificationModule {
     });
 
     // Inicjalizacja systemu gamification
-    router.post('/initialize', async (req, res) => {
+    this.router.post('/initialize', async (req, res) => {
       try {
         await this.initializeSystem();
         res.json({ message: 'System gamification zainicjalizowany pomyślnie' });

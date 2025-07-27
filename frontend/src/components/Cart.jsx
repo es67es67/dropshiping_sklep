@@ -1,7 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { FaShoppingCart, FaTrash, FaMinus, FaPlus, FaStore, FaTruck, FaCreditCard } from 'react-icons/fa';
+
+// 🟡 SHARED COMPONENT: Cart
+// Zależności: AuthContext, /api/cart endpoints
+// Wpływ: koszyk zakupów użytkownika
+// Jeśli się zepsuje: koszyk nie działa
+// Używane w: App.jsx (route /cart), Navbar (CartLink)
+// API: /api/cart, /api/cart/summary, /api/cart/update-quantity, /api/cart/remove
 
 const CartContainer = styled.div`
   max-width: 1200px;

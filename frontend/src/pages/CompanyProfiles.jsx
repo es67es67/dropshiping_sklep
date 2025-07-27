@@ -320,11 +320,7 @@ export default function CompanyProfiles({ theme }) {
         ...searchParams
       });
 
-      const response = await fetch(`/api/company-profiles/search?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await fetch(`/api/company-profiles/search?${params}`);
 
       if (response.ok) {
         const data = await response.json();

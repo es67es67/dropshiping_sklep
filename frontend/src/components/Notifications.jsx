@@ -35,7 +35,7 @@ const Notifications = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data.notifications);
+        setNotifications(data.notifications || []);
       }
     } catch (error) {
       console.error('Błąd pobierania powiadomień:', error);
@@ -54,9 +54,9 @@ const Notifications = () => {
       });
 
       if (response.ok) {
-        setNotifications(notifications.map(notif => 
+        setNotifications(Array.isArray(notifications) ? notifications.map(notif => 
           notif._id === notificationId ? { ...notif, status: 'read' } : notif
-        ));
+        ) : []);
       }
     } catch (error) {
       console.error('Błąd oznaczania jako przeczytane:', error);
@@ -73,7 +73,7 @@ const Notifications = () => {
       });
 
       if (response.ok) {
-        setNotifications(notifications.map(notif => ({ ...notif, status: 'read' })));
+        setNotifications(Array.isArray(notifications) ? notifications.map(notif => ({ ...notif, status: 'read' })) : []);
       }
     } catch (error) {
       console.error('Błąd oznaczania wszystkich jako przeczytane:', error);
@@ -90,7 +90,7 @@ const Notifications = () => {
       });
 
       if (response.ok) {
-        setNotifications(notifications.filter(notif => notif._id !== notificationId));
+        setNotifications(Array.isArray(notifications) ? notifications.filter(notif => notif._id !== notificationId) : []);
       }
     } catch (error) {
       console.error('Błąd usuwania powiadomienia:', error);
@@ -107,9 +107,9 @@ const Notifications = () => {
       });
 
       if (response.ok) {
-        setNotifications(notifications.map(notif => 
+        setNotifications(Array.isArray(notifications) ? notifications.map(notif => 
           notif._id === notificationId ? { ...notif, status: 'archived' } : notif
-        ));
+        ) : []);
       }
     } catch (error) {
       console.error('Błąd archiwizacji powiadomienia:', error);
@@ -191,7 +191,8 @@ const Notifications = () => {
 
   if (!isAuthenticated) {
     return (
-      <div>        <PageTitle title="Powiadomienia" description="Centrum powiadomień" /> className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <PageTitle title="Powiadomienia" description="Centrum powiadomień" />
         <div className="text-center">
           <FaBell className="text-6xl text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-700 mb-2">Zaloguj się</h2>
@@ -209,7 +210,7 @@ const Notifications = () => {
     );
   }
 
-  const unreadCount = notifications.filter(n => n.status === 'unread').length;
+  const unreadCount = Array.isArray(notifications) ? notifications.filter(n => n.status === 'unread').length : 0;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -343,7 +344,7 @@ const Notifications = () => {
         )}
 
         {/* Lista powiadomień */}
-        {notifications.length === 0 ? (
+        {!Array.isArray(notifications) || notifications.length === 0 ? (
           <div className="text-center py-12">
             <FaBell className="text-6xl text-gray-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-700 mb-2">Brak powiadomień</h2>
@@ -351,7 +352,7 @@ const Notifications = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {notifications.map((notification) => (
+            {Array.isArray(notifications) && notifications.map((notification) => (
               <div
                 key={notification._id}
                 className={`bg-white rounded-lg shadow-sm p-6 border-l-4 ${getPriorityColor(notification.priority)} ${

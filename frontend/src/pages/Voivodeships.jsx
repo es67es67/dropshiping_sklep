@@ -280,7 +280,6 @@ export default function Voivodeships({ theme }) {
       setLoading(false);
     }
   };
->>>>>>> 2aa7d5eefe6f72527b0c8ae57358b805b5120e47
 
   const handleVoivodeshipSelect = (voivodeship) => {
     setSelectedVoivodeship(voivodeship);
