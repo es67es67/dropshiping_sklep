@@ -165,3 +165,19 @@ test-*.js
 
 # Documentation files with Puppeteer references
 PUPPETEER_*.md
+
+# Puppeteer test files in inne folder
+inne/puppeteer-*.js
+inne/test-*.png
+inne/test-*.json
+inne/test-screenshots/
+inne/test-reports/
+inne/run-puppeteer-tests.ps1
+inne/puppeteer-test-config.json
+inne/README-puppeteer-tests.md
+
+# Test reports and screenshots
+inne/test-report*.json
+inne/test-*-*.png
+inne/test-*-*.jpg
+inne/test-*-*.jpeg
