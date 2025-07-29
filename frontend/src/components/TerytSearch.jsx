@@ -243,7 +243,7 @@ const TerytSearch = () => {
 
       // Wyszukiwanie sklepów
       if (searchParams.searchType === 'all' || searchParams.searchType === 'shops') {
-        const shopsResponse = await fetch(`/api/shops/search-by-teryt?${new URLSearchParams(searchParams)}`, {
+        const shopsResponse = await fetch(`/api/shops/search/teryt?${new URLSearchParams(searchParams)}`, {
           headers
         });
         
@@ -255,7 +255,7 @@ const TerytSearch = () => {
 
       // Wyszukiwanie firm
       if (searchParams.searchType === 'all' || searchParams.searchType === 'companies') {
-        const companiesResponse = await fetch(`/api/company-profiles/search-by-teryt?${new URLSearchParams(searchParams)}`, {
+        const companiesResponse = await fetch(`/api/company-profiles/search/teryt?${new URLSearchParams(searchParams)}`, {
           headers
         });
         
@@ -267,7 +267,7 @@ const TerytSearch = () => {
 
       // Wyszukiwanie użytkowników
       if (searchParams.searchType === 'all' || searchParams.searchType === 'users') {
-        const usersResponse = await fetch(`/api/users/search-by-teryt?${new URLSearchParams(searchParams)}`, {
+        const usersResponse = await fetch(`/api/users/search/teryt?${new URLSearchParams(searchParams)}`, {
           headers
         });
         

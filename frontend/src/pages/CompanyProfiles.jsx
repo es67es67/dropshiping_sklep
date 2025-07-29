@@ -110,7 +110,9 @@ const FiltersSection = styled.div`
   flex-wrap: wrap;
 `;
 
-const FilterChip = styled.div`
+const FilterChip = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active'
+})`
   background: ${props => props.active ? props.theme.primary : props.theme.background};
   color: ${props => props.active ? 'white' : props.theme.text};
   padding: 8px 16px;
@@ -320,11 +322,11 @@ export default function CompanyProfiles({ theme }) {
         ...searchParams
       });
 
-      const response = await fetch(`/api/company-profiles/search?${params}`);
+      const response = await fetch(`/api/company-profiles/list?${params}`);
 
       if (response.ok) {
         const data = await response.json();
-        setCompanies(data.companies);
+        setCompanies(data.companyProfiles);
         setTotalPages(data.totalPages);
       }
     } catch (error) {
@@ -475,7 +477,7 @@ export default function CompanyProfiles({ theme }) {
         <>
           <CompaniesGrid>
             {companies.map(company => (
-              <CompanyCard key={company._id} to={`/company/${company._id}`} theme={theme}>
+              <CompanyCard key={company._id} to={`/company-profiles/${company._id}`} theme={theme}>
                 <CompanyHeader>
                   <CompanyLogo image={company.logo} />
                   <CompanyInfo>
@@ -556,7 +558,7 @@ export default function CompanyProfiles({ theme }) {
       )}
 
       {isAuthenticated && (
-        <CreateButton to="/company/create" theme={theme}>
+        <CreateButton to="/company-profiles/create" theme={theme}>
           +
         </CreateButton>
       )}

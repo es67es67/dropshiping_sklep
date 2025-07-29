@@ -9,6 +9,7 @@ router.get('/search', companyProfileController.searchCompanies);
 router.get('/search/teryt', companyProfileController.searchCompaniesByTeryt);
 router.get('/radius', companyProfileController.getCompaniesInRadius);
 router.get('/stats/industry', companyProfileController.getIndustryStats);
+router.get('/:id', companyProfileController.getCompanyProfile);
 
 // Trasy wymagające autoryzacji
 router.use(authMiddleware.authenticateToken);
@@ -31,8 +32,5 @@ router.post('/:id/jobs/:jobId/apply', companyProfileController.applyForJob);
 
 // Recenzje firm
 router.post('/:id/reviews', companyProfileController.addCompanyReview);
-
-// Publiczny endpoint na samym końcu, aby nie łapał /list, /search itd.
-router.get('/:id', companyProfileController.getCompanyProfile);
 
 module.exports = router; 

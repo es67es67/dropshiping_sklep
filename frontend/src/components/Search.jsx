@@ -143,7 +143,9 @@ const FilterSection = styled.div`
   }
 `;
 
-const FilterButton = styled.button`
+const FilterButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active'
+})`
   padding: 0.5rem 1rem;
   border: 2px solid ${props => props.active ? props.theme.primary : props.theme.border};
   background: ${props => props.active ? props.theme.primary : props.theme.background};

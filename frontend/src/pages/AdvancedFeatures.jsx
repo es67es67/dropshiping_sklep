@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import AIProductAssistant from '../components/AIProductAssistant';
@@ -97,7 +97,9 @@ const TabContainer = styled.div`
   overflow-x: auto;
 `;
 
-const Tab = styled.button`
+const Tab = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active'
+})`
   background: none;
   border: none;
   padding: 12px 20px;

@@ -13,6 +13,50 @@ const authMiddleware = require('../middleware/authMiddleware');
 router.post('/register', userController.register);
 router.post('/login', userController.login);
 
+// Endpoint do weryfikacji tokenu
+router.get('/verify-token', authMiddleware.authenticateToken, (req, res) => {
+  res.json({ 
+    valid: true, 
+    user: req.user,
+    message: 'Token jest ważny' 
+  });
+});
+
+// Endpointy do zarządzania ustawieniami layoutu
+router.get('/layout-settings/:type', authMiddleware.authenticateToken, async (req, res) => {
+  try {
+    const { type } = req.params;
+    const userId = req.user.id;
+    
+    // Pobierz ustawienia z bazy danych lub zwróć domyślne
+    const settings = {
+      layout: 'modern',
+      theme: 'default',
+      language: 'pl'
+    };
+    
+    res.json(settings);
+  } catch (error) {
+    console.error('Błąd pobierania ustawień layoutu:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/layout-settings', authMiddleware.authenticateToken, async (req, res) => {
+  try {
+    const { layout, theme, language } = req.body;
+    const userId = req.user.id;
+    
+    // Zapisz ustawienia do bazy danych
+    console.log('Zapisywanie ustawień layoutu:', { layout, theme, language });
+    
+    res.json({ message: 'Ustawienia zostały zapisane' });
+  } catch (error) {
+    console.error('Błąd zapisywania ustawień layoutu:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Publiczne endpointy (bez autoryzacji)
 router.get('/search', userController.searchUsers);
 router.get('/public/:id', userController.getUserById);

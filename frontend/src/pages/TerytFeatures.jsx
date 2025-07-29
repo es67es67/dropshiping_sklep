@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { FiSearch, FiMapPin, FiGlobe, FiSettings, FiInfo } from 'react-icons/fi';
@@ -39,7 +39,9 @@ const FeatureTabs = styled.div`
   border-bottom: 2px solid ${props => props.theme.border};
 `;
 
-const TabButton = styled.button`
+const TabButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active'
+})`
   background: none;
   border: none;
   padding: 1rem 2rem;

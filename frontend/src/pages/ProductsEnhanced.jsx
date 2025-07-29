@@ -139,7 +139,9 @@ const QuickActions = styled.div`
   flex-wrap: wrap;
 `;
 
-const QuickActionButton = styled.button`
+const QuickActionButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active'
+})`
   background: ${props => props.active ? props.theme.primary : props.theme.background};
   color: ${props => props.active ? 'white' : props.theme.text};
   border: 1px solid ${props => props.active ? props.theme.primary : props.theme.border};
@@ -163,7 +165,9 @@ const Pagination = styled.div`
   margin-top: 40px;
 `;
 
-const PageButton = styled.button`
+const PageButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active'
+})`
   background: ${props => props.active ? props.theme.primary : props.theme.background};
   color: ${props => props.active ? 'white' : props.theme.text};
   border: 1px solid ${props => props.active ? props.theme.primary : props.theme.border};

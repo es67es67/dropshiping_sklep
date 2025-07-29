@@ -23,19 +23,36 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Sprawdź czy użytkownik jest zalogowany przy starcie aplikacji
-    const checkAuthStatus = () => {
+    const checkAuthStatus = async () => {
       try {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
         const userData = localStorage.getItem('user');
         const storedToken = localStorage.getItem('token');
         
         if (isLoggedIn === 'true' && userData && storedToken) {
-          const parsedUser = JSON.parse(userData);
-          console.log('Restored user from localStorage:', parsedUser);
-          console.log('User ID from localStorage:', parsedUser._id);
-          setUser(parsedUser);
-          setToken(storedToken);
-          setIsAuthenticated(true);
+          // Weryfikuj token z backendem
+          try {
+            const response = await fetch('/api/users/verify-token', {
+              headers: {
+                'Authorization': `Bearer ${storedToken}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              const parsedUser = JSON.parse(userData);
+              console.log('Token jest ważny, przywracam użytkownika:', parsedUser);
+              setUser(parsedUser);
+              setToken(storedToken);
+              setIsAuthenticated(true);
+            } else {
+              console.log('Token wygasł, wylogowuję użytkownika');
+              logout();
+            }
+          } catch (error) {
+            console.error('Błąd weryfikacji tokenu:', error);
+            logout();
+          }
         }
       } catch (error) {
         console.error('Błąd podczas sprawdzania statusu autoryzacji:', error);

@@ -45,8 +45,7 @@ export default function CompanyProfile({ theme }) {
       setLoading(true);
       setError(null);
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const res = await fetch(`${apiUrl}/api/company-profiles/${id}`);
+        const res = await fetch(`/api/company-profiles/${id}`);
         if (!res.ok) throw new Error('Nie znaleziono firmy');
         const data = await res.json();
         setCompany(data);

@@ -26,6 +26,7 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const geocodingRoutes = require('./routes/geocodingRoutes');
 const exportRoutes = require('./routes/exportRoutes');
+const errorRoutes = require('./routes/errorRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -271,6 +272,7 @@ safeUse('/api/company-profiles', require('./routes/companyProfileRoutes'), 'comp
 safeUse('/api/admin', adminRoutes, 'adminRoutes');
 safeUse('/api/geocoding', geocodingRoutes, 'geocodingRoutes');
 safeUse('/api/export', exportRoutes, 'exportRoutes');
+safeUse('/api', errorRoutes, 'errorRoutes');
 
 // Uruchom serwer po zarejestrowaniu routes
 const PORT = process.env.PORT || 5000;
@@ -452,7 +454,13 @@ app.use('*', (req, res) => {
   });
 });
 
+// Import error handling middleware
+const { expressErrorHandler, notFoundHandler } = require('./middleware/errorHandler');
+
 // Error handling middleware
+app.use('/api/*', notFoundHandler); // 404 dla API routes
+app.use('*', notFoundHandler); // 404 dla wszystkich routes
+app.use(expressErrorHandler); // Obsługa błędów Express
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Coś poszło nie tak!' });

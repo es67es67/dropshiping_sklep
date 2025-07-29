@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { FaMapMarkerAlt, FaChevronDown } from 'react-icons/fa';
@@ -169,18 +169,18 @@ export default function Voivodeships({ theme }) {
     }
     // Sprawdź czy jest state z nawigacji
     if (location.state?.selectedVoivodeship) {
-      const voivodeshipFromState = voivodeships.find(v => v.id === location.state.selectedVoivodeship.code);
+      const voivodeshipFromState = voivodeshipsData.find(v => v.code === location.state.selectedVoivodeship.code);
       if (voivodeshipFromState) {
         setSelectedVoivodeship(voivodeshipFromState);
-        fetchVoivodeshipData(voivodeshipFromState.id);
+        fetchVoivodeshipData(voivodeshipFromState.code);
         return;
       }
     }
     // Fallback do domyślnego województwa
-    const defaultVoivodeship = voivodeships.find(v => v.id === '14') || voivodeships[0];
+    const defaultVoivodeship = voivodeshipsData.find(v => v.code === '14') || voivodeshipsData[0];
     setSelectedVoivodeship(defaultVoivodeship);
-    fetchVoivodeshipData(defaultVoivodeship.id);
-  }, [location.state, voivodeshipCode, voivodeships]);
+    fetchVoivodeshipData(defaultVoivodeship.code);
+  }, [location.state, userTeryt?.voivodeshipCode, voivodeshipsData]);
 
   const fetchVoivodeshipData = async (voivodeshipId) => {
     try {
@@ -411,6 +411,20 @@ export default function Voivodeships({ theme }) {
             </TableRow>
           ))}
         </DataTable>
+      </Container>
+    );
+  }
+
+  // Jeśli nie wybrano województwa, pokaż selektor
+  if (!selectedVoivodeship) {
+    return (
+      <Container>
+        <PageTitle title="Województwa" description="Wybierz województwo" />
+        <Header>
+          <Title>Województwa</Title>
+          <Subtitle>Wybierz województwo, aby zobaczyć szczegółowe dane</Subtitle>
+        </Header>
+        <LoadingSpinner theme={theme}>Ładowanie...</LoadingSpinner>
       </Container>
     );
   }

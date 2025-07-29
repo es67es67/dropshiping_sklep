@@ -24,13 +24,17 @@
     "@testing-library/user-event": "^14.4.3",
     "@vitejs/plugin-react": "^4.6.0",
     "cypress": "^14.5.1",
+    "puppeteer": "^21.5.2",
     "vite": "^7.0.4"
   },
   "scripts": {
     "dev": "vite",
     "start": "vite",
     "build": "vite build --mode production",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:error-monitoring": "node run-error-tests.js",
+    "test:cypress": "cypress run",
+    "test:cypress:open": "cypress open"
   },
   "proxy": "http://localhost:5000",
   "browserslist": {

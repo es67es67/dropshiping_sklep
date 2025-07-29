@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/PageTitle';
 import { useAuth } from '../contexts/AuthContext';
 import DataManager from '../components/DataManager';
@@ -401,7 +401,7 @@ const tabs = [
 ];
 
 const AdminPanel = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -420,6 +420,42 @@ const AdminPanel = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Sprawdź uprawnienia admina
+  if (!isAdmin()) {
+    return (
+      <Container>
+        <PageTitle title="Brak uprawnień" description="Dostęp zabroniony" />
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '3rem',
+          backgroundColor: '#fee',
+          border: '1px solid #fcc',
+          borderRadius: '12px',
+          margin: '2rem 0'
+        }}>
+          <h2 style={{ color: '#c33', marginBottom: '1rem' }}>🚫 Brak uprawnień</h2>
+          <p style={{ marginBottom: '2rem', color: '#666', fontSize: '1.1rem' }}>
+            Nie masz uprawnień administratora, aby uzyskać dostęp do tego panelu.
+          </p>
+          <button 
+            onClick={() => window.location.href = '/'}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              cursor: 'pointer'
+            }}
+          >
+            🏠 Wróć do strony głównej
+          </button>
+        </div>
+      </Container>
+    );
+  }
 
   useEffect(() => {
     if (activeTab === 'dashboard') {
@@ -548,7 +584,7 @@ const AdminPanel = () => {
     });
   };
 
-  if (!user || !user.roles || !user.roles.includes('admin')) {
+  if (!isAdmin()) {
     return (
       <AccessDenied>
       <PageTitle title="Panel Admina" description="Zarządzanie systemem i danymi" />
@@ -672,6 +708,12 @@ const AdminPanel = () => {
             </UsersTable>
           </div>
         );
+      
+      case 'data':
+        return <DataManager />;
+      
+      case 'export':
+        return <DataExport />;
       
       case 'system':
         return (

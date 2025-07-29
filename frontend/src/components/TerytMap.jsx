@@ -311,7 +311,7 @@ const TerytMap = () => {
         types: filters.objectType
       });
 
-      const response = await fetch(`/api/geocoding/search-nearby?${searchParams}`, {
+      const response = await fetch(`/api/geocoding/nearby?${searchParams}`, {
         headers
       });
       

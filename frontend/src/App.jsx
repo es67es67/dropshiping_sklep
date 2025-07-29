@@ -5,6 +5,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { GlobalStyles, lightTheme, darkTheme } from './styles/GlobalStyles';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './components/Login';
@@ -49,6 +50,7 @@ import TestShopsPage from './components/TestShopsPage';
 import TestComponent from './components/TestComponent';
 import LocationMap from './pages/LocationMap';
 import CompanyProfile from './pages/CompanyProfile';
+import CompanyProfiles from './pages/CompanyProfiles';
 import Product from './pages/Product';
 import User from './pages/User';
 import Post from './pages/Post';
@@ -57,6 +59,7 @@ import TerytFeatures from './pages/TerytFeatures';
 import ProductDetails from './components/ProductDetails';
 import LocationDemo from './pages/LocationDemo';
 import Feed from './pages/Feed';
+import ErrorDashboard from './components/ErrorDashboard';
 
 
 function App() {
@@ -73,7 +76,14 @@ function App() {
   const fetchUserLayoutSettings = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      
+      // Sprawdź czy użytkownik jest zalogowany
+      if (!token || isLoggedIn !== 'true') {
+        console.log('Użytkownik nie jest zalogowany, pomijam pobieranie ustawień layoutu');
+        return;
+      }
+      
       const response = await fetch(`/api/users/layout-settings/portal`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -287,6 +297,7 @@ function App() {
         <Route path="/posts/create" element={<PostCreate />} />
         <Route path="/test" element={<TestComponent />} />
         <Route path="/location-map" element={<LocationMap theme={currentTheme} />} />
+        <Route path="/company-profiles" element={<CompanyProfiles theme={currentTheme} />} />
         <Route path="/company-profiles/:id" element={<CompanyProfile theme={currentTheme} />} />
         <Route path="/products/:id" element={<Product theme={currentTheme} />} />
         <Route path="/users/:id" element={<User theme={currentTheme} />} />
@@ -296,6 +307,7 @@ function App() {
             <Feed theme={currentTheme} />
           </ProtectedRoute>
         } />
+        <Route path="/error-dashboard" element={<ErrorDashboard />} />
         <Route path="/advanced-features" element={<AdvancedFeatures theme={currentTheme} />} />
         <Route path="/teryt-features" element={<TerytFeatures theme={currentTheme} />} />
         <Route path="/product/:productId" element={<ProductDetails theme={currentTheme} />} />
@@ -356,11 +368,13 @@ function App() {
     <HelmetProvider>
       <ThemeProvider theme={currentTheme}>
         <GlobalStyles />
-        <AuthProvider>
-          <Router>
-            {renderLayout()}
-          </Router>
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <Router>
+              {renderLayout()}
+            </Router>
+          </AuthProvider>
+        </ErrorBoundary>
       </ThemeProvider>
     </HelmetProvider>
   );

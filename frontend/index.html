@@ -22,6 +22,147 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    
+    <!-- Global Error Reporter -->
+    <script>
+      window.errorReporter = {
+        queue: [],
+        isOnline: navigator.onLine,
+        
+        init() {
+          // Nasłuchuj zmian stanu połączenia
+          window.addEventListener('online', () => {
+            this.isOnline = true;
+            this.processQueue();
+          });
+          
+          window.addEventListener('offline', () => {
+            this.isOnline = false;
+          });
+          
+          // Przetwórz zapisane błędy przy starcie
+          this.processStoredErrors();
+        },
+        
+        reportError(errorData) {
+          // Dodaj timestamp jeśli nie ma
+          if (!errorData.timestamp) {
+            errorData.timestamp = new Date().toISOString();
+          }
+          
+          // Dodaj do kolejki
+          this.queue.push(errorData);
+          
+          // Zapisz w localStorage jako backup
+          this.saveToLocalStorage(errorData);
+          
+          // Próbuj wysłać jeśli online
+          if (this.isOnline) {
+            this.sendError(errorData);
+          }
+        },
+        
+        sendError(errorData) {
+          fetch('/api/errors', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+            },
+            body: JSON.stringify(errorData)
+          })
+          .then(response => {
+            if (response.ok) {
+              // Usuń z kolejki po udanym wysłaniu
+              this.queue = this.queue.filter(err => err.id !== errorData.id);
+              this.removeFromLocalStorage(errorData.id);
+            }
+          })
+          .catch(err => {
+            console.error('Błąd podczas wysyłania błędu:', err);
+          });
+        },
+        
+        saveToLocalStorage(errorData) {
+          try {
+            const stored = JSON.parse(localStorage.getItem('errorQueue') || '[]');
+            stored.push(errorData);
+            localStorage.setItem('errorQueue', JSON.stringify(stored));
+          } catch (err) {
+            console.error('Błąd podczas zapisywania błędu w localStorage:', err);
+          }
+        },
+        
+        removeFromLocalStorage(errorId) {
+          try {
+            const stored = JSON.parse(localStorage.getItem('errorQueue') || '[]');
+            const filtered = stored.filter(err => err.id !== errorId);
+            localStorage.setItem('errorQueue', JSON.stringify(filtered));
+          } catch (err) {
+            console.error('Błąd podczas usuwania błędu z localStorage:', err);
+          }
+        },
+        
+        processQueue() {
+          if (!this.isOnline) return;
+          
+          const stored = JSON.parse(localStorage.getItem('errorQueue') || '[]');
+          stored.forEach(errorData => {
+            this.sendError(errorData);
+          });
+        },
+        
+        processStoredErrors() {
+          this.processQueue();
+        }
+      };
+      
+      // Inicjalizuj error reporter
+      window.errorReporter.init();
+      
+      // Globalne handlery błędów
+      window.addEventListener('error', (event) => {
+        const errorData = {
+          id: `js_error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          message: event.message,
+          stack: event.error?.stack || '',
+          url: window.location.href,
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+          type: 'javascript_error',
+          severity: 'medium',
+          context: {
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno,
+            route: window.location.pathname,
+            userId: localStorage.getItem('userId') || 'anonymous'
+          }
+        };
+        
+        window.errorReporter.reportError(errorData);
+      });
+      
+      window.addEventListener('unhandledrejection', (event) => {
+        const errorData = {
+          id: `promise_error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          message: event.reason?.message || event.reason || 'Unhandled Promise Rejection',
+          stack: event.reason?.stack || '',
+          url: window.location.href,
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+          type: 'promise_rejection',
+          severity: 'high',
+          context: {
+            route: window.location.pathname,
+            userId: localStorage.getItem('userId') || 'anonymous'
+          }
+        };
+        
+        window.errorReporter.reportError(errorData);
+      });
+    </script>
+    
     <script type="module" src="/src/index.jsx"></script>
   </body>
 </html>

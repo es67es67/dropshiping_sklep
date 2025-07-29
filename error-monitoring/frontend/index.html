@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="System monitorowania błędów dla portalu społecznościowo-handlowego" />
+    <meta name="keywords" content="error monitoring, dashboard, portal, bugs, tracking" />
+    <meta name="author" content="Portal Team" />
+    
+    <!-- Preconnect dla lepszej wydajności -->
+    <link rel="preconnect" href="http://localhost:5001" />
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <title>Error Monitoring - Portal Dashboard</title>
+    
+    <!-- Global error reporter -->
+    <script>
+      window.errorReporter = {
+        reportError: function(errorData) {
+          // Queue dla błędów offline
+          if (!window.errorQueue) {
+            window.errorQueue = [];
+          }
+          
+          // Dodaj timestamp
+          errorData.timestamp = new Date().toISOString();
+          errorData.url = window.location.href;
+          errorData.userAgent = navigator.userAgent;
+          
+          // Dodaj do kolejki
+          window.errorQueue.push(errorData);
+          
+          // Próbuj wysłać do API
+          this.sendErrors();
+        },
+        
+        sendErrors: function() {
+          if (!window.errorQueue || window.errorQueue.length === 0) return;
+          
+          const errors = window.errorQueue.splice(0, 10); // Wyślij max 10 na raz
+          
+          fetch('/api/errors/report', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              errors: errors
+            })
+          }).catch(error => {
+            console.error('Failed to send errors:', error);
+            // Przywróć błędy do kolejki
+            window.errorQueue.unshift(...errors);
+          });
+        }
+      };
+      
+      // Próbuj wysłać błędy co 30 sekund
+      setInterval(() => {
+        if (window.errorReporter) {
+          window.errorReporter.sendErrors();
+        }
+      }, 30000);
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html> 

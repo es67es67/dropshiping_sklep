@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PageTitle from '../components/PageTitle';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -226,7 +226,9 @@ const LayerControl = styled.div`
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 `;
 
-const LayerButton = styled.button`
+const LayerButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active'
+})`
   display: block;
   width: 100%;
   padding: 8px 12px;

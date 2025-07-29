@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { FaShoppingCart, FaTrash, FaMinus, FaPlus, FaStore, FaTruck, FaCreditCard } from 'react-icons/fa';
+import { useAuth } from '../contexts/AuthContext';
 
 // 🟡 SHARED COMPONENT: Cart
 // Zależności: AuthContext, /api/cart endpoints
@@ -398,27 +399,74 @@ const Cart = () => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
+    console.log('🔍 Cart component - stan autoryzacji:', {
+      isAuthenticated,
+      user: user?._id,
+      hasToken: !!localStorage.getItem('token'),
+      token: localStorage.getItem('token')?.substring(0, 20) + '...'
+    });
+    
+    // Test logowania
+    if (!isAuthenticated) {
+      console.log('⚠️ Użytkownik nie jest zalogowany');
+      console.log('🔍 Sprawdzam localStorage:', {
+        isLoggedIn: localStorage.getItem('isLoggedIn'),
+        user: localStorage.getItem('user'),
+        token: localStorage.getItem('token')
+      });
+    } else {
+      console.log('✅ Użytkownik jest zalogowany:', user);
+    }
+    
     fetchCart();
-  }, []);
+  }, [isAuthenticated]);
 
   const fetchCart = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      // Sprawdź czy użytkownik jest zalogowany
+      if (!isAuthenticated) {
+        setError('Musisz się zalogować, aby zobaczyć koszyk');
+        setLoading(false);
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Brak tokenu autoryzacji');
+        setLoading(false);
+        return;
+      }
+
+      console.log('🔍 Pobieranie koszyka dla użytkownika:', user?._id);
+      console.log('🔑 Token:', token ? 'Dostępny' : 'Brak');
+
       const response = await fetch('/api/cart', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
+      console.log('📡 Status odpowiedzi:', response.status);
+      console.log('📡 Headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        throw new Error('Nie udało się pobrać koszyka');
+        const errorText = await response.text();
+        console.error('❌ Błąd odpowiedzi:', errorText);
+        throw new Error(`Nie udało się pobrać koszyka (${response.status}): ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('✅ Pobrano koszyk:', data);
       setCart(data);
     } catch (err) {
+      console.error('💥 Błąd podczas pobierania koszyka:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -484,11 +532,65 @@ const Cart = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <CartContainer>
+        <PageTitle title="Koszyk" description="Twój koszyk zakupów" />
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '3rem',
+          backgroundColor: '#e3f2fd',
+          border: '1px solid #2196f3',
+          borderRadius: '12px',
+          margin: '2rem 0'
+        }}>
+          <h2 style={{ color: '#1976d2', marginBottom: '1rem' }}>🔐 Wymagane logowanie</h2>
+          <p style={{ marginBottom: '2rem', color: '#424242', fontSize: '1.1rem' }}>
+            Aby zobaczyć swój koszyk zakupów, musisz się zalogować.
+          </p>
+          <button 
+            onClick={() => window.location.href = '/login'}
+            style={{
+              padding: '1rem 2rem',
+              backgroundColor: '#2196f3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1.1rem',
+              cursor: 'pointer',
+              textDecoration: 'none',
+              marginRight: '1rem'
+            }}
+          >
+            🔐 Zaloguj się
+          </button>
+          <button 
+            onClick={() => window.location.href = '/register'}
+            style={{
+              padding: '1rem 2rem',
+              backgroundColor: '#4caf50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1.1rem',
+              cursor: 'pointer',
+              textDecoration: 'none'
+            }}
+          >
+            📝 Zarejestruj się
+          </button>
+        </div>
+      </CartContainer>
+    );
+  }
+
   if (loading) {
     return (
       <CartContainer>
         <PageTitle title="Koszyk" description="Twój koszyk zakupów" />
-        <LoadingSpinner>Ładowanie koszyka...</LoadingSpinner>
+        <LoadingSpinner>
+          {isAuthenticated ? 'Ładowanie koszyka...' : 'Sprawdzanie autoryzacji...'}
+        </LoadingSpinner>
       </CartContainer>
     );
   }
@@ -496,8 +598,38 @@ const Cart = () => {
   if (error) {
     return (
       <CartContainer>
-        <div style={{ textAlign: 'center', color: 'red' }}>
-          Błąd: {error}
+        <PageTitle title="Koszyk" description="Twój koszyk zakupów" />
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '2rem',
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffeaa7',
+          borderRadius: '8px',
+          margin: '1rem 0'
+        }}>
+          <h3 style={{ color: '#856404', marginBottom: '1rem' }}>⚠️ Błąd: {error}</h3>
+          {!isAuthenticated && (
+            <div>
+              <p style={{ marginBottom: '1rem', color: '#856404' }}>
+                Musisz się zalogować, aby zobaczyć swój koszyk
+              </p>
+              <button 
+                onClick={() => window.location.href = '/login'}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  textDecoration: 'none'
+                }}
+              >
+                🔐 Zaloguj się
+              </button>
+            </div>
+          )}
         </div>
       </CartContainer>
     );

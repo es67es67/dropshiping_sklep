@@ -131,7 +131,9 @@ const FilterOptions = styled.div`
   border-radius: 12px 12px 0 0;
 `;
 
-const FilterOption = styled.button`
+const FilterOption = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active'
+})`
   background: ${props => props.active ? (props.theme.primary || '#007bff') : 'transparent'};
   color: ${props => props.active ? 'white' : (props.theme.text || '#333')};
   border: 1px solid ${props => props.active ? (props.theme.primary || '#007bff') : (props.theme.border || '#ccc')};

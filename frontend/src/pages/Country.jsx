@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { FaStore, FaComments, FaBuilding, FaBox, FaUsers, FaStar, FaMapMarkerAlt, FaCalendar } from 'react-icons/fa';
@@ -33,7 +33,9 @@ const TabContainer = styled.div`
   border-bottom: 2px solid ${props => props.theme.border};
 `;
 
-const Tab = styled.button.attrs(props => ({
+const Tab = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active'
+}).attrs(props => ({
   'data-active': props.active ? 'true' : undefined
 }))`
   padding: 1rem 2rem;

@@ -1,0 +1,51 @@
+{
+  "name": "error-monitoring-frontend",
+  "version": "1.0.0",
+  "description": "Frontend dashboard dla systemu monitorowania błędów",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.15.0",
+    "styled-components": "^6.0.7",
+    "axios": "^1.5.0",
+    "socket.io-client": "^4.7.2",
+    "chart.js": "^4.4.0",
+    "react-chartjs-2": "^5.2.0",
+    "date-fns": "^2.30.0",
+    "react-icons": "^4.11.0",
+    "react-query": "^3.39.3",
+    "react-hot-toast": "^2.4.1",
+    "react-helmet-async": "^1.3.0",
+    "framer-motion": "^10.16.4",
+    "react-hook-form": "^7.47.0",
+    "react-select": "^5.7.4",
+    "react-datepicker": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.4",
+    "vite": "^4.4.9",
+    "vitest": "^0.34.3",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/jest-dom": "^6.1.3",
+    "jsdom": "^22.1.0"
+  },
+  "keywords": [
+    "error-monitoring",
+    "dashboard",
+    "react",
+    "typescript",
+    "portal"
+  ],
+  "author": "Portal Team",
+  "license": "MIT"
+} 
