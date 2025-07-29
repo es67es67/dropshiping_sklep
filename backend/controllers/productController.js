@@ -81,24 +81,52 @@ exports.getProducts = async (req, res) => {
 // Pobieranie pojedynczego produktu
 exports.getProduct = async (req, res) => {
   try {
+    console.log('🔍 Pobieranie produktu o ID:', req.params.id);
+    
     const product = await Product.findById(req.params.id)
       .populate('shop', 'name logo description address')
       .populate('seller', 'username firstName lastName avatar')
       .populate('relatedProducts', 'name price mainImage ratings');
     
+    console.log('📦 Produkt znaleziony:', !!product);
+    
     if (!product) {
+      console.log('❌ Produkt nie został znaleziony');
       return res.status(404).json({ error: 'Produkt nie został znaleziony' });
     }
     
+    // Jeśli produkt nie ma seller, ustaw go na podstawie właściciela sklepu
+    if (!product.seller && product.shop) {
+      console.log('🔧 Ustawianie seller na podstawie właściciela sklepu');
+      try {
+        const shop = await Shop.findById(product.shop);
+        if (shop && shop.owner) {
+          product.seller = shop.owner;
+          await product.save();
+          console.log('✅ Seller ustawiony:', product.seller);
+        }
+      } catch (shopError) {
+        console.error('❌ Błąd podczas pobierania sklepu:', shopError);
+      }
+    }
+    
+    console.log('📊 Sprawdzanie pola stats...');
     // Zwiększ licznik wyświetleń - bezpiecznie
     if (!product.stats) {
+      console.log('🔧 Inicjalizacja pola stats');
       product.stats = { views: 0, sales: 0, revenue: 0, wishlistCount: 0 };
     }
+    
+    console.log('👁️ Aktualizacja licznika wyświetleń');
     product.stats.views = (product.stats.views || 0) + 1;
+    
+    console.log('💾 Zapisanie produktu...');
     await product.save();
     
+    console.log('✅ Produkt zwrócony pomyślnie');
     res.json(product);
   } catch (err) {
+    console.error('❌ Błąd w getProduct:', err);
     res.status(500).json({ error: err.message });
   }
 };

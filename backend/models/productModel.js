@@ -88,7 +88,7 @@ const productSchema = new mongoose.Schema({
   
   // Powiązania
   shop: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
-  seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Zmienione na opcjonalne
   categoryRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
   
   // Tagi i kategorie
