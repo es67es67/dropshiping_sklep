@@ -428,7 +428,7 @@ export default function LayoutCustomization({ theme, onSettingsSaved }) {
     console.log('User ID:', user?._id);
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
       
       console.log('API URL:', apiUrl);

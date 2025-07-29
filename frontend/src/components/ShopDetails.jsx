@@ -364,7 +364,9 @@ const TabsContainer = styled.div`
   border-bottom: 1px solid ${props => props.theme.border};
 `;
 
-const Tab = styled.button`
+const Tab = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active'
+})`
   padding: 0.75rem 1.5rem;
   border: none;
   border-bottom: 2px solid transparent;

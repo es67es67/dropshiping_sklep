@@ -90,8 +90,11 @@ exports.getProduct = async (req, res) => {
       return res.status(404).json({ error: 'Produkt nie został znaleziony' });
     }
     
-    // Zwiększ licznik wyświetleń
-    product.stats.views += 1;
+    // Zwiększ licznik wyświetleń - bezpiecznie
+    if (!product.stats) {
+      product.stats = { views: 0, sales: 0, revenue: 0, wishlistCount: 0 };
+    }
+    product.stats.views = (product.stats.views || 0) + 1;
     await product.save();
     
     res.json(product);
@@ -423,14 +426,26 @@ exports.addProductReview = async (req, res) => {
     });
     await review.save();
 
-    // Zaktualizuj średnią ocenę produktu
+    // Zaktualizuj średnią ocenę produktu - bezpiecznie
     const allReviews = await Review.find({ product: productId });
     const avg = allReviews.reduce((sum, r) => sum + r.rating, 0) / (allReviews.length || 1);
+    
+    // Inicjalizuj pole ratings jeśli nie istnieje
+    if (!product.ratings) {
+      product.ratings = {
+        average: 0,
+        count: 0,
+        distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+      };
+    }
+    
     product.ratings.average = Math.round(avg * 10) / 10;
     product.ratings.count = allReviews.length;
     // Rozkład ocen
     product.ratings.distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    allReviews.forEach(r => { product.ratings.distribution[r.rating] = (product.ratings.distribution[r.rating] || 0) + 1; });
+    allReviews.forEach(r => { 
+      product.ratings.distribution[r.rating] = (product.ratings.distribution[r.rating] || 0) + 1; 
+    });
     await product.save();
 
     res.json({ 
