@@ -20,7 +20,12 @@ const miejscowoscSchema = new mongoose.Schema({
   
   // Statystyki
   stats: {
-    totalUlice: { type: Number, default: 0 }
+    totalUlice: { type: Number, default: 0 },
+    totalUsers: { type: Number, default: 0 },
+    totalShops: { type: Number, default: 0 },
+    totalProducts: { type: Number, default: 0 },
+    totalPosts: { type: Number, default: 0 },
+    totalCompanies: { type: Number, default: 0 }
   },
   
   // Status

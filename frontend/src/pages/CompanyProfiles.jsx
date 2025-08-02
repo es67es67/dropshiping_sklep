@@ -465,7 +465,7 @@ export default function CompanyProfiles({ theme }) {
           🏢 MŚP
         </FilterChip>
         <FilterChip
-          active={false}
+          active="false"
           onClick={clearFilters}
           theme={theme}
         >

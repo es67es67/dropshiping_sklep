@@ -14,6 +14,7 @@ const moduleLoader = require('./core/moduleLoader');
 const userRoutes = require('./routes/userRoutes');
 const shopRoutes = require('./routes/shopRoutes');
 const productRoutes = require('./routes/productRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const locationRoutes = require('./routes/locationRoutes');
@@ -27,6 +28,8 @@ const adminRoutes = require('./routes/adminRoutes');
 const geocodingRoutes = require('./routes/geocodingRoutes');
 const exportRoutes = require('./routes/exportRoutes');
 const errorRoutes = require('./routes/errorRoutes');
+const auctionRoutes = require('./routes/auctionRoutes');
+const marketplaceProductRoutes = require('./routes/marketplaceProductRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -258,6 +261,8 @@ function safeUse(path, router, name) {
 safeUse('/api/users', userRoutes, 'userRoutes');
 safeUse('/api/shops', shopRoutes, 'shopRoutes');
 safeUse('/api/products', productRoutes, 'productRoutes');
+safeUse('/api/marketplace', marketplaceProductRoutes, 'marketplaceProductRoutes');
+safeUse('/api/categories', categoryRoutes, 'categoryRoutes');
 safeUse('/api/cart', cartRoutes, 'cartRoutes');
 safeUse('/api/orders', orderRoutes, 'orderRoutes');
 safeUse('/api/locations', locationRoutes, 'locationRoutes');
@@ -272,6 +277,7 @@ safeUse('/api/company-profiles', require('./routes/companyProfileRoutes'), 'comp
 safeUse('/api/admin', adminRoutes, 'adminRoutes');
 safeUse('/api/geocoding', geocodingRoutes, 'geocodingRoutes');
 safeUse('/api/export', exportRoutes, 'exportRoutes');
+safeUse('/api/auctions', auctionRoutes, 'auctionRoutes');
 safeUse('/api', errorRoutes, 'errorRoutes');
 
 // Uruchom serwer po zarejestrowaniu routes

@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import ProductList from '../components/ProductList';
 import ProductCard from '../components/ProductCard';
+import AuctionCard from '../components/AuctionCard';
+import BidModal from '../components/BidModal';
 import PageTitle from '../components/PageTitle';
-import { FaSearch, FaTimes, FaShoppingCart, FaHeart } from 'react-icons/fa';
+import AdvertisementManager from '../components/AdvertisementManager';
+import { useAuth } from '../contexts/AuthContext';
+import { FaSearch, FaTimes, FaShoppingCart, FaHeart, FaGavel, FaMapMarkerAlt, FaPlus } from 'react-icons/fa';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -64,6 +69,36 @@ const Subtitle = styled.p.withConfig({
   }
 `;
 
+const AddProductButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: ${props => props.theme.primary};
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  
+  &:hover {
+    background: ${props => props.theme.primaryDark || '#0056b3'};
+    transform: translateY(-1px);
+    text-decoration: none;
+    color: white;
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem;
+  }
+`;
+
 const SearchContainer = styled.div`
   position: relative;
   max-width: 400px;
@@ -100,6 +135,37 @@ const SearchIcon = styled.div.withConfig({
   top: 50%;
   transform: translateY(-50%);
   color: ${props => props.theme.textSecondary};
+  display: flex;
+  align-items: center;
+`;
+
+const FilterContainer = styled.div`
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    gap: 0.25rem;
+  }
+`;
+
+const FilterButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => !['active'].includes(prop)
+})`
+  padding: 0.5rem 1rem;
+  border: 1px solid ${props => props.active ? props.theme.primary : props.theme.border};
+  border-radius: 6px;
+  background: ${props => props.active ? props.theme.primary : 'transparent'};
+  color: ${props => props.active ? 'white' : props.theme.text};
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.active ? props.theme.primary : props.theme.background};
+    border-color: ${props => props.theme.primary};
+  }
 `;
 
 const ClearButton = styled.button.withConfig({
@@ -235,7 +301,7 @@ const RatingContainer = styled.div`
 `;
 
 const StarIcon = styled(FaHeart)`
-  color: ${props => props.filled ? '#fbbf24' : '#d1d5db'};
+  color: ${props => props.filled === 'true' ? '#fbbf24' : '#d1d5db'};
   width: 1rem;
   height: 1rem;
 `;
@@ -310,7 +376,186 @@ const WishlistButton = styled.button`
   }
 `;
 
+const AuctionSection = styled.div`
+  margin-top: 2rem;
+  padding: 2rem;
+  background: ${props => props.theme.surface};
+  border-radius: 16px;
+  box-shadow: ${props => props.theme.shadow};
+`;
+
+const AuctionSectionTitle = styled.h2`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${props => props.theme.text};
+  margin: 0 0 1.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const AuctionGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+// Nowe styled-components dla lokalizacji
+const LocationModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const LocationModalContent = styled.div`
+  background: ${props => props.theme.surface};
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+`;
+
+const LocationSearchInput = styled.input`
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  
+  &:focus {
+    outline: none;
+    border-color: ${props => props.theme.primary};
+  }
+`;
+
+const SearchResults = styled.div`
+  max-height: 300px;
+  overflow-y: auto;
+`;
+
+const LocationItem = styled.div`
+  padding: 0.75rem;
+  border-bottom: 1px solid ${props => props.theme.border};
+  cursor: pointer;
+  
+  &:hover {
+    background: ${props => props.theme.background};
+  }
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const LocationName = styled.div`
+  font-weight: 600;
+  color: ${props => props.theme.text};
+`;
+
+const LocationDetails = styled.div`
+  font-size: 0.9rem;
+  color: ${props => props.theme.textSecondary};
+  margin-top: 0.25rem;
+`;
+
+const LoadingText = styled.div`
+  text-align: center;
+  color: ${props => props.theme.textSecondary};
+  padding: 1rem;
+`;
+
+const LocationFilterContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+`;
+
+const LocationButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 6px;
+  background: ${props => props.selected ? props.theme.primary : 'transparent'};
+  color: ${props => props.selected ? 'white' : props.theme.text};
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.selected ? props.theme.primary : props.theme.background};
+    border-color: ${props => props.theme.primary};
+  }
+`;
+
+const ClearLocationButton = styled.button`
+  padding: 0.25rem 0.5rem;
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 4px;
+  background: transparent;
+  color: ${props => props.theme.textSecondary};
+  font-size: 0.8rem;
+  cursor: pointer;
+  
+  &:hover {
+    background: ${props => props.theme.background};
+    color: ${props => props.theme.text};
+  }
+`;
+
+const ClearAllFiltersButton = styled.button`
+  padding: 0.5rem 1rem;
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 6px;
+  background: ${props => props.theme.background};
+  color: ${props => props.theme.textSecondary};
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.theme.primary};
+    color: white;
+    border-color: ${props => props.theme.primary};
+  }
+`;
+
+const LocationSettingsButton = styled.button`
+  padding: 0.5rem 1rem;
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 6px;
+  background: ${props => props.theme.background};
+  color: ${props => props.theme.textSecondary};
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.theme.secondary || props.theme.primary};
+    color: white;
+    border-color: ${props => props.theme.secondary || props.theme.primary};
+  }
+`;
+
 const Products = () => {
+  const { user, getUserLocation, getUserTeryt, getUserAddress } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -320,162 +565,105 @@ const Products = () => {
   const [wishlist, setWishlist] = useState([]);
   const [showQuickView, setShowQuickView] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showBidModal, setShowBidModal] = useState(false);
+  const [selectedAuction, setSelectedAuction] = useState(null);
+  const [saleTypeFilter, setSaleTypeFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  
+  // Nowe stany dla filtrów lokalizacji
+  const [locationFilter, setLocationFilter] = useState('all');
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locationSearch, setLocationSearch] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
-  // Symulowane dane produktów
-  const mockProducts = [
-    {
-      _id: '1',
-      name: 'iPhone 15 Pro Max',
-      description: 'Najnowszy iPhone z zaawansowaną kamerą i procesorem A17 Pro',
-      price: 4999.99,
-      originalPrice: 5499.99,
-      images: [
-        'https://via.placeholder.com/400x400/007AFF/FFFFFF?text=iPhone+15+Pro+Max',
-        'https://via.placeholder.com/400x400/007AFF/FFFFFF?text=iPhone+15+Pro+Max+2'
-      ],
-      mainImage: 'https://via.placeholder.com/400x400/007AFF/FFFFFF?text=iPhone+15+Pro+Max',
-      ratings: { average: 4.8, count: 127 },
-      shop: {
-        name: 'Apple Store',
-        logo: 'https://via.placeholder.com/50x50/007AFF/FFFFFF?text=A',
-        address: { city: 'Warszawa' }
-      },
-      isOnSale: true,
-      isFeatured: true,
-      stock: 15,
-      shipping: { freeShipping: true },
-      tags: ['smartphone', 'apple', 'premium'],
-      category: 'electronics'
-    },
-    {
-      _id: '2',
-      name: 'Samsung Galaxy S24 Ultra',
-      description: 'Flaga Samsung z S Pen i zaawansowaną kamerą',
-      price: 4499.99,
-      originalPrice: 4999.99,
-      images: [
-        'https://via.placeholder.com/400x400/1428A0/FFFFFF?text=Galaxy+S24+Ultra',
-        'https://via.placeholder.com/400x400/1428A0/FFFFFF?text=Galaxy+S24+Ultra+2'
-      ],
-      mainImage: 'https://via.placeholder.com/400x400/1428A0/FFFFFF?text=Galaxy+S24+Ultra',
-      ratings: { average: 4.6, count: 89 },
-      shop: {
-        name: 'Samsung Store',
-        logo: 'https://via.placeholder.com/50x50/1428A0/FFFFFF?text=S',
-        address: { city: 'Kraków' }
-      },
-      isOnSale: true,
-      isFeatured: false,
-      stock: 8,
-      shipping: { freeShipping: true },
-      tags: ['smartphone', 'samsung', 'android'],
-      category: 'electronics'
-    },
-    {
-      _id: '3',
-      name: 'MacBook Pro 16" M3 Max',
-      description: 'Profesjonalny laptop z najnowszym procesorem Apple M3 Max',
-      price: 12999.99,
-      originalPrice: 13999.99,
-      images: [
-        'https://via.placeholder.com/400x400/000000/FFFFFF?text=MacBook+Pro+16',
-        'https://via.placeholder.com/400x400/000000/FFFFFF?text=MacBook+Pro+16+2'
-      ],
-      mainImage: 'https://via.placeholder.com/400x400/000000/FFFFFF?text=MacBook+Pro+16',
-      ratings: { average: 4.9, count: 45 },
-      shop: {
-        name: 'Apple Store',
-        logo: 'https://via.placeholder.com/50x50/007AFF/FFFFFF?text=A',
-        address: { city: 'Warszawa' }
-      },
-      isOnSale: false,
-      isFeatured: true,
-      stock: 3,
-      shipping: { freeShipping: true },
-      tags: ['laptop', 'apple', 'professional'],
-      category: 'electronics'
-    },
-    {
-      _id: '4',
-      name: 'Nike Air Max 270',
-      description: 'Wygodne buty sportowe z amortyzacją Air Max',
-      price: 599.99,
-      originalPrice: 699.99,
-      images: [
-        'https://via.placeholder.com/400x400/FF6B35/FFFFFF?text=Nike+Air+Max+270',
-        'https://via.placeholder.com/400x400/FF6B35/FFFFFF?text=Nike+Air+Max+270+2'
-      ],
-      mainImage: 'https://via.placeholder.com/400x400/FF6B35/FFFFFF?text=Nike+Air+Max+270',
-      ratings: { average: 4.4, count: 234 },
-      shop: {
-        name: 'Nike Store',
-        logo: 'https://via.placeholder.com/50x50/FF6B35/FFFFFF?text=N',
-        address: { city: 'Gdańsk' }
-      },
-      isOnSale: true,
-      isFeatured: false,
-      stock: 25,
-      shipping: { freeShipping: false },
-      tags: ['sport', 'nike', 'shoes'],
-      category: 'sports'
-    },
-    {
-      _id: '5',
-      name: 'Sony WH-1000XM5',
-      description: 'Słuchawki z aktywną redukcją szumów',
-      price: 1299.99,
-      originalPrice: 1499.99,
-      images: [
-        'https://via.placeholder.com/400x400/000000/FFFFFF?text=Sony+WH-1000XM5',
-        'https://via.placeholder.com/400x400/000000/FFFFFF?text=Sony+WH-1000XM5+2'
-      ],
-      mainImage: 'https://via.placeholder.com/400x400/000000/FFFFFF?text=Sony+WH-1000XM5',
-      ratings: { average: 4.7, count: 156 },
-      shop: {
-        name: 'Sony Store',
-        logo: 'https://via.placeholder.com/50x50/000000/FFFFFF?text=S',
-        address: { city: 'Poznań' }
-      },
-      isOnSale: true,
-      isFeatured: false,
-      stock: 12,
-      shipping: { freeShipping: true },
-      tags: ['headphones', 'sony', 'wireless'],
-      category: 'electronics'
-    },
-    {
-      _id: '6',
-      name: 'Adidas Ultraboost 22',
-      description: 'Buty do biegania z technologią Boost',
-      price: 799.99,
-      originalPrice: 899.99,
-      images: [
-        'https://via.placeholder.com/400x400/000000/FFFFFF?text=Adidas+Ultraboost+22',
-        'https://via.placeholder.com/400x400/000000/FFFFFF?text=Adidas+Ultraboost+22+2'
-      ],
-      mainImage: 'https://via.placeholder.com/400x400/000000/FFFFFF?text=Adidas+Ultraboost+22',
-      ratings: { average: 4.5, count: 189 },
-      shop: {
-        name: 'Adidas Store',
-        logo: 'https://via.placeholder.com/50x50/000000/FFFFFF?text=A',
-        address: { city: 'Wrocław' }
-      },
-      isOnSale: true,
-      isFeatured: false,
-      stock: 18,
-      shipping: { freeShipping: false },
-      tags: ['running', 'adidas', 'shoes'],
-      category: 'sports'
-    }
-  ];
-
+  // Pobieranie produktów z API
   useEffect(() => {
-    // Symulacja ładowania danych
-    setTimeout(() => {
-      setProducts(mockProducts);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        // Użyj proxy w trybie development, VITE_API_URL w production
+        const apiUrl = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:5000');
+        
+        // Buduj parametry zapytania
+        const params = new URLSearchParams();
+        if (saleTypeFilter !== 'all') {
+          params.append('saleType', saleTypeFilter);
+        }
+        if (categoryFilter !== 'all') {
+          params.append('category', categoryFilter);
+        }
+        if (selectedLocation) {
+          params.append('location', selectedLocation.city);
+        }
+        if (searchQuery) {
+          params.append('search', searchQuery);
+        }
+        
+        const response = await fetch(`${apiUrl}/api/marketplace?${params.toString()}`);
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data.products || []);
+        } else {
+          console.error('Błąd podczas pobierania produktów');
+        }
+      } catch (error) {
+        console.error('Błąd podczas pobierania produktów:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [saleTypeFilter, categoryFilter, selectedLocation, searchQuery]);
+
+  // Ustaw domyślną lokalizację użytkownika przy pierwszym załadowaniu (opcjonalnie)
+  useEffect(() => {
+    if (user && !selectedLocation) {
+      const userLocation = getUserLocation();
+      const userTeryt = getUserTeryt();
+      const userAddress = getUserAddress();
+      
+      // Sprawdź czy użytkownik chce automatyczną lokalizację
+      const autoLocation = localStorage.getItem('autoLocation') !== 'false';
+      
+      if (autoLocation && (userLocation || userTeryt || userAddress)) {
+        let defaultLocation = null;
+        
+        if (userLocation) {
+          defaultLocation = {
+            city: userLocation.city || '',
+            municipality: userLocation.municipality || '',
+            county: userLocation.county || '',
+            voivodeship: userLocation.voivodeship || '',
+            terytCode: userLocation.terytCode || ''
+          };
+        } else if (userTeryt) {
+          defaultLocation = {
+            city: userTeryt.city || '',
+            municipality: userTeryt.municipality || '',
+            county: userTeryt.county || '',
+            voivodeship: userTeryt.voivodeship || '',
+            terytCode: userTeryt.terytCode || ''
+          };
+        } else if (userAddress) {
+          defaultLocation = {
+            city: userAddress.city || '',
+            municipality: userAddress.municipality || '',
+            county: userAddress.county || '',
+            voivodeship: userAddress.voivodeship || '',
+            terytCode: userAddress.terytCode || ''
+          };
+        }
+        
+        if (defaultLocation && defaultLocation.city) {
+          setSelectedLocation(defaultLocation);
+        }
+      }
+    }
+  }, [user, getUserLocation, getUserTeryt, getUserAddress, selectedLocation]);
+
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -491,6 +679,99 @@ const Products = () => {
     setSortBy(sort);
     // Tutaj można dodać logikę sortowania
   };
+
+  const handleSaleTypeFilter = (saleType) => {
+    setSaleTypeFilter(saleType);
+  };
+
+  const handleCategoryFilter = (category) => {
+    setCategoryFilter(category);
+  };
+
+  // Funkcje do obsługi lokalizacji
+  const searchLocations = async (query, type = 'miejscowość') => {
+    if (!query || query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/locations/search?q=${encodeURIComponent(query)}&type=${type}&limit=10`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data.locations || []);
+      } else {
+        console.error('Błąd podczas wyszukiwania lokalizacji');
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error('Błąd podczas wyszukiwania lokalizacji:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleLocationSelect = (location) => {
+    setSelectedLocation({
+      city: location.name,
+      municipality: location.gmina?.name || '',
+      county: location.powiat?.name || '',
+      voivodeship: location.wojewodztwo?.name || '',
+      terytCode: location.code || ''
+    });
+    setShowLocationModal(false);
+    setLocationSearch('');
+    setSearchResults([]);
+  };
+
+  const openLocationModal = () => {
+    setShowLocationModal(true);
+    setLocationSearch('');
+    setSearchResults([]);
+  };
+
+  const clearLocationFilter = () => {
+    setSelectedLocation(null);
+  };
+
+  const clearAllFilters = () => {
+    setSelectedLocation(null);
+    setSaleTypeFilter('all');
+    setCategoryFilter('all');
+    setSearchQuery('');
+    setFilters({});
+  };
+
+  // Filtrowanie produktów
+  const filteredProducts = products.filter(product => {
+    // Filtr typu sprzedaży
+    if (saleTypeFilter === 'free') {
+      // Produkty za darmo (cena 0 lub oferty za darmo w aukcjach)
+      if (product.price !== 0 && (!product.auction || !product.auction.bids?.some(bid => bid.amount === 0))) {
+        return false;
+      }
+    } else if (saleTypeFilter !== 'all' && product.saleType !== saleTypeFilter) {
+      return false;
+    }
+    
+    // Filtr kategorii
+    if (categoryFilter !== 'all' && product.category !== categoryFilter) {
+      return false;
+    }
+    
+    return true;
+  });
+
+  // Rozdzielenie produktów na zwykłe i aukcje
+  const regularProducts = filteredProducts.filter(product => product.saleType !== 'auction');
+  const auctionProducts = filteredProducts.filter(product => product.saleType === 'auction');
+
+  // Pobierz unikalne kategorie
+  const uniqueCategories = [...new Set(products.map(product => product.category).filter(Boolean))];
 
   const handleAddToCart = (product) => {
     setCart(prev => {
@@ -531,37 +812,59 @@ const Products = () => {
     setShowQuickView(true);
   };
 
-  const filteredProducts = products.filter(product => {
-    if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
+  const handleBid = (product) => {
+    setSelectedAuction(product);
+    setShowBidModal(true);
+  };
+
+  const handleBidSubmit = async (productId, amount) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${apiUrl}/api/auctions/${productId}/bid`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ amount })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Błąd podczas składania oferty');
+      }
+
+      const data = await response.json();
+      
+      // Aktualizuj produkt w liście
+      setProducts(prev => prev.map(p => 
+        p._id === productId ? data.product : p
+      ));
+      
+      return data;
+    } catch (error) {
+      throw error;
     }
-    if (filters.category && product.category !== filters.category) {
-      return false;
-    }
-    if (filters.minPrice && product.price < parseFloat(filters.minPrice)) {
-      return false;
-    }
-    if (filters.maxPrice && product.price > parseFloat(filters.maxPrice)) {
-      return false;
-    }
-    if (filters.rating && product.ratings.average < parseFloat(filters.rating)) {
-      return false;
-    }
-    return true;
-  });
+  };
 
   return (
     <Container>
-      <PageTitle title="Produkty" description="Odkryj najlepsze produkty w najlepszych cenach" />
+      <PageTitle title="Giełda" description="Odkryj najlepsze produkty w najlepszych cenach" />
       {/* Header */}
       <Header>
         <HeaderContent>
           <HeaderFlex>
             <HeaderInfo>
-              <Title>Produkty</Title>
+              <Title>Giełda</Title>
               <Subtitle>
                 Odkryj najlepsze produkty w najlepszych cenach
               </Subtitle>
+              <AddProductButton to="/add-product">
+                <FaPlus />
+                Dodaj produkt
+              </AddProductButton>
             </HeaderInfo>
             
             {/* Search Bar */}
@@ -584,20 +887,141 @@ const Products = () => {
               )}
             </SearchContainer>
           </HeaderFlex>
+          
+          {/* Filtry kategorii sprzedaży */}
+          <FilterContainer>
+            <FilterButton
+              active={saleTypeFilter === 'all'}
+              onClick={() => handleSaleTypeFilter('all')}
+            >
+              Wszystkie
+            </FilterButton>
+            <FilterButton
+              active={saleTypeFilter === 'fixed_price'}
+              onClick={() => handleSaleTypeFilter('fixed_price')}
+            >
+              💰 Cena stała
+            </FilterButton>
+            <FilterButton
+              active={saleTypeFilter === 'auction'}
+              onClick={() => handleSaleTypeFilter('auction')}
+            >
+              🔨 Aukcje
+            </FilterButton>
+            <FilterButton
+              active={saleTypeFilter === 'negotiation'}
+              onClick={() => handleSaleTypeFilter('negotiation')}
+            >
+              💬 Propozycje
+            </FilterButton>
+            <FilterButton
+              active={saleTypeFilter === 'free'}
+              onClick={() => handleSaleTypeFilter('free')}
+            >
+              🎁 Za darmo
+            </FilterButton>
+          </FilterContainer>
+          
+          {/* Filtry kategorii */}
+          <FilterContainer>
+            <FilterButton
+              active={categoryFilter === 'all'}
+              onClick={() => handleCategoryFilter('all')}
+            >
+              Wszystkie kategorie
+            </FilterButton>
+            {uniqueCategories.map(category => (
+              <FilterButton
+                key={category}
+                active={categoryFilter === category}
+                onClick={() => handleCategoryFilter(category)}
+              >
+                {category}
+              </FilterButton>
+            ))}
+          </FilterContainer>
+          
+          {/* Filtry lokalizacji */}
+          <FilterContainer>
+            <LocationFilterContainer>
+              <LocationButton
+                selected={!selectedLocation}
+                onClick={openLocationModal}
+              >
+                <FaMapMarkerAlt />
+                {selectedLocation ? selectedLocation.city : 'Wybierz lokalizację'}
+              </LocationButton>
+              {selectedLocation && (
+                <ClearLocationButton onClick={clearLocationFilter}>
+                  Wyczyść
+                </ClearLocationButton>
+              )}
+            </LocationFilterContainer>
+          </FilterContainer>
+          
+          {/* Przycisk wyczyszczenia wszystkich filtrów */}
+          {(selectedLocation || saleTypeFilter !== 'all' || categoryFilter !== 'all' || searchQuery) && (
+            <FilterContainer>
+              <ClearAllFiltersButton onClick={clearAllFilters}>
+                🗑️ Wyczyść wszystkie filtry
+              </ClearAllFiltersButton>
+            </FilterContainer>
+          )}
+          
+          {/* Opcja wyłączenia automatycznej lokalizacji */}
+          <FilterContainer>
+            <LocationSettingsButton 
+              onClick={() => {
+                const current = localStorage.getItem('autoLocation') !== 'false';
+                localStorage.setItem('autoLocation', (!current).toString());
+                window.location.reload();
+              }}
+            >
+              {localStorage.getItem('autoLocation') !== 'false' ? '🔒' : '🔓'} 
+              {localStorage.getItem('autoLocation') !== 'false' ? 'Wyłącz' : 'Włącz'} automatyczną lokalizację
+            </LocationSettingsButton>
+          </FilterContainer>
         </HeaderContent>
       </Header>
 
       {/* Main Content */}
       <MainContent>
+        {/* Komponent reklamowy dla strony produktów */}
+        <AdvertisementManager location="products" showAds={true} />
+        
         <ProductList
-          products={filteredProducts}
+          products={filteredProducts.filter(p => p.saleType !== 'auction')}
           loading={loading}
           onAddToCart={handleAddToCart}
           onAddToWishlist={handleAddToWishlist}
           onQuickView={handleQuickView}
           onFiltersChange={handleFiltersChange}
           onSortChange={handleSortChange}
+          isMarketplace={true}
         />
+        
+        {/* Sekcja aukcji */}
+        {filteredProducts.filter(p => p.saleType === 'auction').length > 0 && (
+          <AuctionSection>
+            <AuctionSectionTitle>
+              <FaGavel />
+              Aktywne aukcje
+            </AuctionSectionTitle>
+            <AuctionGrid>
+              {filteredProducts
+                .filter(p => p.saleType === 'auction')
+                .map(product => (
+                  <AuctionCard
+                    key={product._id}
+                    product={product}
+                    onBid={handleBid}
+                    onAddToWishlist={handleAddToWishlist}
+                    onQuickView={handleQuickView}
+                  />
+                ))}
+            </AuctionGrid>
+          </AuctionSection>
+        )}
       </MainContent>
 
       {/* Quick View Modal */}
@@ -689,6 +1113,54 @@ const Products = () => {
             </ModalBody>
           </ModalContent>
         </ModalOverlay>
+      )}
+
+      {/* Bid Modal */}
+      {showBidModal && selectedAuction && (
+        <BidModal
+          product={selectedAuction}
+          isOpen={showBidModal}
+          onClose={() => setShowBidModal(false)}
+          onBidSubmit={handleBidSubmit}
+        />
+      )}
+
+      {/* Location Modal */}
+      {showLocationModal && (
+        <LocationModal onClick={() => setShowLocationModal(false)}>
+          <LocationModalContent onClick={(e) => e.stopPropagation()}>
+            <h3>Wybierz lokalizację</h3>
+            <LocationSearchInput
+              type="text"
+              placeholder="Wyszukaj miejscowość, gminę, powiat lub województwo..."
+              value={locationSearch}
+              onChange={(e) => {
+                setLocationSearch(e.target.value);
+                searchLocations(e.target.value);
+              }}
+            />
+            
+            <SearchResults>
+              {isSearching ? (
+                <LoadingText>Wyszukiwanie...</LoadingText>
+              ) : searchResults.length > 0 ? (
+                searchResults.map((location) => (
+                  <LocationItem
+                    key={location._id}
+                    onClick={() => handleLocationSelect(location)}
+                  >
+                    <LocationName>{location.name}</LocationName>
+                    <LocationDetails>
+                      {location.type} • {location.code}
+                    </LocationDetails>
+                  </LocationItem>
+                ))
+              ) : locationSearch.length > 0 ? (
+                <LoadingText>Brak wyników</LoadingText>
+              ) : null}
+            </SearchResults>
+          </LocationModalContent>
+        </LocationModal>
       )}
     </Container>
   );

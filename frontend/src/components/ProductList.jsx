@@ -152,7 +152,8 @@ const ProductList = ({
   onQuickView,
   onFiltersChange,
   onSortChange,
-  onPageChange 
+  onPageChange,
+  isMarketplace = false
 }) => {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [showFilters, setShowFilters] = useState(false);
@@ -274,6 +275,7 @@ const ProductList = ({
             onAddToCart={onAddToCart}
             onAddToWishlist={onAddToWishlist}
             onQuickView={onQuickView}
+            isMarketplace={isMarketplace}
           />
         ))}
       </ProductGrid>

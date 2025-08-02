@@ -1,0 +1,68 @@
+{
+  "timestamp": "2025-07-29T18:09:39.810Z",
+  "totalTests": 15,
+  "passedTests": 14,
+  "failedTests": 1,
+  "results": [
+    {
+      "test": "Strona główna",
+      "status": "✅ OK"
+    },
+    {
+      "test": "Strona województw",
+      "status": "❌ Brak danych"
+    },
+    {
+      "test": "Strona logowania",
+      "status": "✅ OK"
+    },
+    {
+      "test": "Strona rejestracji",
+      "status": "✅ OK"
+    },
+    {
+      "test": "Strona sklepów",
+      "status": "✅ OK"
+    },
+    {
+      "test": "Strona produktów",
+      "status": "✅ OK"
+    },
+    {
+      "test": "Strona koszyka",
+      "status": "✅ OK"
+    },
+    {
+      "test": "Strona wiadomości",
+      "status": "✅ OK"
+    },
+    {
+      "test": "Strona profilów firm",
+      "status": "✅ OK"
+    },
+    {
+      "test": "Strona zaawansowanych funkcji",
+      "status": "✅ OK"
+    },
+    {
+      "test": "Błędy konsoli",
+      "status": "✅ Brak błędów"
+    },
+    {
+      "test": "Responsywność",
+      "status": "✅ OK"
+    },
+    {
+      "test": "API Health Check",
+      "status": "✅ OK"
+    },
+    {
+      "test": "API Voivodeships",
+      "status": "✅ OK"
+    },
+    {
+      "test": "API Status",
+      "status": "✅ OK"
+    }
+  ]
+}

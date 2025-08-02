@@ -33,6 +33,44 @@ const productSchema = new mongoose.Schema({
   isFeatured: { type: Boolean, default: false },
   isOnSale: { type: Boolean, default: false },
   
+  // Typ sprzedaży
+  saleType: {
+    type: String,
+    enum: ['fixed_price', 'auction', 'negotiation'],
+    default: 'fixed_price'
+  },
+  
+  // Aukcja (jeśli saleType = 'auction')
+  auction: {
+    startPrice: { type: Number },
+    currentPrice: { type: Number },
+    minIncrement: { type: Number, default: 1 },
+    endTime: { type: Date },
+    bids: [{
+      bidder: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      amount: { type: Number },
+      timestamp: { type: Date, default: Date.now }
+    }],
+    isActive: { type: Boolean, default: false }
+  },
+  
+  // Negocjacje (jeśli saleType = 'negotiation')
+  negotiation: {
+    minPrice: { type: Number },
+    maxPrice: { type: Number },
+    offers: [{
+      buyer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      amount: { type: Number },
+      message: { type: String },
+      status: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected'],
+        default: 'pending'
+      },
+      timestamp: { type: Date, default: Date.now }
+    }]
+  },
+  
   // Wymiary i waga
   dimensions: {
     length: { type: Number },
@@ -90,6 +128,23 @@ const productSchema = new mongoose.Schema({
   shop: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
   seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Zmienione na opcjonalne
   categoryRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+  
+  // Lokalizacja
+  location: {
+    country: { type: String, default: 'Polska' },
+    voivodeship: { type: String },
+    county: { type: String },
+    municipality: { type: String },
+    city: { type: String },
+    voivodeshipCode: { type: String },
+    countyCode: { type: String },
+    municipalityCode: { type: String },
+    cityCode: { type: String },
+    coordinates: {
+      latitude: { type: Number },
+      longitude: { type: Number }
+    }
+  },
   
   // Tagi i kategorie
   tags: [{ type: String }],

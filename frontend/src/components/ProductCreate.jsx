@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
+import LocationSelector from './LocationSelector';
 
 const Container = styled.div`
   max-width: 800px;
@@ -422,7 +423,15 @@ export default function ProductCreate() {
     dimensions: '',
     stock: '0',
     tags: [],
-    shopId: ''
+    shopId: '',
+    saleType: 'fixed_price',
+    location: {
+      country: 'Polska',
+      voivodeship: '',
+      county: '',
+      municipality: '',
+      city: ''
+    }
   });
   
   const [images, setImages] = useState([]);
@@ -433,22 +442,26 @@ export default function ProductCreate() {
   const [loadingShops, setLoadingShops] = useState(true);
   const [hasPermission, setHasPermission] = useState(false);
 
-  const categories = [
-    'Elektronika',
-    'Odzież',
-    'Książki',
-    'Sport',
-    'Dom i ogród',
-    'Motoryzacja',
-    'Zdrowie i uroda',
-    'Zabawki',
-    'Inne'
-  ];
+  const [categories, setCategories] = useState([]);
 
-  // Pobierz sklepy użytkownika
+  // Pobierz sklepy użytkownika i kategorie
   useEffect(() => {
     fetchUserShops();
+    fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/categories`);
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error('Błąd podczas pobierania kategorii:', error);
+    }
+  };
 
   const fetchUserShops = async () => {
     try {
@@ -560,20 +573,21 @@ export default function ProductCreate() {
       const apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
       const token = localStorage.getItem('token');
       
-      const productData = {
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        category: formData.category,
-        location: 'Polska', // Domyślna lokalizacja
-        shopId: formData.shopId, // Backend oczekuje shopId
-        brand: formData.brand,
-        sku: formData.sku,
-        weight: formData.weight,
-        dimensions: formData.dimensions,
-        stock: parseInt(formData.stock) || 0,
-        tags: formData.tags
-      };
+             const productData = {
+         name: formData.name,
+         description: formData.description,
+         price: parseFloat(formData.price),
+         category: formData.category,
+         saleType: formData.saleType,
+         location: formData.location,
+         shopId: formData.shopId,
+         brand: formData.brand,
+         sku: formData.sku,
+         weight: formData.weight,
+         dimensions: formData.dimensions,
+         stock: parseInt(formData.stock) || 0,
+         tags: formData.tags
+       };
       
       const response = await fetch(`${apiUrl}/api/products`, {
         method: 'POST',
@@ -593,20 +607,28 @@ export default function ProductCreate() {
       
       alert('Produkt został dodany pomyślnie!');
       
-      // Reset form
-      setFormData({
-        name: '',
-        description: '',
-        price: '',
-        category: '',
-        brand: '',
-        sku: '',
-        weight: '',
-        dimensions: '',
-        stock: '0',
-        tags: [],
-        shopId: formData.shopId // Zachowaj wybrany sklep
-      });
+             // Reset form
+       setFormData({
+         name: '',
+         description: '',
+         price: '',
+         category: '',
+         brand: '',
+         sku: '',
+         weight: '',
+         dimensions: '',
+         stock: '0',
+         tags: [],
+         shopId: formData.shopId, // Zachowaj wybrany sklep
+         saleType: 'fixed_price',
+         location: {
+           country: 'Polska',
+           voivodeship: '',
+           county: '',
+           municipality: '',
+           city: ''
+         }
+       });
       setImages([]);
       setErrors({});
       
@@ -619,20 +641,28 @@ export default function ProductCreate() {
   };
 
   const handleReset = () => {
-    if (window.confirm('Czy na pewno chcesz zresetować formularz?')) {
-      setFormData({
-        name: '',
-        description: '',
-        price: '',
-        category: '',
-        brand: '',
-        sku: '',
-        weight: '',
-        dimensions: '',
-        stock: '0',
-        tags: [],
-        shopId: formData.shopId // Zachowaj wybrany sklep
-      });
+         if (window.confirm('Czy na pewno chcesz zresetować formularz?')) {
+       setFormData({
+         name: '',
+         description: '',
+         price: '',
+         category: '',
+         brand: '',
+         sku: '',
+         weight: '',
+         dimensions: '',
+         stock: '0',
+         tags: [],
+         shopId: formData.shopId, // Zachowaj wybrany sklep
+         saleType: 'fixed_price',
+         location: {
+           country: 'Polska',
+           voivodeship: '',
+           county: '',
+           municipality: '',
+           city: ''
+         }
+       });
       setImages([]);
       setErrors({});
     }
@@ -665,62 +695,92 @@ export default function ProductCreate() {
             </FormRow>
           </FormSection>
 
-          <FormSection>
-            <SectionTitle>📝 Podstawowe informacje</SectionTitle>
-            <FormGrid>
-              <FormRow>
-                <Label>Nazwa produktu *</Label>
-                <Input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Wprowadź nazwę produktu"
-                />
-                {errors.name && <ErrorMessage>{errors.name}</ErrorMessage>}
-              </FormRow>
-              
-              <FormRow>
-                <Label>Kategoria *</Label>
-                <Select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Wybierz kategorię</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </Select>
-                {errors.category && <ErrorMessage>{errors.category}</ErrorMessage>}
-              </FormRow>
-              
-              <FormRow>
-                <Label>Cena (zł) *</Label>
-                <Input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  placeholder="0.00"
-                  step="0.01"
-                  min="0"
-                />
-                {errors.price && <ErrorMessage>{errors.price}</ErrorMessage>}
-              </FormRow>
-              
-              <FormRow>
-                <Label>Marka</Label>
-                <Input
-                  type="text"
-                  name="brand"
-                  value={formData.brand}
-                  onChange={handleInputChange}
-                  placeholder="Nazwa marki"
-                />
-              </FormRow>
-            </FormGrid>
-          </FormSection>
+                     <FormSection>
+             <SectionTitle>💰 Typ sprzedaży</SectionTitle>
+             <FormGrid>
+               <FormRow>
+                 <Label>Typ sprzedaży *</Label>
+                 <Select
+                   name="saleType"
+                   value={formData.saleType}
+                   onChange={handleInputChange}
+                 >
+                   <option value="fixed_price">Cena stała</option>
+                   <option value="auction">Licytacja</option>
+                   <option value="negotiation">Negocjacje</option>
+                 </Select>
+               </FormRow>
+               
+               <FormRow>
+                 <Label>Cena (zł) *</Label>
+                 <Input
+                   type="number"
+                   name="price"
+                   value={formData.price}
+                   onChange={handleInputChange}
+                   placeholder="0.00"
+                   step="0.01"
+                   min="0"
+                 />
+                 {errors.price && <ErrorMessage>{errors.price}</ErrorMessage>}
+               </FormRow>
+             </FormGrid>
+           </FormSection>
+
+           <FormSection>
+             <SectionTitle>📝 Podstawowe informacje</SectionTitle>
+             <FormGrid>
+               <FormRow>
+                 <Label>Nazwa produktu *</Label>
+                 <Input
+                   type="text"
+                   name="name"
+                   value={formData.name}
+                   onChange={handleInputChange}
+                   placeholder="Wprowadź nazwę produktu"
+                 />
+                 {errors.name && <ErrorMessage>{errors.name}</ErrorMessage>}
+               </FormRow>
+               
+               <FormRow>
+                 <Label>Kategoria *</Label>
+                 <Select
+                   name="category"
+                   value={formData.category}
+                   onChange={handleInputChange}
+                 >
+                   <option value="">Wybierz kategorię</option>
+                   {categories.map(category => (
+                     <option key={category._id} value={category._id}>{category.name}</option>
+                   ))}
+                 </Select>
+                 {errors.category && <ErrorMessage>{errors.category}</ErrorMessage>}
+               </FormRow>
+               
+               <FormRow>
+                 <Label>Marka</Label>
+                 <Input
+                   type="text"
+                   name="brand"
+                   value={formData.brand}
+                   onChange={handleInputChange}
+                   placeholder="Nazwa marki"
+                 />
+               </FormRow>
+               
+               <FormRow>
+                 <Label>Stan magazynowy</Label>
+                 <Input
+                   type="number"
+                   name="stock"
+                   value={formData.stock}
+                   onChange={handleInputChange}
+                   placeholder="0"
+                   min="0"
+                 />
+               </FormRow>
+             </FormGrid>
+           </FormSection>
 
           <FormSection>
             <SectionTitle>📄 Opis produktu</SectionTitle>
@@ -763,57 +823,63 @@ export default function ProductCreate() {
             </FormRow>
           </FormSection>
 
-          <FormSection>
-            <SectionTitle>📦 Szczegóły techniczne</SectionTitle>
-            <FormGrid>
-              <FormRow>
-                <Label>SKU</Label>
-                <Input
-                  type="text"
-                  name="sku"
-                  value={formData.sku}
-                  onChange={handleInputChange}
-                  placeholder="Kod produktu"
-                />
-              </FormRow>
-              
-              <FormRow>
-                <Label>Stan magazynowy</Label>
-                <Input
-                  type="number"
-                  name="stock"
-                  value={formData.stock}
-                  onChange={handleInputChange}
-                  placeholder="0"
-                  min="0"
-                />
-              </FormRow>
-              
-              <FormRow>
-                <Label>Waga (kg)</Label>
-                <Input
-                  type="number"
-                  name="weight"
-                  value={formData.weight}
-                  onChange={handleInputChange}
-                  placeholder="0.0"
-                  step="0.1"
-                  min="0"
-                />
-              </FormRow>
-              
-              <FormRow>
-                <Label>Wymiary (cm)</Label>
-                <Input
-                  type="text"
-                  name="dimensions"
-                  value={formData.dimensions}
-                  onChange={handleInputChange}
-                  placeholder="Dł. x Szer. x Wys."
-                />
-              </FormRow>
-            </FormGrid>
-          </FormSection>
+                     <FormSection>
+             <SectionTitle>📍 Lokalizacja</SectionTitle>
+             <FormRow>
+               <Label>Lokalizacja produktu *</Label>
+               <LocationSelector
+                 onLocationChange={(locationData) => {
+                   setFormData(prev => ({
+                     ...prev,
+                     location: {
+                       ...prev.location,
+                       ...locationData
+                     }
+                   }));
+                 }}
+               />
+             </FormRow>
+           </FormSection>
+
+           <FormSection>
+             <SectionTitle>📦 Szczegóły techniczne</SectionTitle>
+             <FormGrid>
+               <FormRow>
+                 <Label>SKU</Label>
+                 <Input
+                   type="text"
+                   name="sku"
+                   value={formData.sku}
+                   onChange={handleInputChange}
+                   placeholder="Kod produktu"
+                 />
+               </FormRow>
+               
+               <FormRow>
+                 <Label>Waga (kg)</Label>
+                 <Input
+                   type="number"
+                   name="weight"
+                   value={formData.weight}
+                   onChange={handleInputChange}
+                   placeholder="0.0"
+                   step="0.1"
+                   min="0"
+                 />
+               </FormRow>
+               
+               <FormRow>
+                 <Label>Wymiary (cm)</Label>
+                 <Input
+                   type="text"
+                   name="dimensions"
+                   value={formData.dimensions}
+                   onChange={handleInputChange}
+                   placeholder="Dł. x Szer. x Wys."
+                 />
+               </FormRow>
+             </FormGrid>
+           </FormSection>
 
           <FormSection>
             <SectionTitle>🖼️ Zdjęcia produktu</SectionTitle>

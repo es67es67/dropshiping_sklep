@@ -3,6 +3,7 @@ import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { FaShoppingCart, FaTrash, FaMinus, FaPlus, FaStore, FaTruck, FaCreditCard } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
+import AdvertisementManager from './AdvertisementManager';
 
 // 🟡 SHARED COMPONENT: Cart
 // Zależności: AuthContext, /api/cart endpoints
@@ -468,6 +469,36 @@ const Cart = () => {
     } catch (err) {
       console.error('💥 Błąd podczas pobierania koszyka:', err);
       setError(err.message);
+      
+      // Wysyłanie błędu do systemu monitorowania
+      try {
+        const errorData = {
+          message: err.message,
+          type: 'cart_fetch_error',
+          severity: 'medium',
+          url: window.location.href,
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+          context: {
+            userId: user?._id || 'anonymous',
+            route: '/cart',
+            action: 'fetch_cart'
+          }
+        };
+
+        fetch('/api/errors', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(errorData)
+        }).catch(reportError => {
+          console.error('Nie udało się wysłać błędu do systemu monitorowania:', reportError);
+        });
+      } catch (reportError) {
+        console.error('Błąd podczas raportowania błędu:', reportError);
+      }
     } finally {
       setLoading(false);
     }
@@ -657,6 +688,9 @@ const Cart = () => {
         <FaShoppingCart className="cart-icon" />
         <h1>Koszyk zakupów</h1>
       </CartHeader>
+
+      {/* Komponent reklamowy dla strony koszyka */}
+      <AdvertisementManager location="cart" showAds={true} />
 
       {cart.sellerGroups.map((sellerGroup, index) => (
         <SellerCard key={sellerGroup.shopId}>

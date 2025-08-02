@@ -15,12 +15,13 @@ router.get('/search', productController.searchProducts);
 router.get('/category/:category', productController.getProductsByCategory);
 router.get('/shop/:shopId', productController.getProductsByShop);
 
+// Chronione trasy (wymagają autoryzacji) - MUSZĄ BYĆ PRZED trasami z parametrami
+router.post('/', authenticateToken, productController.createProduct);
+router.post('/user', authenticateToken, productController.createUserProduct);
+
 // Trasy z parametrami (muszą być po trasach bez parametrów)
 router.get('/:productId/reviews', productController.getProductReviews);
 router.get('/:id', productController.getProduct);
-
-// Chronione trasy (wymagają autoryzacji)
-router.post('/', authenticateToken, productController.createProduct);
 router.put('/:id', authenticateToken, productController.updateProduct);
 router.delete('/:id', authenticateToken, productController.deleteProduct);
 router.post('/:id/rating', authenticateToken, productController.addRating);

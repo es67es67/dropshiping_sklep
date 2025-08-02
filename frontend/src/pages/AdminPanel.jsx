@@ -3,6 +3,7 @@ import PageTitle from '../components/PageTitle';
 import { useAuth } from '../contexts/AuthContext';
 import DataManager from '../components/DataManager';
 import DataExport from '../components/DataExport';
+import AdvertisementAnalytics from '../components/AdvertisementAnalytics';
 import { api } from '../utils/api';
 import styled from 'styled-components';
 
@@ -387,6 +388,12 @@ const tabs = [
     description: 'Eksport danych do różnych formatów'
   },
   { 
+    key: 'advertising', 
+    label: '📢 Reklamy', 
+    icon: '📢',
+    description: 'Analityka reklam i zarządzanie kampaniami'
+  },
+  { 
     key: 'users', 
     label: '👥 Użytkownicy', 
     icon: '👥',
@@ -674,6 +681,77 @@ const AdminPanel = () => {
       
       case 'export':
         return <DataExport />;
+      
+      case 'advertising':
+        return (
+          <div>
+            <h2>📢 Zarządzanie Reklamami</h2>
+            <p>Analityka reklam i zarządzanie kampaniami marketingowymi</p>
+            
+            {error && <ErrorMessage>{error}</ErrorMessage>}
+            
+            <AdvertisementAnalytics 
+              timeRange="7d" 
+              showCharts={true} 
+            />
+            
+            <div style={{ marginTop: '2rem' }}>
+              <h3>🎯 Kampanie Marketingowe</h3>
+              <p>Zgodnie z planem marketingowym z pliku REKLAMA_MARKETPLACE.md:</p>
+              
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+                gap: '1rem',
+                marginTop: '1rem'
+              }}>
+                <div style={{ 
+                  background: '#f8f9fa', 
+                  padding: '1rem', 
+                  borderRadius: '8px',
+                  border: '1px solid #e9ecef'
+                }}>
+                  <h4>🏪 Dla Sprzedawców</h4>
+                  <p>"Wystaw swoje rzeczy w 2 minuty!"</p>
+                  <p>AI pomoże opisać produkt i wybrać kategorię</p>
+                </div>
+                
+                <div style={{ 
+                  background: '#f8f9fa', 
+                  padding: '1rem', 
+                  borderRadius: '8px',
+                  border: '1px solid #e9ecef'
+                }}>
+                  <h4>💰 Dla Kupujących</h4>
+                  <p>"Znajdź to, czego szukasz w swojej okolicy!"</p>
+                  <p>Lokalne oferty, szybka dostawa, zaufani sprzedawcy</p>
+                </div>
+                
+                <div style={{ 
+                  background: '#f8f9fa', 
+                  padding: '1rem', 
+                  borderRadius: '8px',
+                  border: '1px solid #e9ecef'
+                }}>
+                  <h4>🎯 Aukcje</h4>
+                  <p>"Licytuj okazje w swojej gminie!"</p>
+                  <p>Unikalne przedmioty, konkurencyjne ceny</p>
+                </div>
+                
+                <div style={{ 
+                  background: '#f8f9fa', 
+                  padding: '1rem', 
+                  borderRadius: '8px',
+                  border: '1px solid #e9ecef'
+                }}>
+                  <h4>🏪 Sklepy</h4>
+                  <p>"Sklepy stacjonarne i online w jednym miejscu!"</p>
+                  <p>Połącz siły - sprzedawaj lokalnie i globalnie</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
       
       case 'users':
         return (

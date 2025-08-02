@@ -21,6 +21,7 @@ import LocationSelector from './components/LocationSelector';
 import GamificationPanel from './components/GamificationPanel';
 import Notifications from './components/Notifications';
 import ProductCreate from './components/ProductCreate';
+import AddProductPage from './pages/AddProductPage';
 import ShopCreate from './components/ShopCreate';
 import ShopManagement from './components/ShopManagement';
 import ProductManagement from './components/ProductManagement';
@@ -57,9 +58,14 @@ import Post from './pages/Post';
 import AdvancedFeatures from './pages/AdvancedFeatures';
 import TerytFeatures from './pages/TerytFeatures';
 import ProductDetails from './components/ProductDetails';
+import ShopProductDetails from './components/ShopProductDetails';
+import CategoryManagement from './components/CategoryManagement';
 import LocationDemo from './pages/LocationDemo';
 import Feed from './pages/Feed';
 import ErrorDashboard from './components/ErrorDashboard';
+import AuctionDetails from './pages/AuctionDetails';
+import NegotiationDetails from './pages/NegotiationDetails';
+import FreeItemDetails from './pages/FreeItemDetails';
 
 
 function App() {
@@ -237,7 +243,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/products" element={<Products />} />
+        <Route path="/products" element={<Navigate to="/market" replace />} />
+        <Route path="/market" element={<Products />} />
         <Route path="/shops" element={
           <ProtectedRoute>
             <ShopList />
@@ -257,10 +264,12 @@ function App() {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/product-create" element={<ProductCreate />} />
         <Route path="/products/create" element={<ProductCreate />} />
+        <Route path="/add-product" element={<AddProductPage />} />
         <Route path="/shop-create" element={<ShopCreate theme={currentTheme} />} />
         <Route path="/shops/create" element={<ShopCreate theme={currentTheme} />} />
         <Route path="/shop-management" element={<ShopManagement />} />
         <Route path="/product-management" element={<ProductManagement />} />
+        <Route path="/category-management" element={<CategoryManagement theme={currentTheme} />} />
         <Route path="/layout-customization" element={<LayoutCustomization theme={currentTheme} onSettingsSaved={handleSettingsSaved} />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/search" element={<Search />} />
@@ -299,7 +308,7 @@ function App() {
         <Route path="/location-map" element={<LocationMap theme={currentTheme} />} />
         <Route path="/company-profiles" element={<CompanyProfiles theme={currentTheme} />} />
         <Route path="/company-profiles/:id" element={<CompanyProfile theme={currentTheme} />} />
-        <Route path="/products/:id" element={<Product theme={currentTheme} />} />
+        <Route path="/products/:id" element={<ShopProductDetails theme={currentTheme} />} />
         <Route path="/users/:id" element={<User theme={currentTheme} />} />
         <Route path="/posts/:id" element={<Post theme={currentTheme} />} />
         <Route path="/feed" element={
@@ -311,6 +320,10 @@ function App() {
         <Route path="/advanced-features" element={<AdvancedFeatures theme={currentTheme} />} />
         <Route path="/teryt-features" element={<TerytFeatures theme={currentTheme} />} />
         <Route path="/product/:productId" element={<ProductDetails theme={currentTheme} />} />
+        <Route path="/marketproduct/:productId" element={<ProductDetails theme={currentTheme} />} />
+        <Route path="/auction/:id" element={<AuctionDetails theme={currentTheme} />} />
+        <Route path="/negotiation/:id" element={<NegotiationDetails theme={currentTheme} />} />
+        <Route path="/free/:id" element={<FreeItemDetails theme={currentTheme} />} />
         <Route path="/location-demo" element={<LocationDemo />} />
       </Routes>
     );

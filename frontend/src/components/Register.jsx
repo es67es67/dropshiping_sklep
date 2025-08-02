@@ -3,6 +3,8 @@ import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import LocationSelector from './LocationSelector';
+import { useTheme } from 'styled-components';
 
 const Container = styled.div`
   max-width: 500px;
@@ -369,6 +371,7 @@ const CheckboxLabel = styled.label.withConfig({
 `;
 
 export default function Register() {
+  const theme = useTheme();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -382,6 +385,20 @@ export default function Register() {
     username: '', // Dodaję username
     acceptTerms: false,
     acceptNewsletter: false
+  });
+
+  const [locationData, setLocationData] = useState({
+    voivodeshipCode: '',
+    countyCode: '',
+    municipalityCode: '',
+    simcCode: '',
+    tercCode: '',
+    address: {
+      city: '',
+      street: '',
+      houseNumber: '',
+      postalCode: ''
+    }
   });
   
   const [errors, setErrors] = useState({});
@@ -493,7 +510,21 @@ export default function Register() {
     setIsLoading(true);
     
     try {
-      const result = await register(formData);
+      // Połącz dane formularza z danymi lokalizacji
+      const registrationData = {
+        ...formData,
+        ...locationData,
+        street: locationData.address?.street || '',
+        houseNumber: locationData.address?.houseNumber || '',
+        postalCode: locationData.address?.postalCode || '',
+        voivodeshipCode: locationData.voivodeshipCode || '',
+        countyCode: locationData.countyCode || '',
+        municipalityCode: locationData.municipalityCode || '',
+        simcCode: locationData.simcCode || '',
+        tercCode: locationData.tercCode || ''
+      };
+      
+      const result = await register(registrationData);
       
       if (result.success) {
         setMessage('Konto zostało utworzone pomyślnie! Przekierowywanie...');
@@ -507,6 +538,18 @@ export default function Register() {
       setMessage('Wystąpił błąd podczas rejestracji');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleLocationChange = (newLocationData) => {
+    setLocationData(newLocationData);
+    
+    // Aktualizuj pole city w formData
+    if (newLocationData.address?.city) {
+      setFormData(prev => ({
+        ...prev,
+        city: newLocationData.address.city
+      }));
     }
   };
 
@@ -637,36 +680,30 @@ export default function Register() {
           </FormGroup>
         </FormGrid>
         
-        <FormGrid>
-          <FormGroup>
-            <Label>Płeć</Label>
-            <Select
-              name="gender"
-              value={formData.gender}
-              onChange={handleInputChange}
-              disabled={isLoading}
-            >
-              <option value="">Wybierz płeć</option>
-              <option value="male">Męska</option>
-              <option value="female">Żeńska</option>
-              <option value="other">Inna</option>
-            </Select>
-          </FormGroup>
-          
-          <FormGroup>
-            <Label>Miasto *</Label>
-            <Input
-              type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleInputChange}
-              placeholder="Wprowadź miasto"
-              disabled={isLoading}
-              className={errors.city ? 'error' : ''}
-            />
-            {errors.city && <ErrorMessage>{errors.city}</ErrorMessage>}
-          </FormGroup>
-        </FormGrid>
+        <FormGroup>
+          <Label>Płeć</Label>
+          <Select
+            name="gender"
+            value={formData.gender}
+            onChange={handleInputChange}
+            disabled={isLoading}
+          >
+            <option value="">Wybierz płeć</option>
+            <option value="male">Męska</option>
+            <option value="female">Żeńska</option>
+            <option value="other">Inna</option>
+          </Select>
+        </FormGroup>
+        
+        <FormGroup className="full-width">
+          <Label>Lokalizacja *</Label>
+          <LocationSelector
+            theme={theme}
+            onLocationChange={handleLocationChange}
+            showEditButton={false}
+          />
+          {errors.city && <ErrorMessage>{errors.city}</ErrorMessage>}
+        </FormGroup>
         
         <FormGroup>
           <Label>Nazwa użytkownika *</Label>

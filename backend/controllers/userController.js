@@ -4,18 +4,81 @@ const Post = require('../models/postModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const locationService = require('../services/locationService');
+const UniversalErrorService = require('../services/universalErrorService');
 
 // Rejestracja użytkownika
 exports.register = async (req, res) => {
   try {
-    const { username, email, password, firstName, lastName } = req.body;
+    console.log('📝 Rozpoczynam rejestrację użytkownika:', {
+      username: req.body.username,
+      email: req.body.email,
+      hasLocationData: !!req.body.locationData
+    });
+
+    const { 
+      username, 
+      email, 
+      password, 
+      firstName, 
+      lastName,
+      phone,
+      dateOfBirth,
+      gender,
+      locationData // Nowe pole z danymi lokalizacji
+    } = req.body;
+
+    // Walidacja wymaganych pól
+    const validationErrors = [];
+    if (!username) validationErrors.push('Nazwa użytkownika jest wymagana');
+    if (!email) validationErrors.push('Email jest wymagany');
+    if (!password) validationErrors.push('Hasło jest wymagane');
+    if (!firstName) validationErrors.push('Imię jest wymagane');
+    if (!lastName) validationErrors.push('Nazwisko jest wymagane');
+    if (!phone) validationErrors.push('Telefon jest wymagany');
+    if (!dateOfBirth) validationErrors.push('Data urodzenia jest wymagana');
+    if (!gender) validationErrors.push('Płeć jest wymagana');
+
+    // Sprawdź dane lokalizacji
+    if (!locationData || !locationData.address || !locationData.address.city) {
+      validationErrors.push('Miasto jest wymagane');
+    }
+
+              if (validationErrors.length > 0) {
+            console.log('❌ Błędy walidacji:', validationErrors);
+            
+            // Zapisz błąd walidacji
+            await UniversalErrorService.logValidationError(validationErrors, {
+              componentName: 'userController',
+              filename: 'userController.js',
+              additionalData: {
+                action: 'register',
+                requestData: { username, email, hasLocationData: !!locationData }
+              }
+            });
+
+      return res.status(400).json({ 
+        error: 'Błędy walidacji',
+        details: validationErrors
+      });
+    }
 
     // Sprawdź czy użytkownik już istnieje
     const existingUser = await User.findOne({ 
       $or: [{ email }, { username }] 
     });
 
-    if (existingUser) {
+              if (existingUser) {
+            const error = new Error(`Użytkownik z tym emailem (${email}) lub nazwą użytkownika (${username}) już istnieje`);
+            await UniversalErrorService.logError(error, {
+              componentName: 'userController',
+              filename: 'userController.js',
+              type: 'validation_error',
+              additionalData: {
+                action: 'register',
+                requestData: { username, email }
+              }
+            });
+
       return res.status(400).json({ 
         error: 'Użytkownik z tym emailem lub nazwą użytkownika już istnieje' 
       });
@@ -24,14 +87,54 @@ exports.register = async (req, res) => {
     // Hashuj hasło
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Utwórz nowego użytkownika
-    const user = new User({
+    // Przygotuj dane użytkownika
+    const userData = {
       username,
       email,
       password: hashedPassword,
       firstName,
-      lastName
-    });
+      lastName,
+      phone,
+      dateOfBirth,
+      gender
+    };
+
+    // Dodaj dane lokalizacji jeśli są dostępne
+    if (locationData) {
+      if (locationData.address) {
+        userData.address = locationData.address;
+      }
+      if (locationData.teryt) {
+        userData.teryt = locationData.teryt;
+      }
+      if (locationData.simcCode) {
+        userData.teryt = {
+          ...userData.teryt,
+          simcCode: locationData.simcCode
+        };
+      }
+      if (locationData.voivodeshipCode) {
+        userData.teryt = {
+          ...userData.teryt,
+          voivodeshipCode: locationData.voivodeshipCode
+        };
+      }
+      if (locationData.countyCode) {
+        userData.teryt = {
+          ...userData.teryt,
+          countyCode: locationData.countyCode
+        };
+      }
+      if (locationData.municipalityCode) {
+        userData.teryt = {
+          ...userData.teryt,
+          municipalityCode: locationData.municipalityCode
+        };
+      }
+    }
+
+    // Utwórz nowego użytkownika
+    const user = new User(userData);
 
     await user.save();
 
@@ -42,6 +145,8 @@ exports.register = async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    console.log('✅ Użytkownik został pomyślnie utworzony:', user.username);
+    
     res.status(201).json({
       message: 'Użytkownik został utworzony pomyślnie',
       token,
@@ -53,8 +158,28 @@ exports.register = async (req, res) => {
         lastName: user.lastName
       }
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+          } catch (err) {
+          console.error('❌ Błąd podczas rejestracji:', err);
+          
+          // Zapisz błąd w bazie danych
+          await UniversalErrorService.logError(err, {
+            componentName: 'userController',
+            filename: 'userController.js',
+            type: 'api_error',
+            additionalData: {
+              action: 'register',
+              requestData: { 
+                username: req.body.username, 
+                email: req.body.email,
+                hasLocationData: !!req.body.locationData
+              }
+            }
+          });
+
+    res.status(500).json({ 
+      error: 'Błąd podczas rejestracji użytkownika',
+      details: err.message 
+    });
   }
 };
 

@@ -128,6 +128,23 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Rejestracja użytkownika:', userData);
       
+      // Przygotuj dane lokalizacji
+      const locationData = {
+        address: {
+          city: userData.city,
+          street: userData.street || '',
+          houseNumber: userData.houseNumber || '',
+          postalCode: userData.postalCode || ''
+        },
+        teryt: {
+          voivodeshipCode: userData.voivodeshipCode || '',
+          countyCode: userData.countyCode || '',
+          municipalityCode: userData.municipalityCode || '',
+          simcCode: userData.simcCode || '',
+          tercCode: userData.tercCode || ''
+        }
+      };
+      
       // Wyślij dane do backendu
       const response = await fetch(`/api/users/register`, {
         method: 'POST',
@@ -143,7 +160,8 @@ export const AuthProvider = ({ children }) => {
           dateOfBirth: userData.dateOfBirth,
           phone: userData.phone,
           city: userData.city,
-          gender: userData.gender
+          gender: userData.gender,
+          locationData: locationData
         }),
       });
 

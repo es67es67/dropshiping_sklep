@@ -56,7 +56,8 @@ const TabContainer = styled.div`
 `;
 
 const Tab = styled.button.attrs(props => ({
-  'data-active': props.active ? 'true' : undefined
+  'data-active': props.active ? 'true' : undefined,
+  active: undefined // Usuń atrybut active z DOM
 }))`
   padding: 1rem 2rem;
   margin: 0 0.5rem;

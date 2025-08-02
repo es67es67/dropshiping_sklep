@@ -4,6 +4,7 @@ import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import AdvertisementManager from './AdvertisementManager';
 
 // 🟡 SHARED COMPONENT: ShopList
 // Zależności: AuthContext, React Router, /api/shops endpoints
@@ -596,6 +597,9 @@ export default function ShopList() {
           {showAllShops ? '🔒 Moje sklepy' : '🔓 Wszystkie sklepy'}
         </button>
       </Filters>
+
+      {/* Komponent reklamowy dla strony sklepów */}
+      <AdvertisementManager location="shops" showAds={true} />
 
       {filteredShops.length === 0 ? (
         <EmptyState>

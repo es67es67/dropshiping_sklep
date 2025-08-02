@@ -31,15 +31,46 @@ const ProductBox = styled.div`
   }
 `;
 
-const Image = styled.img`
-  width: 320px;
-  height: 320px;
+// Galeria zdjęć
+const ImageGallery = styled.div`
+  width: 400px;
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
+
+const MainImage = styled.img`
+  width: 100%;
+  height: 400px;
   object-fit: cover;
   border-radius: 12px;
   background: #f0f0f0;
-  @media (max-width: 480px) {
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+  
+  &:hover {
+    transform: scale(1.02);
+  }
+`;
+
+const ThumbnailGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+`;
+
+const Thumbnail = styled.img`
     width: 100%;
-    height: 200px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid ${props => props.active ? props.theme.primary : 'transparent'};
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: ${props => props.theme.primary};
   }
 `;
 
@@ -62,9 +93,27 @@ const Price = styled.div`
   color: ${props => props.theme.primary};
 `;
 
+const OriginalPrice = styled.div`
+  font-size: 1.2rem;
+  color: ${props => props.theme.textSecondary};
+  text-decoration: line-through;
+  margin-left: 0.5rem;
+`;
+
+const Discount = styled.span`
+  background: #ff4444;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+`;
+
 const Description = styled.p`
   color: ${props => props.theme.textSecondary};
   font-size: 1.1rem;
+  line-height: 1.6;
 `;
 
 const Label = styled.span`
@@ -72,9 +121,94 @@ const Label = styled.span`
   color: ${props => props.theme.text};
 `;
 
+const SellerInfo = styled.div`
+  background: ${props => props.theme.background};
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+`;
+
+const SellerName = styled.div`
+  font-weight: 600;
+  color: ${props => props.theme.text};
+  margin-bottom: 0.5rem;
+`;
+
+const SellerRating = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+`;
+
+const Stars = styled.div`
+  color: #ffd700;
+  font-size: 1.1rem;
+`;
+
+const ContactButton = styled.button`
+  background: ${props => props.theme.secondary || props.theme.primary};
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  
+  &:hover {
+    background: ${props => props.theme.secondary || props.theme.primary}cc;
+  }
+`;
+
+// Sekcja zakupu
+const PurchaseSection = styled.div`
+  background: ${props => props.theme.background};
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+`;
+
+const QuantitySelector = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+`;
+
+const QuantityButton = styled.button`
+  background: ${props => props.theme.primary};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const QuantityInput = styled.input`
+  width: 60px;
+  text-align: center;
+  border: 1px solid ${props => props.theme.border};
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 1rem;
+`;
+
 const AddToCartButton = styled.button`
-  margin-top: 1rem;
-  padding: 0.75rem 2rem;
+  width: 100%;
+  padding: 1rem 2rem;
   background: ${props => props.theme.primary};
   color: white;
   border: none;
@@ -85,7 +219,9 @@ const AddToCartButton = styled.button`
   transition: background 0.2s;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  margin: 1rem 0;
   
   &:hover {
     background: ${props => props.theme.primary}cc;
@@ -97,177 +233,24 @@ const AddToCartButton = styled.button`
   }
 `;
 
-// Nowe komponenty dla zakładek
-const TabsContainer = styled.div`
-  background: ${props => props.theme.surface};
-  border-radius: 16px;
-  box-shadow: ${props => props.theme.shadow};
-  overflow: hidden;
-`;
-
-const TabsHeader = styled.div`
-  display: flex;
-  border-bottom: 1px solid ${props => props.theme.border};
-`;
-
-const TabButton = styled.button`
-  flex: 1;
-  padding: 1rem 1.5rem;
-  background: ${props => props.active === 'true' ? props.theme.primary : 'transparent'};
-  color: ${props => props.active === 'true' ? 'white' : props.theme.text};
+const BuyNowButton = styled.button`
+  width: 100%;
+  padding: 1rem 2rem;
+  background: #4caf50;
+  color: white;
   border: none;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s;
-  &:hover {
-    background: ${props => props.active === 'true' ? props.theme.primary : props.theme.background};
-  }
-`;
-
-const TabContent = styled.div`
-  padding: 2rem;
-`;
-
-const Section = styled.div`
-  margin-bottom: 2rem;
-  
-  h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: ${props => props.theme.text};
-  }
-  
-  p {
-    line-height: 1.6;
-    color: ${props => props.theme.textSecondary};
-    margin-bottom: 1rem;
-  }
-`;
-
-const Specifications = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-`;
-
-const SpecItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 0.75rem;
-  background: ${props => props.theme.background};
   border-radius: 8px;
-  
-  .label {
-    font-weight: 600;
-    color: ${props => props.theme.text};
-  }
-  
-  .value {
-    color: ${props => props.theme.textSecondary};
-  }
-`;
-
-const RatingSection = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-`;
-
-const RatingStars = styled.div`
-  display: flex;
-  gap: 0.25rem;
-  font-size: 1.5rem;
-`;
-
-const Star = styled.span`
-  color: ${props => props.filled === 'true' ? '#FFD700' : '#ddd'};
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-`;
-
-const RatingInfo = styled.div`
-  .rating {
-    font-size: 2rem;
-    font-weight: 700;
-    color: ${props => props.theme.text};
-  }
-  
-  .count {
-    color: ${props => props.theme.textSecondary};
-    font-size: 0.9rem;
-  }
-`;
-
-const ReviewsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-`;
-
-const ReviewItem = styled.div`
-  padding: 1.5rem;
-  background: ${props => props.theme.background};
-  border-radius: 12px;
-  border-left: 4px solid ${props => props.theme.primary};
-`;
-
-const ReviewHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-`;
-
-const ReviewerInfo = styled.div`
-  .name {
-    font-weight: 600;
-    color: ${props => props.theme.text};
-  }
-  
-  .date {
-    font-size: 0.9rem;
-    color: ${props => props.theme.textSecondary};
-  }
-`;
-
-const ReviewContent = styled.div`
-  color: ${props => props.theme.textSecondary};
-  line-height: 1.6;
-`;
-
-const NoReviews = styled.div`
-  text-align: center;
-  padding: 3rem;
-  color: ${props => props.theme.textSecondary};
-  font-style: italic;
-`;
-
-const QuantitySelector = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-`;
-
-const QuantityButton = styled.button`
-  width: 40px;
-  height: 40px;
-  border: 2px solid ${props => props.theme.primary};
-  background: white;
-  color: ${props => props.theme.primary};
-  border-radius: 8px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
+  transition: background 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  gap: 0.5rem;
   
   &:hover {
-    background: ${props => props.theme.primary};
-    color: white;
+    background: #45a049;
   }
   
   &:disabled {
@@ -276,17 +259,194 @@ const QuantityButton = styled.button`
   }
 `;
 
-const QuantityInput = styled.input`
-  width: 60px;
-  height: 40px;
-  text-align: center;
-  border: 2px solid ${props => props.theme.border};
+const WishlistButton = styled.button`
+  width: 100%;
+  padding: 0.75rem 2rem;
+  background: transparent;
+  color: ${props => props.theme.primary};
+  border: 2px solid ${props => props.theme.primary};
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    background: ${props => props.theme.primary};
+    color: white;
+  }
+  
+  &.active {
+    background: ${props => props.theme.primary};
+    color: white;
+  }
 `;
 
+// Sekcja szczegółów
+const DetailsSection = styled.div`
+  background: ${props => props.theme.surface};
+  border-radius: 16px;
+  box-shadow: ${props => props.theme.shadow};
+  padding: 2rem;
+  margin-bottom: 2rem;
+`;
 
+const TabsContainer = styled.div`
+  border-bottom: 1px solid ${props => props.theme.border};
+  margin-bottom: 2rem;
+`;
+
+const TabButton = styled.button`
+  background: none;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: ${props => props.active ? props.theme.primary : props.theme.textSecondary};
+  border-bottom: 2px solid ${props => props.active ? props.theme.primary : 'transparent'};
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    color: ${props => props.theme.primary};
+  }
+`;
+
+const TabContent = styled.div`
+  min-height: 200px;
+`;
+
+// Recenzje
+const ReviewsSection = styled.div`
+  margin-top: 2rem;
+`;
+
+const ReviewItem = styled.div`
+  border-bottom: 1px solid ${props => props.theme.border};
+  padding: 1rem 0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const ReviewHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+`;
+
+const ReviewAuthor = styled.div`
+    font-weight: 600;
+    color: ${props => props.theme.text};
+`;
+  
+const ReviewDate = styled.div`
+    color: ${props => props.theme.textSecondary};
+  font-size: 0.9rem;
+`;
+
+const ReviewRating = styled.div`
+  color: #ffd700;
+  font-size: 1rem;
+`;
+
+const ReviewText = styled.div`
+  color: ${props => props.theme.textSecondary};
+  line-height: 1.5;
+`;
+
+// Powiązane produkty
+const RelatedProducts = styled.div`
+  margin-top: 3rem;
+`;
+
+const RelatedTitle = styled.h2`
+  font-size: 1.5rem;
+    font-weight: 700;
+  margin-bottom: 1rem;
+    color: ${props => props.theme.text};
+`;
+
+const RelatedGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+`;
+
+const RelatedProductCard = styled.div`
+  background: ${props => props.theme.surface};
+  border-radius: 12px;
+  box-shadow: ${props => props.theme.shadow};
+  overflow: hidden;
+  transition: transform 0.2s;
+  cursor: pointer;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+`;
+
+const RelatedProductImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+`;
+
+const RelatedProductInfo = styled.div`
+  padding: 1rem;
+`;
+
+const RelatedProductName = styled.div`
+  font-weight: 600;
+  color: ${props => props.theme.text};
+  margin-bottom: 0.5rem;
+`;
+
+const RelatedProductPrice = styled.div`
+  color: ${props => props.theme.primary};
+  font-weight: 700;
+`;
+
+// Modal dla galerii
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalImage = styled.img`
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 8px;
+`;
+
+const ModalClose = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+`;
 
 const Notification = styled.div`
   position: fixed;
@@ -333,14 +493,25 @@ export default function ProductDetails({ theme }) {
   const [reviewSuccess, setReviewSuccess] = useState(false);
   const [userReview, setUserReview] = useState(null);
   
-  // Nowe stany dla koszyka
+  // Nowe stany dla zakupu
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [buyingNow, setBuyingNow] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  
+  // Stany dla galerii
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  
+  // Stany dla powiązanych produktów
+  const [relatedProducts, setRelatedProducts] = useState([]);
 
   useEffect(() => {
     fetchProduct();
     fetchReviews();
+    fetchRelatedProducts();
+    checkWishlistStatus();
     // eslint-disable-next-line
   }, [productId]);
 
@@ -354,261 +525,196 @@ export default function ProductDetails({ theme }) {
   }, [reviews, user, isAuthenticated]);
 
   const fetchProduct = async () => {
-    try {
       setLoading(true);
+    try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/products/${productId}`);
-      if (!response.ok) throw new Error('Nie udało się pobrać produktu');
+      const response = await fetch(`${apiUrl}/api/marketplace/${productId}`);
+      if (response.ok) {
       const data = await response.json();
       setProduct(data);
-    } catch (err) {
-      setError(err.message);
+      } else {
+        setError('Nie znaleziono produktu');
+      }
+    } catch (error) {
+      setError('Błąd podczas ładowania produktu');
     } finally {
       setLoading(false);
     }
   };
 
   const fetchReviews = async () => {
-    try {
       setReviewsLoading(true);
+    try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/products/${productId}/reviews`);
+      const response = await fetch(`${apiUrl}/api/marketplace/${productId}/reviews`);
       if (response.ok) {
         const data = await response.json();
         setReviews(data.reviews || []);
       }
-    } catch (err) {
-      console.error('Błąd pobierania recenzji:', err);
+    } catch (error) {
+      console.error('Błąd podczas ładowania recenzji:', error);
     } finally {
       setReviewsLoading(false);
     }
   };
 
-  const renderStars = (rating) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star key={i} filled={(i < rating).toString()}>★</Star>
-    ));
-  };
-
-  const handleReviewChange = e => {
-    setReviewForm({ ...reviewForm, [e.target.name]: e.target.value });
-  };
-
-  const handleReviewSubmit = async e => {
-    e.preventDefault();
-    setReviewError(null);
-    setReviewSuccess(null);
+  const fetchRelatedProducts = async () => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/products/${productId}/reviews`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(reviewForm)
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        setReviewError(data.error || 'Błąd dodawania recenzji');
-      } else {
-        setReviewSuccess('Dziękujemy za recenzję!');
-        setReviewForm({ rating: 5, comment: '' });
-        fetchReviews();
+      const response = await fetch(`${apiUrl}/api/marketplace/${productId}/related`);
+      if (response.ok) {
+        const data = await response.json();
+        setRelatedProducts(data.products || []);
       }
-    } catch (err) {
-      setReviewError('Błąd sieci');
+    } catch (error) {
+      console.error('Błąd podczas ładowania powiązanych produktów:', error);
     }
   };
 
-  const handleQuantityChange = (newQuantity) => {
-    const validQuantity = Math.max(1, Math.min(newQuantity, product?.stock || 1));
-    setQuantity(validQuantity);
+  const checkWishlistStatus = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${apiUrl}/api/marketplace/${productId}/wishlist`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setIsInWishlist(data.isInWishlist);
+      }
+    } catch (error) {
+      console.error('Błąd podczas sprawdzania statusu wishlist:', error);
+    }
   };
 
-  const addToCart = async () => {
+  const handleAddToCart = async () => {
     if (!isAuthenticated) {
-      setNotification({ type: 'error', message: 'Musisz się zalogować, aby dodać produkt do koszyka' });
-      return;
-    }
-
-    if (!product || !product.isActive) {
-      setNotification({ type: 'error', message: 'Produkt jest niedostępny' });
-      return;
-    }
-
-    if (quantity > product.stock) {
-      setNotification({ type: 'error', message: 'Niewystarczający stan magazynowy' });
+      setNotification({ type: 'error', message: 'Zaloguj się, aby dodać do koszyka' });
       return;
     }
 
     setAddingToCart(true);
     try {
-      const response = await fetch(`/api/cart/add`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${apiUrl}/api/cart/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          productId: product._id,
+          productId: productId,
           quantity: quantity
         })
       });
 
-      const data = await response.json();
-      
       if (response.ok) {
-        setNotification({ type: 'success', message: `Dodano ${quantity} szt. do koszyka!` });
-        setQuantity(1); // Reset quantity
+        setNotification({ type: 'success', message: 'Dodano do koszyka!' });
       } else {
-        setNotification({ type: 'error', message: data.error || 'Błąd dodawania do koszyka' });
+        setNotification({ type: 'error', message: 'Błąd podczas dodawania do koszyka' });
       }
     } catch (error) {
-      setNotification({ type: 'error', message: 'Błąd sieci' });
+      setNotification({ type: 'error', message: 'Błąd podczas dodawania do koszyka' });
     } finally {
       setAddingToCart(false);
     }
   };
 
-  // Auto-hide notification after 3 seconds
-  useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => {
-        setNotification(null);
-      }, 3000);
-      return () => clearTimeout(timer);
+  const handleBuyNow = async () => {
+    if (!isAuthenticated) {
+      setNotification({ type: 'error', message: 'Zaloguj się, aby kupić produkt' });
+      return;
     }
-  }, [notification]);
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'description':
-        return (
-          <Section>
-            <h3>Opis produktu</h3>
-            <p>{product.description}</p>
-            {product.longDescription && (
-              <p>{product.longDescription}</p>
-            )}
-          </Section>
-        );
+    setBuyingNow(true);
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${apiUrl}/api/orders/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          items: [{
+            productId: productId,
+          quantity: quantity
+          }]
+        })
+      });
       
-      case 'specifications':
-        return (
-          <Section>
-            <h3>Specyfikacje techniczne</h3>
-            <Specifications>
-              {product.specifications && Object.entries(product.specifications).map(([key, value]) => (
-                <SpecItem key={key}>
-                  <span className="label">{key}</span>
-                  <span className="value">{value}</span>
-                </SpecItem>
-              ))}
-              <SpecItem>
-                <span className="label">Kategoria</span>
-                <span className="value">{product.category}</span>
-              </SpecItem>
-              <SpecItem>
-                <span className="label">Marka</span>
-                <span className="value">{product.brand || 'Brak informacji'}</span>
-              </SpecItem>
-              <SpecItem>
-                <span className="label">Stan magazynowy</span>
-                <span className="value">{product.stock} szt.</span>
-              </SpecItem>
-              <SpecItem>
-                <span className="label">Status</span>
-                <span className="value">{product.isActive ? 'Dostępny' : 'Niedostępny'}</span>
-              </SpecItem>
-              {product.tags && product.tags.length > 0 && (
-                <SpecItem>
-                  <span className="label">Tagi</span>
-                  <span className="value">{product.tags.join(', ')}</span>
-                </SpecItem>
-              )}
-            </Specifications>
-          </Section>
-        );
-      
-      case 'reviews':
-        return (
-          <Section>
-            <h3>Recenzje i oceny</h3>
-            <RatingSection>
-              <RatingStars>
-                {renderStars(product.rating || 0)}
-              </RatingStars>
-              <RatingInfo>
-                <div className="rating">{product.rating || 0}</div>
-                <div className="count">{reviews.length} recenzji</div>
-              </RatingInfo>
-            </RatingSection>
-
-            {isAuthenticated && !userReview && (
-              <form onSubmit={handleReviewSubmit} style={{ marginBottom: '2rem', background: '#f9f9f9', padding: '1.5rem', borderRadius: '12px' }}>
-                <h4>Dodaj swoją recenzję</h4>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label>Ocena: </label>
-                  <select name="rating" value={reviewForm.rating} onChange={handleReviewChange}>
-                    {[5,4,3,2,1].map(v => <option key={v} value={v}>{v}</option>)}
-                  </select>
-                </div>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label>Komentarz:</label><br />
-                  <textarea name="comment" value={reviewForm.comment} onChange={handleReviewChange} rows={4} style={{ width: '100%' }} required minLength={10} />
-                </div>
-                {reviewError && <div style={{ color: 'red', marginBottom: '1rem' }}>{reviewError}</div>}
-                {reviewSuccess && <div style={{ color: 'green', marginBottom: '1rem' }}>{reviewSuccess}</div>}
-                <button type="submit">Dodaj recenzję</button>
-              </form>
-            )}
-
-            {isAuthenticated && userReview && (
-              <div style={{ marginBottom: '2rem', color: '#4caf50', fontWeight: 600 }}>
-                Dziękujemy za Twoją recenzję!
-              </div>
-            )}
-
-            {reviewsLoading ? (
-              <div>Ładowanie recenzji...</div>
-            ) : reviews.length > 0 ? (
-              <ReviewsList>
-                {reviews.map((review) => (
-                  <ReviewItem key={review._id}>
-                    <ReviewHeader>
-                      <ReviewerInfo>
-                        <div className="name">{review.userName || 'Anonimowy użytkownik'}</div>
-                        <div className="date">
-                          {new Date(review.createdAt).toLocaleDateString('pl-PL')}
-                        </div>
-                      </ReviewerInfo>
-                      <RatingStars>
-                        {renderStars(review.rating)}
-                      </RatingStars>
-                    </ReviewHeader>
-                    <ReviewContent>
-                      {review.comment}
-                    </ReviewContent>
-                  </ReviewItem>
-                ))}
-              </ReviewsList>
-            ) : (
-              <NoReviews>
-                Brak recenzji dla tego produktu. Bądź pierwszym, który oceni ten produkt!
-              </NoReviews>
-            )}
-          </Section>
-        );
-      
-      default:
-        return null;
+      if (response.ok) {
+        const data = await response.json();
+        setNotification({ type: 'success', message: 'Zamówienie utworzone! Przekierowywanie do płatności...' });
+        // Przekierowanie do strony płatności
+        window.location.href = `/payment/${data.orderId}`;
+      } else {
+        setNotification({ type: 'error', message: 'Błąd podczas tworzenia zamówienia' });
+      }
+    } catch (error) {
+      setNotification({ type: 'error', message: 'Błąd podczas tworzenia zamówienia' });
+    } finally {
+      setBuyingNow(false);
     }
   };
 
-  if (loading) return <Container>Ładowanie produktu...</Container>;
+  const handleWishlistToggle = async () => {
+    if (!isAuthenticated) {
+      setNotification({ type: 'error', message: 'Zaloguj się, aby dodać do ulubionych' });
+      return;
+    }
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const token = localStorage.getItem('token');
+      const method = isInWishlist ? 'DELETE' : 'POST';
+      const response = await fetch(`${apiUrl}/api/marketplace/${productId}/wishlist`, {
+        method,
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        setIsInWishlist(!isInWishlist);
+        setNotification({ 
+          type: 'success', 
+          message: isInWishlist ? 'Usunięto z ulubionych' : 'Dodano do ulubionych' 
+        });
+      }
+    } catch (error) {
+      setNotification({ type: 'error', message: 'Błąd podczas aktualizacji ulubionych' });
+    }
+  };
+
+  const handleQuantityChange = (newQuantity) => {
+    if (newQuantity >= 1 && newQuantity <= product.stock) {
+      setQuantity(newQuantity);
+    }
+  };
+
+  const handleImageClick = (index) => {
+    setSelectedImage(index);
+    setShowModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowModal(false);
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
+
+  if (loading) return <Container>Ładowanie...</Container>;
   if (error) return <Container>Błąd: {error}</Container>;
   if (!product) return <Container>Nie znaleziono produktu.</Container>;
+
+  const images = product.images || [product.mainImage].filter(Boolean);
+  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const discountPercentage = hasDiscount ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
 
   return (
     <Container theme={theme}>
@@ -618,36 +724,84 @@ export default function ProductDetails({ theme }) {
         </Notification>
       )}
       
-      <BackButton theme={theme} to={product.shop ? `/shop/${product.shop}` : '/shops'}>← Wróć do sklepu</BackButton>
+      <BackButton theme={theme} to="/market">← Wróć do giełdy</BackButton>
       
       <ProductBox theme={theme}>
-        <Image src={product.mainImage || (product.images && product.images[0]) || 'https://via.placeholder.com/400x300'} alt={product.name} />
+        <ImageGallery>
+          <MainImage 
+            src={images[selectedImage] || 'https://via.placeholder.com/400x300'} 
+            alt={product.name}
+            onClick={() => setShowModal(true)}
+          />
+          {images.length > 1 && (
+            <ThumbnailGrid>
+              {images.map((image, index) => (
+                <Thumbnail
+                  key={index}
+                  src={image}
+                  alt={`${product.name} - zdjęcie ${index + 1}`}
+                  active={index === selectedImage}
+                  onClick={() => setSelectedImage(index)}
+                  theme={theme}
+                />
+              ))}
+            </ThumbnailGrid>
+          )}
+        </ImageGallery>
+        
         <Info>
           <Name>{product.name}</Name>
-          <Price theme={theme}>{product.price} zł</Price>
-          <Description theme={theme}>{product.description}</Description>
-          <div><Label theme={theme}>Kategoria:</Label> {product.category}</div>
-          <div><Label theme={theme}>Marka:</Label> {product.brand}</div>
-          <div><Label theme={theme}>Dostępność:</Label> {product.isActive ? 'Dostępny' : 'Niedostępny'} ({product.stock} szt.)</div>
-          <div><Label theme={theme}>Tagi:</Label> {product.tags && product.tags.join(', ')}</div>
           
-          {product.isActive && product.stock > 0 && (
-            <>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Price theme={theme}>{product.price} zł</Price>
+            {hasDiscount && (
+              <>
+                <OriginalPrice theme={theme}>{product.originalPrice} zł</OriginalPrice>
+                <Discount>-{discountPercentage}%</Discount>
+              </>
+            )}
+          </div>
+          
+          <Description theme={theme}>{product.description}</Description>
+          
+          <div><Label theme={theme}>Kategoria:</Label> {product.category}</div>
+          {product.brand && <div><Label theme={theme}>Marka:</Label> {product.brand}</div>}
+          <div><Label theme={theme}>Stan:</Label> {product.condition}</div>
+          <div><Label theme={theme}>Dostępność:</Label> {product.isActive ? 'Dostępny' : 'Niedostępny'} ({product.stock} szt.)</div>
+          {product.tags && product.tags.length > 0 && (
+            <div><Label theme={theme}>Tagi:</Label> {product.tags.join(', ')}</div>
+          )}
+          
+          <SellerInfo theme={theme}>
+            <SellerName theme={theme}>Sprzedawca: {product.seller?.username || 'Nieznany'}</SellerName>
+            <SellerRating>
+              <Stars>★★★★☆</Stars>
+              <span>4.2 (156 opinii)</span>
+            </SellerRating>
+            <ContactButton theme={theme}>💬 Skontaktuj się</ContactButton>
+          </SellerInfo>
+          
+          {product.isActive && (product.stock > 0 || product.stock === undefined) && (
+            <PurchaseSection theme={theme}>
+              <Label theme={theme}>Ilość:</Label>
               <QuantitySelector>
                 <QuantityButton 
+                  theme={theme}
                   onClick={() => handleQuantityChange(quantity - 1)}
                   disabled={quantity <= 1}
                 >
                   -
                 </QuantityButton>
                 <QuantityInput
+                  theme={theme}
                   type="number"
-                  min="1"
-                  max={product.stock}
                   value={quantity}
                   onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+                  min="1"
+                  max={product.stock}
                 />
                 <QuantityButton 
+                  theme={theme}
                   onClick={() => handleQuantityChange(quantity + 1)}
                   disabled={quantity >= product.stock}
                 >
@@ -657,53 +811,195 @@ export default function ProductDetails({ theme }) {
               
               <AddToCartButton 
                 theme={theme}
-                onClick={addToCart}
-                disabled={addingToCart || !isAuthenticated}
+                onClick={handleAddToCart}
+                disabled={addingToCart}
               >
                 {addingToCart ? 'Dodawanie...' : '🛒 Dodaj do koszyka'}
               </AddToCartButton>
-            </>
-          )}
-          
-          {!product.isActive && (
-            <div style={{ color: '#f44336', fontWeight: 600, marginTop: '1rem' }}>
-              Produkt niedostępny
-            </div>
-          )}
-          
-          {product.isActive && product.stock === 0 && (
-            <div style={{ color: '#f44336', fontWeight: 600, marginTop: '1rem' }}>
-              Brak w magazynie
-            </div>
+              
+              <BuyNowButton 
+                onClick={handleBuyNow}
+                disabled={buyingNow}
+              >
+                {buyingNow ? 'Przetwarzanie...' : '💳 Kup teraz'}
+              </BuyNowButton>
+              
+              <WishlistButton 
+                theme={theme}
+                onClick={handleWishlistToggle}
+                className={isInWishlist ? 'active' : ''}
+              >
+                {isInWishlist ? '❤️ W ulubionych' : '🤍 Dodaj do ulubionych'}
+              </WishlistButton>
+            </PurchaseSection>
           )}
         </Info>
       </ProductBox>
 
-      <TabsContainer>
-        <TabsHeader>
+      {/* Szczegóły produktu */}
+      <DetailsSection theme={theme}>
+        <TabsContainer theme={theme}>
           <TabButton 
-            active={(activeTab === 'description').toString()} 
-            onClick={() => setActiveTab('description')}
+            theme={theme}
+            active={activeTab === 'description'}
+            onClick={() => handleTabChange('description')}
           >
             Opis
           </TabButton>
           <TabButton 
-            active={(activeTab === 'specifications').toString()} 
-            onClick={() => setActiveTab('specifications')}
+            theme={theme}
+            active={activeTab === 'specifications'}
+            onClick={() => handleTabChange('specifications')}
           >
-            Specyfikacje
+            Specyfikacja
           </TabButton>
           <TabButton 
-            active={(activeTab === 'reviews').toString()} 
-            onClick={() => setActiveTab('reviews')}
+            theme={theme}
+            active={activeTab === 'reviews'}
+            onClick={() => handleTabChange('reviews')}
           >
             Recenzje ({reviews.length})
           </TabButton>
-        </TabsHeader>
+          <TabButton 
+            theme={theme}
+            active={activeTab === 'shipping'}
+            onClick={() => handleTabChange('shipping')}
+          >
+            Dostawa
+          </TabButton>
+        </TabsContainer>
+        
         <TabContent>
-          {renderTabContent()}
+          {activeTab === 'description' && (
+            <div>
+              <h3>Opis produktu</h3>
+              <p>{product.description}</p>
+              {product.features && (
+                <div>
+                  <h4>Główne cechy:</h4>
+                  <ul>
+                    {product.features.map((feature, index) => (
+                      <li key={index}>{feature}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {activeTab === 'specifications' && (
+            <div>
+              <h3>Specyfikacja techniczna</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee', fontWeight: '600' }}>Kategoria</td>
+                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee' }}>{product.category}</td>
+                  </tr>
+                  {product.brand && (
+                    <tr>
+                      <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee', fontWeight: '600' }}>Marka</td>
+                      <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee' }}>{product.brand}</td>
+                    </tr>
+                  )}
+                  <tr>
+                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee', fontWeight: '600' }}>Stan</td>
+                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee' }}>{product.condition}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee', fontWeight: '600' }}>Dostępność</td>
+                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee' }}>{product.stock} sztuk</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+          
+          {activeTab === 'reviews' && (
+            <ReviewsSection>
+              <h3>Recenzje klientów</h3>
+              {reviewsLoading ? (
+                <p>Ładowanie recenzji...</p>
+              ) : reviews.length > 0 ? (
+                reviews.map((review, index) => (
+                  <ReviewItem key={index} theme={theme}>
+                    <ReviewHeader theme={theme}>
+                      <ReviewAuthor theme={theme}>{review.user?.username || 'Anonim'}</ReviewAuthor>
+                      <ReviewDate theme={theme}>{new Date(review.createdAt).toLocaleDateString()}</ReviewDate>
+                    </ReviewHeader>
+                    <ReviewRating>
+                      {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                    </ReviewRating>
+                    <ReviewText theme={theme}>{review.comment}</ReviewText>
+                  </ReviewItem>
+                ))
+              ) : (
+                <p>Brak recenzji dla tego produktu.</p>
+              )}
+            </ReviewsSection>
+          )}
+          
+          {activeTab === 'shipping' && (
+            <div>
+              <h3>Informacje o dostawie</h3>
+              <div style={{ display: 'grid', gap: '1rem' }}>
+                <div>
+                  <h4>🚚 Dostawa standardowa</h4>
+                  <p>3-5 dni roboczych</p>
+                  <p>Cena: 15 zł</p>
+                </div>
+                <div>
+                  <h4>⚡ Dostawa ekspresowa</h4>
+                  <p>1-2 dni robocze</p>
+                  <p>Cena: 25 zł</p>
+                </div>
+                <div>
+                  <h4>🏪 Odbiór osobisty</h4>
+                  <p>W punkcie sprzedawcy</p>
+                  <p>Cena: Darmowa</p>
+                </div>
+              </div>
+            </div>
+          )}
         </TabContent>
-      </TabsContainer>
+      </DetailsSection>
+
+      {/* Powiązane produkty */}
+      {relatedProducts.length > 0 && (
+        <RelatedProducts>
+          <RelatedTitle theme={theme}>Podobne produkty</RelatedTitle>
+          <RelatedGrid>
+            {relatedProducts.slice(0, 4).map((relatedProduct) => (
+              <RelatedProductCard 
+                key={relatedProduct._id} 
+                theme={theme}
+                onClick={() => window.location.href = `/product/${relatedProduct._id}`}
+              >
+                <RelatedProductImage 
+                  src={relatedProduct.mainImage || relatedProduct.images?.[0] || 'https://via.placeholder.com/200x150'} 
+                  alt={relatedProduct.name} 
+                />
+                <RelatedProductInfo theme={theme}>
+                  <RelatedProductName theme={theme}>{relatedProduct.name}</RelatedProductName>
+                  <RelatedProductPrice theme={theme}>{relatedProduct.price} zł</RelatedProductPrice>
+                </RelatedProductInfo>
+              </RelatedProductCard>
+            ))}
+          </RelatedGrid>
+        </RelatedProducts>
+      )}
+
+      {/* Modal dla galerii */}
+      {showModal && (
+        <Modal onClick={handleModalClose}>
+          <ModalImage 
+            src={images[selectedImage] || 'https://via.placeholder.com/400x300'} 
+            alt={product.name}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <ModalClose onClick={handleModalClose}>×</ModalClose>
+        </Modal>
+      )}
     </Container>
   );
 } 

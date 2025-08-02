@@ -17,6 +17,7 @@ const Card = styled.div`
   transition: all 0.3s ease;
   overflow: hidden;
   position: relative;
+  cursor: pointer;
   
   &:hover {
     transform: translateY(-4px);
@@ -288,7 +289,7 @@ const WishlistButton = styled.button`
   }
 `;
 
-const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView }) => {
+const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView, isMarketplace = false }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -341,11 +342,29 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView }) => 
     }
   };
 
+  // Określ ścieżkę na podstawie typu sprzedaży
+  const getProductPath = () => {
+    if (!isMarketplace) return `/product/${_id}`;
+    
+    switch (product.saleType) {
+      case 'auction':
+        return `/auction/${_id}`;
+      case 'negotiation':
+        return `/negotiation/${_id}`;
+      case 'free':
+        return `/free/${_id}`;
+      case 'fixed_price':
+      default:
+        return `/marketproduct/${_id}`;
+    }
+  };
+
   return (
-    <Card
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <Link to={getProductPath()} style={{ textDecoration: 'none', color: 'inherit' }}>
+      <Card
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
       {/* Badges */}
       <BadgesContainer>
         {isOnSale && (
@@ -488,6 +507,7 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView }) => 
         </ActionButtons>
       </Content>
     </Card>
+    </Link>
   );
 };
 

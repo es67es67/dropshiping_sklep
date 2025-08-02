@@ -1,49 +1,40 @@
 const mongoose = require('mongoose');
-const User = require('./models/userModel');
-require('dotenv').config();
 
 async function checkUsers() {
   try {
-    console.log('🔌 Łączenie z MongoDB...');
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://es67jw:xlnepf0D4JXZtGwT@cluster0.hku8kvd.mongodb.net/portal?retryWrites=true&w=majority&appName=Cluster0');
-    console.log('✅ Połączono z MongoDB');
+    await mongoose.connect('mongodb+srv://es67jw:xlnepf0D4JXZtGwT@cluster0.hku8kvd.mongodb.net/portal?retryWrites=true&w=majority&appName=Cluster0');
+    console.log('Połączono z bazą danych');
 
-    const count = await User.countDocuments();
-    console.log(`📊 Liczba użytkowników w bazie: ${count}`);
+    const UserModel = require('./models/userModel');
 
-    if (count === 0) {
-      console.log('⚠️ Baza jest pusta, dodaję testowego użytkownika...');
-      
-      const testUser = new User({
-        username: 'admin',
-        email: 'admin@test.com',
-        password: 'admin123',
-        firstName: 'Admin',
-        lastName: 'Test',
-        role: 'admin',
-        isActive: true
-      });
-      
-      await testUser.save();
-      console.log('✅ Dodano testowego użytkownika admin');
+    console.log('🔍 Sprawdzam użytkowników w bazie danych...');
+
+    const users = await UserModel.find({}).select('username email firstName lastName isActive createdAt');
+    
+    if (users.length === 0) {
+      console.log('❌ Brak użytkowników w bazie danych');
     } else {
-      console.log('📋 Lista użytkowników:');
-      const users = await User.find().select('username email firstName lastName role isActive');
+      console.log(`✅ Znaleziono ${users.length} użytkowników:`);
       users.forEach((user, index) => {
-        console.log(`${index + 1}. ${user.username} (${user.email}) - ${user.role} - ${user.isActive ? 'Aktywny' : 'Nieaktywny'}`);
+        console.log(`${index + 1}. ${user.username} (${user.email}) - Aktywny: ${user.isActive}`);
       });
     }
 
+    // Sprawdź czy są aktywne koszyki
+    const CartModel = require('./models/cartModel');
+    const carts = await CartModel.find({ status: 'active' }).populate('user', 'username email');
+    
+    console.log(`\n🛒 Koszyki w bazie danych: ${carts.length}`);
+    carts.forEach((cart, index) => {
+      console.log(`${index + 1}. Użytkownik: ${cart.user?.username || 'Nieznany'} - Produktów: ${cart.items.length}`);
+    });
+
   } catch (error) {
-    console.error('❌ Błąd:', error);
+    console.error('❌ Błąd:', error.message);
   } finally {
-    console.log('🔌 Zamykanie połączenia z MongoDB...');
     await mongoose.disconnect();
-    console.log('🔌 Rozłączono z MongoDB');
+    console.log('Rozłączono z bazą danych');
   }
 }
 
-checkUsers().catch(error => {
-  console.error('❌ Błąd w głównej funkcji:', error);
-  process.exit(1);
-}); 
+checkUsers(); 

@@ -126,23 +126,17 @@ const ErrorMessage = styled.div`
   font-size: 1.1rem;
 `;
 
-// Przykładowe dane gmin według kodów GUS (dla powiatu wrocławskiego)
+// Rzeczywiste dane gmin według kodów GUS (dla powiatu wrocławskiego)
 const municipalitiesData = [
-  { code: '0223011', name: 'Czernica', county: '0223' },
-  { code: '0223012', name: 'Długołęka', county: '0223' },
-  { code: '0223013', name: 'Jordanów Śląski', county: '0223' },
-  { code: '0223014', name: 'Kąty Wrocławskie', county: '0223' },
-  { code: '0223015', name: 'Kobierzyce', county: '0223' },
-  { code: '0223016', name: 'Mietków', county: '0223' },
-  { code: '0223017', name: 'Sobótka', county: '0223' },
-  { code: '0223018', name: 'Siechnice', county: '0223' },
-  { code: '0223019', name: 'Żórawina', county: '0223' },
-  { code: '0223020', name: 'Oława', county: '0223' },
-  { code: '0223021', name: 'Prusice', county: '0223' },
-  { code: '0223022', name: 'Trzebnica', county: '0223' },
-  { code: '0223023', name: 'Wisząca', county: '0223' },
-  { code: '0223024', name: 'Zawonia', county: '0223' },
-  { code: '0223025', name: 'Żmigród', county: '0223' }
+  { code: '022301', name: 'Czernica', county: '0223' },
+  { code: '022302', name: 'Długołęka', county: '0223' },
+  { code: '022303', name: 'Jordanów Śląski', county: '0223' },
+  { code: '022304', name: 'Kąty Wrocławskie', county: '0223' },
+  { code: '022305', name: 'Kobierzyce', county: '0223' },
+  { code: '022306', name: 'Mietków', county: '0223' },
+  { code: '022307', name: 'Sobótka', county: '0223' },
+  { code: '022308', name: 'Siechnice', county: '0223' },
+  { code: '022309', name: 'Żórawina', county: '0223' }
 ];
 
 export default function Municipalities({ theme }) {
@@ -168,7 +162,7 @@ export default function Municipalities({ theme }) {
 
     // Fallback: ustaw domyślną gminę (Czernica)
     if (!selectedMunicipality) {
-      const defaultMunicipality = municipalitiesData.find(m => m.code === '0223011') || municipalitiesData[0];
+      const defaultMunicipality = municipalitiesData.find(m => m.code === '022301') || municipalitiesData[0];
       setSelectedMunicipality(defaultMunicipality);
     }
   }, [userTeryt, selectedMunicipality]);

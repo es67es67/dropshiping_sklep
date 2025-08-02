@@ -4,7 +4,7 @@
  */
 class LocationService {
   constructor() {
-    this.apiUrl = import.meta.env.VITE_API_URL || 'https://portal-backend-igf9.onrender.com';
+    this.apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   }
 
   /**
@@ -26,7 +26,7 @@ class LocationService {
   async getCountiesByVoivodeship(voivodeshipCode) {
     try {
       const response = await fetch(
-        `${this.apiUrl}/api/users/locations/counties?voivodeship=${voivodeshipCode}`,
+        `${this.apiUrl}/api/locations/voivodeships/${voivodeshipCode}/counties`,
         {
           headers: this.getAuthHeaders()
         }
@@ -52,7 +52,7 @@ class LocationService {
   async getMunicipalitiesByCounty(countyCode) {
     try {
       const response = await fetch(
-        `${this.apiUrl}/api/users/locations/municipalities?county=${countyCode}`,
+        `${this.apiUrl}/api/locations/counties/${countyCode}/municipalities`,
         {
           headers: this.getAuthHeaders()
         }
@@ -78,7 +78,7 @@ class LocationService {
   async getCitiesByMunicipality(municipalityCode) {
     try {
       const response = await fetch(
-        `${this.apiUrl}/api/users/locations/cities?municipality=${municipalityCode}`,
+        `${this.apiUrl}/api/locations/municipalities/${municipalityCode}/towns`,
         {
           headers: this.getAuthHeaders()
         }
@@ -89,7 +89,7 @@ class LocationService {
       }
 
       const data = await response.json();
-      return data.cities || [];
+      return data.towns || [];
     } catch (error) {
       console.error('Błąd pobierania miejscowości:', error);
       throw error;
@@ -281,6 +281,45 @@ class LocationService {
   }
 
   /**
+   * Fallback - statyczne dane powiatów
+   */
+  getFallbackCounties(query = '') {
+    const counties = [
+      { id: '0201', code: '0201', name: 'Bolesławiecki' },
+      { id: '0202', code: '0202', name: 'Dzierżoniowski' },
+      { id: '0203', code: '0203', name: 'Głogowski' },
+      { id: '0204', code: '0204', name: 'Górowski' },
+      { id: '0205', code: '0205', name: 'Jaworski' },
+      { id: '0206', code: '0206', name: 'Jeleniogórski' },
+      { id: '0207', code: '0207', name: 'Kamiennogórski' },
+      { id: '0208', code: '0208', name: 'Legnicki' },
+      { id: '0209', code: '0209', name: 'Lubański' },
+      { id: '0210', code: '0210', name: 'Lubiński' },
+      { id: '0211', code: '0211', name: 'Lwówecki' },
+      { id: '0212', code: '0212', name: 'Milicki' },
+      { id: '0213', code: '0213', name: 'Oleśnicki' },
+      { id: '0214', code: '0214', name: 'Oławski' },
+      { id: '0215', code: '0215', name: 'Polkowicki' },
+      { id: '0216', code: '0216', name: 'Strzeliński' },
+      { id: '0217', code: '0217', name: 'Średzki' },
+      { id: '0218', code: '0218', name: 'Świdnicki' },
+      { id: '0219', code: '0219', name: 'Trzebnicki' },
+      { id: '0220', code: '0220', name: 'Wałbrzyski' },
+      { id: '0221', code: '0221', name: 'Wołowski' },
+      { id: '0222', code: '0222', name: 'Wrocławski' },
+      { id: '0223', code: '0223', name: 'Ząbkowicki' },
+      { id: '0224', code: '0224', name: 'Zgorzelecki' },
+      { id: '0225', code: '0225', name: 'Złotoryjski' }
+    ];
+
+    if (!query) return counties;
+    
+    return counties.filter(c => 
+      c.name.toLowerCase().includes(query.toLowerCase())
+    );
+  }
+
+  /**
    * Pobiera pełne dane lokalizacyjne dla miejscowości
    * @param {string} cityCode - Kod miejscowości
    * @returns {Promise<Object>} Pełne dane lokalizacyjne
@@ -288,7 +327,7 @@ class LocationService {
   async getLocationDataByCity(cityCode) {
     try {
       const response = await fetch(
-        `${this.apiUrl}/api/users/locations/city/${cityCode}`,
+        `${this.apiUrl}/api/locations/cities/${cityCode}`,
         {
           headers: this.getAuthHeaders()
         }

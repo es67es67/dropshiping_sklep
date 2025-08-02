@@ -363,7 +363,7 @@ export default function LocationDetails({ location, onClose, theme }) {
               <StatLabel>Dostępnych produktów</StatLabel>
             </div>
           </CardStats>
-          <ActionButton to={`/products?location=${location.id}`}>
+                          <ActionButton to={`/market?location=${location.id}`}>
             📦 Zobacz produkty
           </ActionButton>
         </Card>

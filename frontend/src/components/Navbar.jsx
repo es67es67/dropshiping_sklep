@@ -599,9 +599,9 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
         <NavLink to="/" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🏠 Strona główna
         </NavLink>
-        <NavLink to="/products" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
-          📦 Produkty
-        </NavLink>
+                      <NavLink to="/market" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+                🏪 Giełda
+              </NavLink>
         <NavLink to="/shops" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
           🏪 Sklepy
         </NavLink>
@@ -648,6 +648,9 @@ export default function Navbar({ theme, toggleTheme, layout = 'modern' }) {
             </NavLink>
             <NavLink to="/product-management" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
               📦 Zarządzaj produktami
+            </NavLink>
+            <NavLink to="/category-management" theme={theme} layout={layout} onClick={() => setIsMenuOpen(false)}>
+              📂 Zarządzaj kategoriami
             </NavLink>
           </>
         )}

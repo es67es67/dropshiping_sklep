@@ -196,7 +196,7 @@ const Orders = () => {
             <h2 className="text-2xl font-bold text-gray-700 mb-2">Brak zamówień</h2>
             <p className="text-gray-600 mb-4">Nie masz jeszcze żadnych zamówień.</p>
             <button
-              onClick={() => window.location.href = '/products'}
+                              onClick={() => window.location.href = '/market'}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
             >
               Przejdź do sklepu

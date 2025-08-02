@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Autoryzacji</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Autoryzacji</h1>
+    
+    <div class="container">
+        <h2>📊 Stan localStorage</h2>
+        <div id="localStorageStatus"></div>
+        <button onclick="checkLocalStorage()">Sprawdź localStorage</button>
+        <button onclick="clearLocalStorage()">Wyczyść localStorage</button>
+    </div>
+
+    <div class="container">
+        <h2>🔐 Test Logowania</h2>
+        <div class="form-group">
+            <label>Email lub nazwa użytkownika:</label>
+            <input type="text" id="emailOrUsername" value="test@portal.com">
+        </div>
+        <div class="form-group">
+            <label>Hasło:</label>
+            <input type="password" id="password" value="test123">
+        </div>
+        <button onclick="testLogin()">Testuj Logowanie</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>🛒 Test Koszyka</h2>
+        <button onclick="testCart()">Sprawdź Koszyk</button>
+        <div id="cartResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>🔑 Test Tokenu</h2>
+        <button onclick="testToken()">Sprawdź Token</button>
+        <div id="tokenResult"></div>
+    </div>
+
+    <script>
+        function checkLocalStorage() {
+            const status = document.getElementById('localStorageStatus');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const user = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            let html = '<div class="status info">';
+            html += `<strong>isLoggedIn:</strong> ${isLoggedIn}<br>`;
+            html += `<strong>user:</strong> ${user ? 'Zapisany' : 'Brak'}<br>`;
+            html += `<strong>token:</strong> ${token ? 'Zapisany' : 'Brak'}<br>`;
+            
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    html += `<strong>Username:</strong> ${userData.username}<br>`;
+                    html += `<strong>Email:</strong> ${userData.email}<br>`;
+                    html += `<strong>ID:</strong> ${userData._id}<br>`;
+                } catch (e) {
+                    html += `<strong>Błąd parsowania user:</strong> ${e.message}<br>`;
+                }
+            }
+            
+            if (token) {
+                html += `<strong>Token (pierwsze 50 znaków):</strong> ${token.substring(0, 50)}...<br>`;
+            }
+            
+            html += '</div>';
+            status.innerHTML = html;
+        }
+
+        function clearLocalStorage() {
+            localStorage.removeItem('user');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('token');
+            document.getElementById('localStorageStatus').innerHTML = 
+                '<div class="status success">localStorage wyczyszczony</div>';
+        }
+
+        async function testLogin() {
+            const result = document.getElementById('loginResult');
+            result.innerHTML = '<div class="status info">Logowanie...</div>';
+            
+            try {
+                const emailOrUsername = document.getElementById('emailOrUsername').value;
+                const password = document.getElementById('password').value;
+                
+                const response = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        emailOrUsername,
+                        password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Zapisz dane w localStorage
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('token', data.token);
+                    
+                    result.innerHTML = `
+                        <div class="status success">
+                            ✅ Logowanie udane!<br>
+                            Użytkownik: ${data.user.username}<br>
+                            Email: ${data.user.email}<br>
+                            Token zapisany w localStorage
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div class="status error">
+                            ❌ Błąd logowania: ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="status error">
+                        ❌ Błąd połączenia: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testCart() {
+            const result = document.getElementById('cartResult');
+            result.innerHTML = '<div class="status info">Sprawdzanie koszyka...</div>';
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    result.innerHTML = '<div class="status error">❌ Brak tokenu - zaloguj się najpierw</div>';
+                    return;
+                }
+                
+                const response = await fetch('/api/cart', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `
+                        <div class="status success">
+                            ✅ Koszyk pobrany pomyślnie!<br>
+                            Produktów: ${data.cart?.items?.length || 0}<br>
+                            Podsumowanie: ${JSON.stringify(data.summary)}
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div class="status error">
+                            ❌ Błąd pobierania koszyka: ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="status error">
+                        ❌ Błąd połączenia: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testToken() {
+            const result = document.getElementById('tokenResult');
+            result.innerHTML = '<div class="status info">Sprawdzanie tokenu...</div>';
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    result.innerHTML = '<div class="status error">❌ Brak tokenu</div>';
+                    return;
+                }
+                
+                const response = await fetch('/api/users/verify-token', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    result.innerHTML = '<div class="status success">✅ Token jest ważny</div>';
+                } else {
+                    result.innerHTML = '<div class="status error">❌ Token jest nieprawidłowy lub wygasł</div>';
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="status error">
+                        ❌ Błąd weryfikacji tokenu: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Sprawdź localStorage przy załadowaniu strony
+        window.onload = function() {
+            checkLocalStorage();
+        };
+    </script>
+</body>
+</html> 

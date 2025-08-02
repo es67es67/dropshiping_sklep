@@ -3,7 +3,11 @@ const User = require('../models/userModel');
 const Shop = require('../models/shopModel');
 const Product = require('../models/productModel');
 const Post = require('../models/postModel');
+const Powiat = require('../models/powiatModel');
+const Gmina = require('../models/gminaModel');
+const Miejscowosc = require('../models/miejscowoscModel');
 const HybridLocationService = require('../services/hybridLocationService');
+const mongoose = require('mongoose'); // Dodane import dla mongoose
 
 const hybridService = new HybridLocationService();
 
@@ -716,7 +720,11 @@ const getVoivodeships = async (req, res) => {
   try {
     const { search, active } = req.query;
     
-    let query = { type: 'województwo' };
+    // Użyj kolekcji wojewodztwa zamiast locations
+    const db = mongoose.connection.db;
+    const wojewodztwaCollection = db.collection('wojewodztwa');
+    
+    let query = {};
     if (active !== undefined) {
       query.isActive = active === 'true';
     }
@@ -724,16 +732,17 @@ const getVoivodeships = async (req, res) => {
       query.name = { $regex: search, $options: 'i' };
     }
     
-    const voivodeships = await Location.find(query)
-      .select('name code isActive')
-      .sort({ name: 1 });
+    const voivodeships = await wojewodztwaCollection.find(query)
+      .project({ name: 1, code: 1, isActive: 1 })
+      .sort({ name: 1 })
+      .toArray();
     
     // Dodaj liczbę powiatów dla każdego województwa
+    const powiatyCollection = db.collection('powiaty');
     const voivodeshipsWithCounts = await Promise.all(
       voivodeships.map(async (voivodeship) => {
-        const countiesCount = await Location.countDocuments({
-          type: { $in: ['powiat', 'miasto na prawach powiatu'] },
-          'hierarchy.wojewodztwo': voivodeship._id,
+        const countiesCount = await powiatyCollection.countDocuments({
+          wojewodztwo: voivodeship._id,
           isActive: true
         });
         
@@ -760,20 +769,14 @@ const getCountiesForVoivodeship = async (req, res) => {
     const { voivodeshipCode } = req.params;
     const { type, search, active } = req.query;
     
-    // Znajdź województwo
-    const voivodeship = await Location.findOne({
-      type: 'województwo',
-      code: voivodeshipCode,
-      isActive: true
-    });
+    console.log(`🔍 Pobieranie powiatów dla województwa: ${voivodeshipCode}`);
     
-    if (!voivodeship) {
-      return res.status(404).json({ error: 'Województwo nie znalezione' });
-    }
+    // Użyj kolekcji powiaty zamiast locations
+    const db = mongoose.connection.db;
+    const powiatyCollection = db.collection('powiaty');
     
     let query = {
-      type: { $in: ['powiat', 'miasto na prawach powiatu'] },
-      'hierarchy.wojewodztwo': voivodeship._id,
+      wojewodztwoCode: voivodeshipCode,
       isActive: true
     };
     
@@ -787,16 +790,19 @@ const getCountiesForVoivodeship = async (req, res) => {
       query.isActive = active === 'true';
     }
     
-    const counties = await Location.find(query)
-      .select('name code type isActive coordinates')
-      .sort({ name: 1 });
+    const counties = await powiatyCollection.find(query)
+      .project({ name: 1, code: 1, type: 1, isActive: 1, coordinates: 1 })
+      .sort({ name: 1 })
+      .toArray();
+    
+    console.log(`📊 Znaleziono ${counties.length} powiatów`);
     
     // Dodaj liczbę gmin dla każdego powiatu
+    const gminyCollection = db.collection('gminy');
     const countiesWithCounts = await Promise.all(
       counties.map(async (county) => {
-        const municipalitiesCount = await Location.countDocuments({
-          type: { $in: ['gmina miejska', 'gmina wiejska', 'gmina miejsko-wiejska'] },
-          'hierarchy.powiat': county._id,
+        const municipalitiesCount = await gminyCollection.countDocuments({
+          powiatCode: county.code,
           isActive: true
         });
         
@@ -812,12 +818,19 @@ const getCountiesForVoivodeship = async (req, res) => {
       })
     );
     
+    // Znajdź województwo
+    const wojewodztwaCollection = db.collection('wojewodztwa');
+    const voivodeship = await wojewodztwaCollection.findOne({
+      code: voivodeshipCode,
+      isActive: true
+    });
+    
     res.json({
-      voivodeship: {
+      voivodeship: voivodeship ? {
         id: voivodeship._id,
         name: voivodeship.name,
         code: voivodeship.code
-      },
+      } : { code: voivodeshipCode },
       counties: countiesWithCounts
     });
   } catch (error) {
@@ -832,20 +845,14 @@ const getTownsForMunicipality = async (req, res) => {
     const { municipalityCode } = req.params;
     const { search, active } = req.query;
     
-    // Znajdź gminę
-    const municipality = await Location.findOne({
-      type: { $in: ['gmina miejska', 'gmina wiejska', 'gmina miejsko-wiejska'] },
-      code: municipalityCode,
-      isActive: true
-    });
+    console.log(`🔍 Pobieranie miejscowości dla gminy: ${municipalityCode}`);
     
-    if (!municipality) {
-      return res.status(404).json({ error: 'Gmina nie znaleziona' });
-    }
+    // Użyj kolekcji miejscowosci zamiast locations
+    const db = mongoose.connection.db;
+    const miejscowosciCollection = db.collection('miejscowosci');
     
     let query = {
-      type: { $in: ['miejscowość', 'miasto', 'wieś'] },
-      'hierarchy.gmina': municipality._id,
+      gminaCode: municipalityCode,
       isActive: true
     };
     
@@ -856,17 +863,27 @@ const getTownsForMunicipality = async (req, res) => {
       query.isActive = active === 'true';
     }
     
-    const towns = await Location.find(query)
-      .select('name code type isActive population coordinates')
-      .sort({ name: 1 });
+    const towns = await miejscowosciCollection.find(query)
+      .project({ name: 1, code: 1, type: 1, isActive: 1, population: 1, coordinates: 1 })
+      .sort({ name: 1 })
+      .toArray();
+    
+    console.log(`📊 Znaleziono ${towns.length} miejscowości`);
+    
+    // Znajdź gminę
+    const gminyCollection = db.collection('gminy');
+    const municipality = await gminyCollection.findOne({
+      code: municipalityCode,
+      isActive: true
+    });
     
     res.json({
-      municipality: {
+      municipality: municipality ? {
         id: municipality._id,
         name: municipality.name,
         code: municipality.code,
         type: municipality.type
-      },
+      } : { code: municipalityCode },
       towns: towns.map(t => ({
         id: t._id,
         name: t.name,
@@ -889,20 +906,14 @@ const getMunicipalitiesForCounty = async (req, res) => {
     const { countyCode } = req.params;
     const { type, search, active } = req.query;
     
-    // Znajdź powiat
-    const county = await Location.findOne({
-      type: { $in: ['powiat', 'miasto na prawach powiatu'] },
-      code: countyCode,
-      isActive: true
-    });
+    console.log(`🔍 Pobieranie gmin dla powiatu: ${countyCode}`);
     
-    if (!county) {
-      return res.status(404).json({ error: 'Powiat nie znaleziony' });
-    }
+    // Użyj kolekcji gminy zamiast locations
+    const db = mongoose.connection.db;
+    const gminyCollection = db.collection('gminy');
     
     let query = {
-      type: { $in: ['gmina miejska', 'gmina wiejska', 'gmina miejsko-wiejska'] },
-      'hierarchy.powiat': county._id,
+      powiatCode: countyCode,
       isActive: true
     };
     
@@ -916,17 +927,27 @@ const getMunicipalitiesForCounty = async (req, res) => {
       query.isActive = active === 'true';
     }
     
-    const municipalities = await Location.find(query)
-      .select('name code type isActive population area coordinates')
-      .sort({ name: 1 });
+    const municipalities = await gminyCollection.find(query)
+      .project({ name: 1, code: 1, type: 1, isActive: 1, population: 1, area: 1, coordinates: 1 })
+      .sort({ name: 1 })
+      .toArray();
+    
+    console.log(`📊 Znaleziono ${municipalities.length} gmin`);
+    
+    // Znajdź powiat
+    const powiatyCollection = db.collection('powiaty');
+    const county = await powiatyCollection.findOne({
+      code: countyCode,
+      isActive: true
+    });
     
     res.json({
-      county: {
+      county: county ? {
         id: county._id,
         name: county.name,
         code: county.code,
         type: county.type
-      },
+      } : { code: countyCode },
       municipalities: municipalities.map(m => ({
         id: m._id,
         name: m.name,
@@ -1473,12 +1494,19 @@ const getCountyByCode = async (req, res) => {
   try {
     const { countyCode } = req.params;
     
-    // Znajdź powiat według kodu GUS
-    const county = await Location.findOne({
-      type: 'powiat',
-      code: countyCode,
-      isActive: true
+    console.log('🔍 Szukam powiatu z kodem:', countyCode);
+    console.log('🔍 Model Powiat:', Powiat);
+    
+    // Sprawdź wszystkie powiaty z kodem zaczynającym się na 02
+    const allCounties = await Powiat.find({ code: { $regex: '^02' } });
+    console.log('🔍 Wszystkie powiaty z kodem 02:', allCounties.map(c => ({ name: c.name, code: c.code })));
+    
+    // Znajdź powiat według kodu GUS w kolekcji powiaty
+    const county = await Powiat.findOne({
+      code: countyCode
     });
+    
+    console.log('🔍 Znaleziony powiat:', county);
     
     if (!county) {
       return res.status(404).json({ 
@@ -1487,8 +1515,13 @@ const getCountyByCode = async (req, res) => {
       });
     }
     
-    // Pobierz statystyki dla powiatu
-    const stats = await getLocationStatsHelper(county._id);
+    // Pobierz statystyki dla powiatu (tymczasowo puste)
+    const stats = {
+      totalUsers: 0,
+      totalShops: 0,
+      totalProducts: 0,
+      totalPosts: 0
+    };
     
     res.json({
       county: {
@@ -1510,12 +1543,15 @@ const getMunicipalityByCode = async (req, res) => {
   try {
     const { municipalityCode } = req.params;
     
-    // Znajdź gminę według kodu GUS
-    const municipality = await Location.findOne({
-      type: 'gmina',
+    console.log('🔍 Szukam gminy z kodem:', municipalityCode);
+    
+    // Znajdź gminę według kodu GUS w kolekcji gminy
+    const municipality = await Gmina.findOne({
       code: municipalityCode,
       isActive: true
     });
+    
+    console.log('🔍 Znaleziona gmina:', municipality);
     
     if (!municipality) {
       return res.status(404).json({ 
@@ -1524,8 +1560,13 @@ const getMunicipalityByCode = async (req, res) => {
       });
     }
     
-    // Pobierz statystyki dla gminy
-    const stats = await getLocationStatsHelper(municipality._id);
+    // Pobierz statystyki dla gminy (tymczasowo puste)
+    const stats = {
+      totalUsers: 0,
+      totalShops: 0,
+      totalProducts: 0,
+      totalPosts: 0
+    };
     
     res.json({
       municipality: {
@@ -1547,12 +1588,15 @@ const getCityByCode = async (req, res) => {
   try {
     const { cityCode } = req.params;
     
-    // Znajdź miasto/miejscowość według kodu GUS
-    const city = await Location.findOne({
-      type: 'miejscowość',
+    console.log('🔍 Szukam miasta z kodem:', cityCode);
+    
+    // Znajdź miasto/miejscowość według kodu GUS w kolekcji miejscowosci
+    const city = await Miejscowosc.findOne({
       code: cityCode,
       isActive: true
     });
+    
+    console.log('🔍 Znalezione miasto:', city);
     
     if (!city) {
       return res.status(404).json({ 
@@ -1561,8 +1605,13 @@ const getCityByCode = async (req, res) => {
       });
     }
     
-    // Pobierz statystyki dla miasta
-    const stats = await getLocationStatsHelper(city._id);
+    // Pobierz statystyki dla miasta (tymczasowo puste)
+    const stats = {
+      totalUsers: 0,
+      totalShops: 0,
+      totalProducts: 0,
+      totalPosts: 0
+    };
     
     res.json({
       city: {

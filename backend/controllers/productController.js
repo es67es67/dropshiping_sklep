@@ -78,10 +78,11 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-// Pobieranie pojedynczego produktu
+// UWAGA: Ten endpoint obsługuje TYLKO produkty sklepowe (kolekcja 'products').
+// Nie obsługuje produktów giełdowych (marketplaceproducts)!
 exports.getProduct = async (req, res) => {
   try {
-    console.log('🔍 Pobieranie produktu o ID:', req.params.id);
+    console.log('🔍 Pobieranie produktu sklepowego o ID:', req.params.id);
     
     const product = await Product.findById(req.params.id)
       .populate('shop', 'name logo description address')
@@ -92,7 +93,7 @@ exports.getProduct = async (req, res) => {
     
     if (!product) {
       console.log('❌ Produkt nie został znaleziony');
-      return res.status(404).json({ error: 'Produkt nie został znaleziony' });
+      return res.status(404).json({ error: 'Produkt sklepu nie został znaleziony' });
     }
     
     // Jeśli produkt nie ma seller, ustaw go na podstawie właściciela sklepu
@@ -131,7 +132,7 @@ exports.getProduct = async (req, res) => {
   }
 };
 
-// Tworzenie nowego produktu
+// Tworzenie nowego produktu (dla sklepów)
 exports.createProduct = async (req, res) => {
   try {
     const {
@@ -175,6 +176,82 @@ exports.createProduct = async (req, res) => {
     
     res.status(201).json(product);
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Tworzenie nowego produktu (dla użytkowników bez sklepu)
+exports.createUserProduct = async (req, res) => {
+  try {
+    const {
+      name,
+      description,
+      price,
+      category,
+      brand,
+      condition,
+      saleType,
+      location,
+      tags,
+      images
+    } = req.body;
+    
+    // Walidacja wymaganych pól
+    if (!name || !price || !category) {
+      return res.status(400).json({ 
+        error: 'Nazwa, cena i kategoria są wymagane' 
+      });
+    }
+    
+    if (parseFloat(price) <= 0) {
+      return res.status(400).json({ 
+        error: 'Cena musi być większa od 0' 
+      });
+    }
+    
+    // Sprawdź czy użytkownik ma ustawioną lokalizację
+    if (!location || !location.city) {
+      return res.status(400).json({ 
+        error: 'Lokalizacja produktu jest wymagana' 
+      });
+    }
+    
+    const product = new Product({
+      name,
+      description,
+      price: parseFloat(price),
+      category,
+      brand,
+      condition: condition || 'new',
+      saleType: saleType || 'fixed_price',
+      location: {
+        voivodeship: location.voivodeship || '',
+        county: location.county || '',
+        municipality: location.municipality || '',
+        city: location.city,
+        terytCode: location.terytCode || ''
+      },
+      tags: tags || [],
+      images: images || [],
+      mainImage: images && images.length > 0 ? images[0] : null,
+      seller: req.userId,
+      isActive: true,
+      isAvailable: true,
+      stock: 1, // Domyślnie 1 sztuka dla produktów użytkowników
+      ratings: {
+        average: 0,
+        count: 0,
+        distribution: { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 }
+      }
+    });
+    
+    await product.save();
+    
+    console.log('✅ Produkt użytkownika został utworzony:', product._id);
+    
+    res.status(201).json(product);
+  } catch (err) {
+    console.error('❌ Błąd podczas tworzenia produktu użytkownika:', err);
     res.status(500).json({ error: err.message });
   }
 };

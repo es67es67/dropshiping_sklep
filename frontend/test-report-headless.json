@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-07-29T18:32:06.209Z",
+  "totalTests": 6,
+  "passedTests": 6,
+  "failedTests": 0,
+  "results": [
+    {
+      "test": "Strona główna",
+      "status": "✅ OK"
+    },
+    {
+      "test": "Logowanie",
+      "status": "✅ OK"
+    },
+    {
+      "test": "Strona województw (po zalogowaniu)",
+      "status": "✅ OK",
+      "data": "Dane województwa wyświetlane"
+    },
+    {
+      "test": "API Health Check",
+      "status": "✅ OK"
+    },
+    {
+      "test": "API Voivodeships",
+      "status": "✅ OK"
+    },
+    {
+      "test": "API Status",
+      "status": "✅ OK"
+    }
+  ]
+}

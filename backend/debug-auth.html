@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Autoryzacji</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .info { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #e8f5e8; color: #2e7d32; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Autoryzacji</h1>
+    
+    <div class="info">
+        <h3>Status Autoryzacji:</h3>
+        <div id="authStatus">Sprawdzam...</div>
+    </div>
+    
+    <div class="info">
+        <h3>LocalStorage:</h3>
+        <div id="localStorageInfo">Sprawdzam...</div>
+    </div>
+    
+    <div class="info">
+        <h3>Test API:</h3>
+        <input type="number" id="offerAmount" placeholder="Kwota oferty" value="2000">
+        <button onclick="testOffer()">Testuj Ofertę</button>
+        <div id="apiResult"></div>
+    </div>
+    
+    <div class="info">
+        <h3>Logowanie:</h3>
+        <input type="email" id="email" placeholder="Email" value="teste2e@test.com">
+        <input type="password" id="password" placeholder="Hasło" value="test123">
+        <button onclick="login()">Zaloguj</button>
+        <button onclick="logout()">Wyloguj</button>
+    </div>
+
+    <script>
+        function checkAuthStatus() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const user = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            document.getElementById('authStatus').innerHTML = `
+                <strong>Zalogowany:</strong> ${isLoggedIn === 'true' ? 'Tak' : 'Nie'}<br>
+                <strong>Użytkownik:</strong> ${user ? JSON.parse(user).username : 'Brak'}<br>
+                <strong>Token:</strong> ${token ? 'Obecny' : 'Brak'}
+            `;
+            
+            document.getElementById('localStorageInfo').innerHTML = `
+                <strong>isLoggedIn:</strong> ${isLoggedIn}<br>
+                <strong>user:</strong> ${user ? 'Obecny' : 'Brak'}<br>
+                <strong>token:</strong> ${token ? 'Obecny' : 'Brak'}
+            `;
+        }
+        
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('token', data.token);
+                    document.getElementById('apiResult').innerHTML = '<div class="success">Zalogowano pomyślnie!</div>';
+                } else {
+                    document.getElementById('apiResult').innerHTML = `<div class="error">Błąd: ${data.error}</div>`;
+                }
+                
+                checkAuthStatus();
+            } catch (error) {
+                document.getElementById('apiResult').innerHTML = `<div class="error">Błąd: ${error.message}</div>`;
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            document.getElementById('apiResult').innerHTML = '<div class="success">Wylogowano!</div>';
+            checkAuthStatus();
+        }
+        
+        async function testOffer() {
+            const amount = document.getElementById('offerAmount').value;
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                document.getElementById('apiResult').innerHTML = '<div class="error">Brak tokenu - zaloguj się!</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/marketplace/688c5b49951d90a2cd87631c/offer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ amount: parseFloat(amount) })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('apiResult').innerHTML = '<div class="success">Oferta złożona pomyślnie!</div>';
+                } else {
+                    document.getElementById('apiResult').innerHTML = `<div class="error">Błąd: ${data.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('apiResult').innerHTML = `<div class="error">Błąd: ${error.message}</div>`;
+            }
+        }
+        
+        // Sprawdź status przy załadowaniu
+        checkAuthStatus();
+    </script>
+</body>
+</html> 
