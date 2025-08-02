@@ -3,7 +3,12 @@ const mongoose = require('mongoose');
 const cartItemSchema = new mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    refPath: 'productType',
+    required: true
+  },
+  productType: {
+    type: String,
+    enum: ['Product', 'MarketplaceProduct'],
     required: true
   },
   quantity: {
@@ -72,12 +77,12 @@ const cartSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Metody koszyka
-cartSchema.methods.addItem = async function(productId, quantity = 1, options = []) {
-  console.log('🛒 Dodawanie produktu do koszyka:', { productId, quantity, options });
+cartSchema.methods.addItem = async function(productId, quantity = 1, options = [], productType = 'Product') {
+  console.log('🛒 Dodawanie produktu do koszyka:', { productId, quantity, options, productType });
   
   // Pobierz produkt, aby uzyskać cenę
-  const Product = mongoose.model('Product');
-  const product = await Product.findById(productId);
+  const ProductModel = mongoose.model(productType);
+  const product = await ProductModel.findById(productId);
   
   if (!product) {
     console.log('❌ Produkt nie został znaleziony:', productId);
@@ -88,6 +93,7 @@ cartSchema.methods.addItem = async function(productId, quantity = 1, options = [
 
   const existingItem = this.items.find(item => 
     item.product.toString() === productId.toString() &&
+    item.productType === productType &&
     JSON.stringify(item.selectedOptions) === JSON.stringify(options)
   );
 
@@ -101,9 +107,10 @@ cartSchema.methods.addItem = async function(productId, quantity = 1, options = [
     console.log('➕ Dodaję nowy element do koszyka z ceną:', product.price);
     this.items.push({
       product: productId,
+      productType: productType,
       quantity,
       price: product.price,
-      originalPrice: product.originalPrice,
+      originalPrice: product.originalPrice || product.price,
       selectedOptions: options
     });
   }

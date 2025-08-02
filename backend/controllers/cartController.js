@@ -1,5 +1,6 @@
 const Cart = require('../models/cartModel');
 const Product = require('../models/productModel');
+const MarketplaceProduct = require('../models/marketplaceProductModel');
 const User = require('../models/userModel');
 
 // Funkcja do grupowania produktów według sprzedawców
@@ -102,8 +103,16 @@ exports.addToCart = async (req, res) => {
   try {
     const { productId, quantity = 1, options = [] } = req.body;
 
-    // Sprawdź czy produkt istnieje i jest aktywny
-    const product = await Product.findById(productId);
+    // Sprawdź czy produkt istnieje w sklepach lub marketplace
+    let product = await Product.findById(productId);
+    let isMarketplaceProduct = false;
+    
+    if (!product) {
+      // Sprawdź w marketplace
+      product = await MarketplaceProduct.findById(productId);
+      isMarketplaceProduct = true;
+    }
+    
     if (!product || !product.isActive) {
       return res.status(404).json({ error: 'Produkt nie został znaleziony lub jest niedostępny' });
     }
@@ -118,17 +127,24 @@ exports.addToCart = async (req, res) => {
       cart = new Cart({ user: req.userId, items: [] });
     }
 
-    await cart.addItem(productId, quantity, options);
+    const productType = isMarketplaceProduct ? 'MarketplaceProduct' : 'Product';
+    await cart.addItem(productId, quantity, options, productType);
 
     // Pobierz zaktualizowany koszyk
     cart = await Cart.findById(cart._id)
       .populate({
         path: 'items.product',
-        select: 'name price originalPrice images mainImage stock isActive shop',
-        populate: {
-          path: 'shop',
-          select: 'name logo'
-        }
+        select: 'name price originalPrice images mainImage stock isActive shop seller',
+        populate: [
+          {
+            path: 'shop',
+            select: 'name logo'
+          },
+          {
+            path: 'seller',
+            select: 'username firstName lastName'
+          }
+        ]
       });
 
     res.json({

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Logowania Frontend</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 400px; margin: 0 auto; }
+        .form { background: #f5f5f5; padding: 20px; border-radius: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .message { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Test Logowania Frontend</h1>
+        
+        <div class="form">
+            <div class="info message">
+                <strong>Dane testowe:</strong><br>
+                Email: test@example.com<br>
+                Username: testuser<br>
+                Hasło: password123
+            </div>
+            
+            <div class="form-group">
+                <label>Email lub nazwa użytkownika:</label>
+                <input type="text" id="emailOrUsername" value="testuser" placeholder="testuser">
+            </div>
+            
+            <div class="form-group">
+                <label>Hasło:</label>
+                <input type="password" id="password" value="password123" placeholder="password123">
+            </div>
+            
+            <button onclick="login()">Zaloguj się</button>
+            
+            <div id="result"></div>
+            
+            <div class="form-group">
+                <h3>Test Oferty</h3>
+                <input type="number" id="offerAmount" value="2000" placeholder="Kwota oferty">
+                <button onclick="testOffer()">Testuj Ofertę</button>
+            </div>
+            
+            <div id="offerResult"></div>
+        </div>
+    </div>
+
+    <script>
+        async function login() {
+            const emailOrUsername = document.getElementById('emailOrUsername').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/api/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ emailOrUsername, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('token', data.token);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success message">
+                            ✅ Zalogowano pomyślnie!<br>
+                            Użytkownik: ${data.user.username}<br>
+                            Token: ${data.token ? 'Obecny' : 'Brak'}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error message">
+                            ❌ Błąd logowania: ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error message">
+                        ❌ Błąd: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        async function testOffer() {
+            const amount = document.getElementById('offerAmount').value;
+            const token = localStorage.getItem('token');
+            const offerResultDiv = document.getElementById('offerResult');
+            
+            if (!token) {
+                offerResultDiv.innerHTML = `
+                    <div class="error message">
+                        ❌ Brak tokenu - zaloguj się najpierw!
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/marketplace/688c5b49951d90a2cd87631c/offer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ amount: parseFloat(amount) })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    offerResultDiv.innerHTML = `
+                        <div class="success message">
+                            ✅ Oferta złożona pomyślnie!<br>
+                            Kwota: ${amount} zł<br>
+                            Status: ${data.offer.status}
+                        </div>
+                    `;
+                } else {
+                    offerResultDiv.innerHTML = `
+                        <div class="error message">
+                            ❌ Błąd oferty: ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                offerResultDiv.innerHTML = `
+                    <div class="error message">
+                        ❌ Błąd: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Sprawdź status przy załadowaniu
+        window.onload = function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const user = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            if (isLoggedIn === 'true' && user && token) {
+                document.getElementById('result').innerHTML = `
+                    <div class="success message">
+                        ✅ Już zalogowany!<br>
+                        Użytkownik: ${JSON.parse(user).username}<br>
+                        Token: Obecny
+                    </div>
+                `;
+            }
+        };
+    </script>
+</body>
+</html> 
