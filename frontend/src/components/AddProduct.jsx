@@ -429,6 +429,7 @@ const AddProduct = () => {
     name: '',
     description: '',
     price: '',
+    stock: 1,
     category: '',
     brand: '',
     condition: 'new',
@@ -628,6 +629,11 @@ const AddProduct = () => {
       return false;
     }
     
+    if (!formData.stock || parseInt(formData.stock) < 1) {
+      setMessage({ type: 'error', text: 'Ilość dostępna musi być większa od 0' });
+      return false;
+    }
+    
     if (!formData.category) {
       setMessage({ type: 'error', text: 'Wybierz kategorię produktu' });
       return false;
@@ -657,6 +663,7 @@ const AddProduct = () => {
         name: formData.name,
         description: formData.description,
         price: parseFloat(formData.price),
+        stock: parseInt(formData.stock),
         category: formData.category,
         brand: formData.brand,
         condition: formData.condition,
@@ -689,6 +696,7 @@ const AddProduct = () => {
         name: '',
         description: '',
         price: '',
+        stock: 1,
         category: '',
         brand: '',
         condition: 'new',
@@ -711,6 +719,7 @@ const AddProduct = () => {
       name: '',
       description: '',
       price: '',
+      stock: 1,
       category: '',
       brand: '',
       condition: 'new',
@@ -812,6 +821,19 @@ const AddProduct = () => {
                 placeholder="0.00"
                 step="0.01"
                 min="0"
+                required
+              />
+            </FormRow>
+            
+            <FormRow>
+              <Label>Ilość dostępna *</Label>
+              <Input
+                type="number"
+                name="stock"
+                value={formData.stock}
+                onChange={handleInputChange}
+                placeholder="1"
+                min="1"
                 required
               />
             </FormRow>
