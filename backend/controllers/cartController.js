@@ -8,16 +8,32 @@ const groupItemsBySeller = (items) => {
   const sellerGroups = {};
   
   items.forEach(item => {
-    if (item.product && item.product.shop) {
-      const shopId = item.product.shop._id.toString();
-      const shopName = item.product.shop.name;
-      const shopLogo = item.product.shop.logo;
+    if (item.product) {
+      let sellerId, sellerName, sellerLogo;
       
-      if (!sellerGroups[shopId]) {
-        sellerGroups[shopId] = {
-          shopId,
-          shopName,
-          shopLogo,
+      // Sprawdź czy to produkt ze sklepu czy marketplace
+      if (item.product.shop) {
+        // Produkt ze sklepu
+        sellerId = item.product.shop._id.toString();
+        sellerName = item.product.shop.name;
+        sellerLogo = item.product.shop.logo;
+      } else if (item.product.seller) {
+        // Produkt marketplace
+        sellerId = item.product.seller._id.toString();
+        sellerName = item.product.seller.username || item.product.seller.firstName + ' ' + item.product.seller.lastName;
+        sellerLogo = item.product.seller.avatar || null;
+      } else {
+        // Produkt bez sprzedawcy - dodaj do grupy "Inne"
+        sellerId = 'other';
+        sellerName = 'Inne';
+        sellerLogo = null;
+      }
+      
+      if (!sellerGroups[sellerId]) {
+        sellerGroups[sellerId] = {
+          shopId: sellerId,
+          shopName: sellerName,
+          shopLogo: sellerLogo,
           items: [],
           subtotal: 0,
           shippingCost: 0,
@@ -26,9 +42,9 @@ const groupItemsBySeller = (items) => {
       }
       
       const itemTotal = item.price * item.quantity;
-      sellerGroups[shopId].items.push(item);
-      sellerGroups[shopId].subtotal += itemTotal;
-      sellerGroups[shopId].itemCount += item.quantity;
+      sellerGroups[sellerId].items.push(item);
+      sellerGroups[sellerId].subtotal += itemTotal;
+      sellerGroups[sellerId].itemCount += item.quantity;
     }
   });
   
@@ -51,11 +67,17 @@ exports.getCart = async (req, res) => {
     let cart = await Cart.findOne({ user: req.userId, status: 'active' })
       .populate({
         path: 'items.product',
-        select: 'name price originalPrice images mainImage stock isActive shop',
-        populate: {
-          path: 'shop',
-          select: 'name logo address city'
-        }
+        select: 'name price originalPrice images mainImage stock isActive shop seller',
+        populate: [
+          {
+            path: 'shop',
+            select: 'name logo address city'
+          },
+          {
+            path: 'seller',
+            select: 'username firstName lastName avatar'
+          }
+        ]
       });
 
     if (!cart) {
@@ -72,8 +94,20 @@ exports.getCart = async (req, res) => {
     }
     await cart.save();
 
+    // Debug: sprawdź dane produktów
+    console.log('🔍 Debug cart items:', cart.items.map(item => ({
+      productId: item.product?._id,
+      productType: item.productType,
+      hasShop: !!item.product?.shop,
+      hasSeller: !!item.product?.seller,
+      shopData: item.product?.shop,
+      sellerData: item.product?.seller
+    })));
+
     // Grupuj produkty według sprzedawców
     const sellerGroups = groupItemsBySeller(cart.items);
+    
+    console.log('🔍 Debug sellerGroups:', sellerGroups);
     
     // Oblicz ogólne podsumowanie
     const totalSubtotal = sellerGroups.reduce((sum, group) => sum + group.subtotal, 0);

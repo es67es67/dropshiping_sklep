@@ -143,13 +143,11 @@ const FilterSection = styled.div`
   }
 `;
 
-const FilterButton = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
+const FilterButton = styled.button`
   padding: 0.5rem 1rem;
-  border: 2px solid ${props => props.active ? props.theme.primary : props.theme.border};
-  background: ${props => props.active ? props.theme.primary : props.theme.background};
-  color: ${props => props.active ? 'white' : props.theme.text};
+  border: 2px solid ${props => props.$active ? props.theme.primary : props.theme.border};
+  background: ${props => props.$active ? props.theme.primary : props.theme.background};
+  color: ${props => props.$active ? 'white' : props.theme.text};
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -157,7 +155,7 @@ const FilterButton = styled.button.withConfig({
   
   &:hover {
     border-color: ${props => props.theme.primary};
-    background: ${props => props.active ? props.theme.primary : props.theme.primary}10;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}10;
   }
   
   @media (max-width: 768px) {
@@ -746,7 +744,7 @@ export default function Search() {
           {filters.map(filter => (
             <FilterButton
               key={filter.id}
-              active={activeFilter === filter.id}
+                              $active={activeFilter === filter.id}
               onClick={() => setActiveFilter(filter.id)}
             >
               {filter.icon} {filter.label}

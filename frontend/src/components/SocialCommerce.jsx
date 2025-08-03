@@ -37,10 +37,10 @@ const Tab = styled.button`
   background: none;
   border: none;
   padding: 12px 20px;
-  color: ${props => props.active ? '#667eea' : props.theme.textSecondary};
-  font-weight: ${props => props.active ? '600' : '400'};
+  color: ${props => props.$active ? '#667eea' : props.theme.textSecondary};
+  font-weight: ${props => props.$active ? '600' : '400'};
   cursor: pointer;
-  border-bottom: 2px solid ${props => props.active ? '#667eea' : 'transparent'};
+  border-bottom: 2px solid ${props => props.$active ? '#667eea' : 'transparent'};
   transition: all 0.3s ease;
   
   &:hover {
@@ -549,21 +549,21 @@ const SocialCommerce = ({ theme }) => {
 
       <TabContainer theme={theme}>
         <Tab 
-          active={activeTab === 'live'} 
+          $active={activeTab === 'live'} 
           onClick={() => setActiveTab('live')}
           theme={theme}
         >
           🎥 Live Shopping
         </Tab>
         <Tab 
-          active={activeTab === 'social'} 
+          $active={activeTab === 'social'} 
           onClick={() => setActiveTab('social')}
           theme={theme}
         >
           📱 Social Feed
         </Tab>
         <Tab 
-          active={activeTab === 'products'} 
+          $active={activeTab === 'products'} 
           onClick={() => setActiveTab('products')}
           theme={theme}
         >

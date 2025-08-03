@@ -139,12 +139,10 @@ const QuickActions = styled.div`
   flex-wrap: wrap;
 `;
 
-const QuickActionButton = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
-  background: ${props => props.active ? props.theme.primary : props.theme.background};
-  color: ${props => props.active ? 'white' : props.theme.text};
-  border: 1px solid ${props => props.active ? props.theme.primary : props.theme.border};
+const QuickActionButton = styled.button`
+  background: ${props => props.$active ? props.theme.primary : props.theme.background};
+  color: ${props => props.$active ? 'white' : props.theme.text};
+  border: 1px solid ${props => props.$active ? props.theme.primary : props.theme.border};
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -152,7 +150,7 @@ const QuickActionButton = styled.button.withConfig({
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.primary}10;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}10;
     border-color: ${props => props.theme.primary};
   }
 `;
@@ -165,19 +163,17 @@ const Pagination = styled.div`
   margin-top: 40px;
 `;
 
-const PageButton = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
-  background: ${props => props.active ? props.theme.primary : props.theme.background};
-  color: ${props => props.active ? 'white' : props.theme.text};
-  border: 1px solid ${props => props.active ? props.theme.primary : props.theme.border};
+const PageButton = styled.button`
+  background: ${props => props.$active ? props.theme.primary : props.theme.background};
+  color: ${props => props.$active ? 'white' : props.theme.text};
+  border: 1px solid ${props => props.$active ? props.theme.primary : props.theme.border};
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover:not(:disabled) {
-    background: ${props => props.active ? props.theme.primary : props.theme.primary}10;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}10;
     border-color: ${props => props.theme.primary};
   }
   
@@ -477,28 +473,28 @@ export default function ProductsEnhanced({ theme }) {
 
       <QuickActions>
         <QuickActionButton 
-          active={filters.newProducts}
+          $active={filters.newProducts}
           onClick={() => handleQuickFilter('new')}
           theme={theme}
         >
           🆕 Nowe
         </QuickActionButton>
         <QuickActionButton 
-          active={filters.onSale}
+          $active={filters.onSale}
           onClick={() => handleQuickFilter('sale')}
           theme={theme}
         >
           🏷️ Promocje
         </QuickActionButton>
         <QuickActionButton 
-          active={filters.freeShipping}
+          $active={filters.freeShipping}
           onClick={() => handleQuickFilter('free-shipping')}
           theme={theme}
         >
           🆓 Darmowa dostawa
         </QuickActionButton>
         <QuickActionButton 
-          active={filters.inStock}
+          $active={filters.inStock}
           onClick={() => handleQuickFilter('in-stock')}
           theme={theme}
         >
@@ -541,7 +537,7 @@ export default function ProductsEnhanced({ theme }) {
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                     <PageButton
                       key={page}
-                      active={currentPage === page}
+                      $active={currentPage === page}
                       onClick={() => setCurrentPage(page)}
                       theme={theme}
                     >

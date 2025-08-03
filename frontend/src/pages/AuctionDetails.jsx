@@ -65,7 +65,7 @@ const Thumbnail = styled.img`
   object-fit: cover;
   border-radius: 8px;
   cursor: pointer;
-  border: 2px solid ${props => props.active ? props.theme.primary : 'transparent'};
+  border: 2px solid ${props => props.$active ? props.theme.primary : 'transparent'};
   transition: all 0.2s;
   
   &:hover {
@@ -264,8 +264,8 @@ const TabButton = styled.button`
   border: none;
   padding: 1rem 1.5rem;
   font-weight: 600;
-  color: ${props => props.active ? props.theme.primary : props.theme.textSecondary};
-  border-bottom: 3px solid ${props => props.active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? props.theme.primary : props.theme.textSecondary};
+  border-bottom: 3px solid ${props => props.$active ? props.theme.primary : 'transparent'};
   cursor: pointer;
   transition: all 0.2s;
   
@@ -463,7 +463,7 @@ export default function AuctionDetails({ theme }) {
                   key={index}
                   src={image}
                   alt={`${auction.name} - zdjęcie ${index + 1}`}
-                  active={index === selectedImage}
+                  $active={index === selectedImage}
                   onClick={() => handleImageClick(index)}
                 />
               ))}
@@ -553,21 +553,21 @@ export default function AuctionDetails({ theme }) {
         <TabsContainer theme={theme}>
           <TabButton 
             theme={theme}
-            active={activeTab === 'description'}
+            $active={activeTab === 'description'}
             onClick={() => handleTabChange('description')}
           >
             Opis
           </TabButton>
           <TabButton 
             theme={theme}
-            active={activeTab === 'specifications'}
+            $active={activeTab === 'specifications'}
             onClick={() => handleTabChange('specifications')}
           >
             Specyfikacja
           </TabButton>
           <TabButton 
             theme={theme}
-            active={activeTab === 'auction'}
+            $active={activeTab === 'auction'}
             onClick={() => handleTabChange('auction')}
           >
             Szczegóły aukcji

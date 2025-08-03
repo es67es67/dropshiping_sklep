@@ -364,9 +364,7 @@ const TabsContainer = styled.div`
   border-bottom: 1px solid ${props => props.theme.border};
 `;
 
-const Tab = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
+const Tab = styled.button`
   padding: 0.75rem 1.5rem;
   border: none;
   border-bottom: 2px solid transparent;
@@ -381,7 +379,7 @@ const Tab = styled.button.withConfig({
     color: ${props => props.theme.primary};
   }
   
-  ${props => props.active && `
+  ${props => props.$active && `
     border-bottom-color: ${props.theme.primary};
     color: ${props.theme.primary};
     background: ${props.theme.background};
@@ -547,13 +545,13 @@ export default function ShopDetails({ theme }) {
 
       <TabsContainer>
         <Tab 
-          active={activeTab === 'products'} 
+          $active={activeTab === 'products'} 
           onClick={() => setActiveTab('products')}
         >
           📦 Produkty
         </Tab>
         <Tab 
-          active={activeTab === 'details'} 
+          $active={activeTab === 'details'} 
           onClick={() => setActiveTab('details')}
         >
           📋 Szczegóły

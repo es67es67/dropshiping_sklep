@@ -65,7 +65,7 @@ const ThemeGrid = styled.div`
 
 const ThemeCard = styled.div`
   padding: 12px;
-  border: 2px solid ${props => props.active ? props.theme.colors.primary : 'transparent'};
+  border: 2px solid ${props => props.$active ? props.theme.colors.primary : 'transparent'};
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -272,7 +272,7 @@ const ThemeManager = () => {
           <ThemeCard
             key={key}
             theme={currentTheme}
-            active={key === Object.keys(themes).find(k => themes[k] === currentTheme)}
+            $active={key === Object.keys(themes).find(k => themes[k] === currentTheme)}
             onClick={() => handleThemeChange(key)}
           >
             <ThemeName theme={currentTheme}>

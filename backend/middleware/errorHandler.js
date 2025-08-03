@@ -88,11 +88,44 @@ const getQueueStats = () => {
   };
 };
 
+// 🔧 EKSPORT FUNKCJI DLA ERRORCONTROLLER
+const generateErrorHash = UniversalErrorService.generateErrorHash;
+const determineSeverity = UniversalErrorService.determineSeverity;
+
+// Funkcja saveError - wrapper dla UniversalErrorService.logError
+const saveError = async (errorData) => {
+  try {
+    const error = new Error(errorData.message || 'Unknown error');
+    error.stack = errorData.stack;
+    
+    const savedError = await UniversalErrorService.logError(error, {
+      type: errorData.type || 'unknown',
+      severity: errorData.severity || 'medium',
+      componentName: errorData.component || 'Unknown',
+      filename: errorData.filename || 'Unknown',
+      url: errorData.url,
+      userAgent: errorData.userAgent,
+      userId: errorData.userId,
+      hash: errorData.hash,
+      id: errorData.id
+    });
+    
+    return savedError;
+  } catch (saveError) {
+    console.error('Błąd podczas zapisywania błędu:', saveError);
+    throw saveError;
+  }
+};
+
 module.exports = {
   expressErrorHandler,
   unhandledErrorHandler,
   notFoundHandler,
   processOfflineQueue,
   addToOfflineQueue,
-  getQueueStats
+  getQueueStats,
+  // 🔧 NOWE FUNKCJE DLA ERRORCONTROLLER
+  generateErrorHash,
+  saveError,
+  determineSeverity
 }; 

@@ -41,8 +41,8 @@ const LetterButton = styled.button`
   font-size: 1.2rem;
   font-weight: bold;
   border: 2px solid ${props => props.theme.primary};
-  background: ${props => props.isActive ? props.theme.primary : 'transparent'};
-  color: ${props => props.isActive ? 'white' : props.theme.primary};
+  background: ${props => props.$active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? 'white' : props.theme.primary};
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -269,7 +269,7 @@ const AlphabeticalCitySelector = ({ theme }) => {
           <LetterButton
             key={letter}
             theme={theme}
-            isActive={selectedLetter === letter}
+                            $active={selectedLetter === letter}
             onClick={() => handleLetterClick(letter)}
             disabled={loading}
           >

@@ -278,7 +278,7 @@ safeUse('/api/admin', adminRoutes, 'adminRoutes');
 safeUse('/api/geocoding', geocodingRoutes, 'geocodingRoutes');
 safeUse('/api/export', exportRoutes, 'exportRoutes');
 safeUse('/api/auctions', auctionRoutes, 'auctionRoutes');
-safeUse('/api', errorRoutes, 'errorRoutes');
+safeUse('/api/errors', errorRoutes, 'errorRoutes');
 
 // Uruchom serwer po zarejestrowaniu routes
 const PORT = process.env.PORT || 5000;

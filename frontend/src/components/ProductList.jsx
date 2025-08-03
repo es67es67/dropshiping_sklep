@@ -44,19 +44,17 @@ const ViewModeToggle = styled.div`
   padding: 0.25rem;
 `;
 
-const ViewButton = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
+const ViewButton = styled.button`
   padding: 0.5rem;
   border-radius: 6px;
   transition: all 0.2s ease;
-  background: ${props => props.active ? props.theme.primary : 'transparent'};
-  color: ${props => props.active ? 'white' : props.theme.text};
+  background: ${props => props.$active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? 'white' : props.theme.text};
   border: none;
   cursor: pointer;
   
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.border};
+    background: ${props => props.$active ? props.theme.primary : props.theme.border};
   }
 `;
 
@@ -237,14 +235,14 @@ const ProductList = ({
           <ViewModeToggle>
             <ViewButton
               onClick={() => setViewMode('grid')}
-              active={viewMode === 'grid'}
+              $active={viewMode === 'grid'}
               title="Widok siatki"
             >
               <FaTh />
             </ViewButton>
             <ViewButton
               onClick={() => setViewMode('list')}
-              active={viewMode === 'list'}
+              $active={viewMode === 'list'}
               title="Widok listy"
             >
               <FaList />

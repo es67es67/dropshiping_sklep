@@ -55,15 +55,12 @@ const TabContainer = styled.div`
   border-bottom: 2px solid ${props => props.theme.border};
 `;
 
-const Tab = styled.button.attrs(props => ({
-  'data-active': props.active ? 'true' : undefined,
-  active: undefined // Usuń atrybut active z DOM
-}))`
+const Tab = styled.button`
   padding: 1rem 2rem;
   margin: 0 0.5rem;
   border: none;
-  background: ${props => props.active ? props.theme.primary : 'transparent'};
-  color: ${props => props.active ? 'white' : props.theme.text};
+  background: ${props => props.$active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? 'white' : props.theme.text};
   border-radius: 8px 8px 0 0;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -73,7 +70,7 @@ const Tab = styled.button.attrs(props => ({
   font-weight: 500;
 
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.primary}20;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}20;
   }
 `;
 
@@ -493,7 +490,7 @@ const LocationTemplate = ({
         {tabs.map(tab => (
           <Tab
             key={tab.id}
-            active={activeTab === tab.id}
+            $active={activeTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
           >
             {tab.icon}

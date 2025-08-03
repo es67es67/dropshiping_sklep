@@ -39,17 +39,15 @@ const FeatureTabs = styled.div`
   border-bottom: 2px solid ${props => props.theme.border};
 `;
 
-const TabButton = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
+const TabButton = styled.button`
   background: none;
   border: none;
   padding: 1rem 2rem;
   font-size: 1rem;
   font-weight: 600;
-  color: ${props => props.active ? props.theme.primary : props.theme.textSecondary};
+  color: ${props => props.$active ? props.theme.primary : props.theme.textSecondary};
   cursor: pointer;
-  border-bottom: 3px solid ${props => props.active ? props.theme.primary : 'transparent'};
+  border-bottom: 3px solid ${props => props.$active ? props.theme.primary : 'transparent'};
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -220,7 +218,7 @@ const TerytFeatures = () => {
         {tabs.map(tab => (
           <TabButton
             key={tab.id}
-            active={activeTab === tab.id}
+                            $active={activeTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
           >
             {tab.icon}

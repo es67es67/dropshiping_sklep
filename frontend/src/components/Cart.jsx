@@ -465,7 +465,24 @@ const Cart = () => {
 
       const data = await response.json();
       console.log('✅ Pobrano koszyk:', data);
-      setCart(data);
+      console.log('📦 Cart object:', data.cart);
+      console.log('🏪 Seller groups:', data.sellerGroups);
+      console.log('📊 Summary:', data.summary);
+      
+      // Backend zwraca { cart, sellerGroups, summary }, ale komponent oczekuje { cart: { sellerGroups, summary } }
+      const formattedData = {
+        cart: data.cart,
+        sellerGroups: data.sellerGroups,
+        summary: data.summary
+      };
+      
+      console.log('🎯 Sformatowane dane:', formattedData);
+      console.log('🔍 Sprawdzam warunki:');
+      console.log('  - cart istnieje:', !!formattedData.cart);
+      console.log('  - sellerGroups istnieje:', !!formattedData.sellerGroups);
+      console.log('  - sellerGroups.length:', formattedData.sellerGroups?.length);
+      
+      setCart(formattedData);
     } catch (err) {
       console.error('💥 Błąd podczas pobierania koszyka:', err);
       setError(err.message);
@@ -506,7 +523,7 @@ const Cart = () => {
 
   const updateQuantity = async (itemId, newQuantity) => {
     try {
-      const response = await fetch('/api/cart/update-quantity', {
+      const response = await fetch('/api/cart/update', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

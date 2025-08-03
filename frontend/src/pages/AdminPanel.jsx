@@ -76,18 +76,18 @@ const TabContainer = styled.div`
 const TabButton = styled.button`
   padding: 12px 24px;
   border: none;
-  background: ${props => props.active ? props.theme.primary : 'transparent'};
-  color: ${props => props.active ? '#fff' : props.theme.text};
+  background: ${props => props.$active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? '#fff' : props.theme.text};
   border-radius: 8px 8px 0 0;
   font-weight: 600;
   cursor: pointer;
   font-size: 16px;
   transition: all 0.3s;
-  border-bottom: 3px solid ${props => props.active ? props.theme.primary : 'transparent'};
+  border-bottom: 3px solid ${props => props.$active ? props.theme.primary : 'transparent'};
   white-space: nowrap;
   
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.primary}20;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}20;
   }
   
   @media (max-width: 768px) {
@@ -786,12 +786,6 @@ const AdminPanel = () => {
             </UsersTable>
           </div>
         );
-      
-      case 'data':
-        return <DataManager />;
-      
-      case 'export':
-        return <DataExport />;
       
       case 'system':
         return (

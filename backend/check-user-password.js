@@ -1,59 +1,40 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const User = require('./models/userModel');
 
-// Połączenie z MongoDB
-const MONGODB_URI = 'mongodb+srv://es67jw:xlnepf0D4JXZtGwT@cluster0.hku8kvd.mongodb.net/portal?retryWrites=true&w=majority&appName=Cluster0';
-
-// Model użytkownika
-const userSchema = new mongoose.Schema({
-  username: String,
-  email: String,
-  password: String,
-  firstName: String,
-  lastName: String,
-  isActive: Boolean
-});
-
-const User = mongoose.model('User', userSchema);
-
-async function checkUserPassword() {
+const checkUserPassword = async () => {
   try {
-    console.log('🔌 Łączenie z MongoDB...');
-    await mongoose.connect(MONGODB_URI);
-    console.log('✅ Połączono z MongoDB');
+    console.log('🔐 Sprawdzanie hasła użytkownika aaaaaaaaaaaaa...');
+    
+    // Połącz z bazą danych
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/portal');
+    console.log('✅ Połączono z bazą danych MongoDB');
 
-    console.log('\n🔍 Sprawdzam użytkownika teste2e...');
-    console.log('=====================================');
-
-    const user = await User.findOne({ email: 'teste2e@test.com' });
+    // Znajdź użytkownika
+    const user = await User.findOne({ username: 'aaaaaaaaaaaaa' });
     
     if (!user) {
-      console.log('❌ Użytkownik nie został znaleziony');
+      console.log('❌ Użytkownik aaaaaaaaaaaaa nie został znaleziony');
       return;
     }
 
-    console.log('\n📦 Szczegóły użytkownika:');
-    console.log(`  ID: ${user._id}`);
-    console.log(`  Username: ${user.username}`);
-    console.log(`  Email: ${user.email}`);
-    console.log(`  Aktywny: ${user.isActive}`);
-    console.log(`  Hasło (hash): ${user.password ? 'Obecne' : 'Brak'}`);
-    
+    console.log('👤 Użytkownik:', user.email);
+    console.log('🔑 Hash hasła:', user.password.substring(0, 20) + '...');
+
     // Testuj różne hasła
-    const testPasswords = ['test123', 'password', '123456', 'test', 'teste2e'];
-    
-    console.log('\n🔐 Testuję hasła:');
+    const testPasswords = ['test123', 'password123', 'user123', 'demo123', 'polska123', 'test2024', 'user2024', 'admin123', '123456', 'password'];
+
     for (const password of testPasswords) {
       const isValid = await bcrypt.compare(password, user.password);
-      console.log(`  "${password}": ${isValid ? '✅' : '❌'}`);
+      console.log(`🔐 Test hasła "${password}": ${isValid ? '✅ Prawidłowe' : '❌ Nieprawidłowe'}`);
     }
 
-    console.log('\n🔌 Połączenie z MongoDB zamknięte');
+    console.log('🔌 Połączenie z bazą danych zamknięte');
   } catch (error) {
-    console.error('❌ Błąd:', error);
+    console.error('❌ Błąd:', error.message);
   } finally {
     await mongoose.disconnect();
   }
-}
+};
 
 checkUserPassword(); 

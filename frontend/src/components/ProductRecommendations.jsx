@@ -35,10 +35,10 @@ const AlgorithmSelector = styled.div`
 
 const AlgorithmButton = styled.button`
   padding: 8px 16px;
-  border: 2px solid ${props => props.active ? props.theme.colors.primary : 'transparent'};
+  border: 2px solid ${props => props.$active ? props.theme.colors.primary : 'transparent'};
   border-radius: 20px;
-  background: ${props => props.active ? props.theme.colors.primary : 'transparent'};
-  color: ${props => props.active ? 'white' : props.theme.colors.text};
+  background: ${props => props.$active ? props.theme.colors.primary : 'transparent'};
+  color: ${props => props.$active ? 'white' : props.theme.colors.text};
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 14px;
@@ -46,7 +46,7 @@ const AlgorithmButton = styled.button`
   
   &:hover {
     border-color: ${props => props.theme.colors.primary};
-    background: ${props => props.active ? props.theme.colors.primary : 'rgba(59, 130, 246, 0.1)'};
+    background: ${props => props.$active ? props.theme.colors.primary : 'rgba(59, 130, 246, 0.1)'};
   }
 `;
 
@@ -231,7 +231,7 @@ const ProductRecommendations = ({ userId, productId = null, limit = 8 }) => {
             {algorithms.map((algo) => (
               <AlgorithmButton
                 key={algo.key}
-                active={algorithm === algo.key}
+                $active={algorithm === algo.key}
                 onClick={() => handleAlgorithmChange(algo.key)}
               >
                 {algo.icon} {algo.name}

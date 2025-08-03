@@ -58,8 +58,8 @@ const ControlsPanel = styled.div`
 `;
 
 const ControlButton = styled.button`
-  background: ${props => props.active ? '#667eea' : 'rgba(102, 126, 234, 0.1)'};
-  color: ${props => props.active ? 'white' : '#667eea'};
+  background: ${props => props.$active ? '#667eea' : 'rgba(102, 126, 234, 0.1)'};
+  color: ${props => props.$active ? 'white' : '#667eea'};
   border: 2px solid #667eea;
   border-radius: 50%;
   width: 40px;

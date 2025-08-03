@@ -131,12 +131,10 @@ const FilterOptions = styled.div`
   border-radius: 12px 12px 0 0;
 `;
 
-const FilterOption = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
-  background: ${props => props.active ? (props.theme.primary || '#007bff') : 'transparent'};
-  color: ${props => props.active ? 'white' : (props.theme.text || '#333')};
-  border: 1px solid ${props => props.active ? (props.theme.primary || '#007bff') : (props.theme.border || '#ccc')};
+const FilterOption = styled.button`
+  background: ${props => props.$active ? (props.theme.primary || '#007bff') : 'transparent'};
+  color: ${props => props.$active ? 'white' : (props.theme.text || '#333')};
+  border: 1px solid ${props => props.$active ? (props.theme.primary || '#007bff') : (props.theme.border || '#ccc')};
   border-radius: 20px;
   padding: 0.25rem 0.75rem;
   font-size: 0.8rem;
@@ -147,7 +145,7 @@ const FilterOption = styled.button.withConfig({
   gap: 0.25rem;
   
   &:hover {
-    background: ${props => props.active ? (props.theme.primary || '#007bff') : (props.theme.border || '#ccc')};
+    background: ${props => props.$active ? (props.theme.primary || '#007bff') : (props.theme.border || '#ccc')};
   }
 `;
 
@@ -455,21 +453,21 @@ export default function IntegratedSearch({ theme }) {
             <FilterOptions theme={theme}>
               <FilterOption 
                 theme={theme} 
-                active={activeFilter === 'users'}
+                $active={activeFilter === 'users'}
                 onClick={() => setActiveFilter('users')}
               >
                 <FaUsers /> Użytkownicy
               </FilterOption>
               <FilterOption 
                 theme={theme} 
-                active={activeFilter === 'shops'}
+                $active={activeFilter === 'shops'}
                 onClick={() => setActiveFilter('shops')}
               >
                 <FaStore /> Sklepy
               </FilterOption>
               <FilterOption 
                 theme={theme} 
-                active={activeFilter === 'companies'}
+                $active={activeFilter === 'companies'}
                 onClick={() => setActiveFilter('companies')}
               >
                 <FaBuilding /> Firmy

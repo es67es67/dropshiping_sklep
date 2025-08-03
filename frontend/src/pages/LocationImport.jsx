@@ -50,8 +50,8 @@ const TabContainer = styled.div`
 const Tab = styled.button`
   padding: 1rem 2rem;
   border: none;
-  background: ${props => props.active ? props.theme.primary : 'transparent'};
-  color: ${props => props.active ? 'white' : props.theme.text};
+  background: ${props => props.$active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? 'white' : props.theme.text};
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 500;
@@ -59,7 +59,7 @@ const Tab = styled.button`
   white-space: nowrap;
   
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.primary}20;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}20;
   }
 `;
 
@@ -726,13 +726,13 @@ export default function LocationImport() {
 
       <TabContainer>
         <Tab 
-          active={activeTab === 'import'} 
+          $active={activeTab === 'import'} 
           onClick={() => setActiveTab('import')}
         >
           📥 Nowy import
         </Tab>
         <Tab 
-          active={activeTab === 'history'} 
+          $active={activeTab === 'history'} 
           onClick={() => setActiveTab('history')}
         >
           📋 Historia importów

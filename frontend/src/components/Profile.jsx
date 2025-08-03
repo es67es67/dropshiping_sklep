@@ -220,15 +220,15 @@ const TabNavigation = styled.div`
 const TabButton = styled.button`
   padding: 0.75rem 1.5rem;
   border: none;
-  background: ${props => props.active ? props.theme.primary : 'transparent'};
-  color: ${props => props.active ? 'white' : props.theme.text};
+  background: ${props => props.$active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? 'white' : props.theme.text};
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 600;
   
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.primary}10;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}10;
   }
   
   @media (max-width: 768px) {
@@ -862,19 +862,19 @@ export default function Profile() {
         <MainContent>
           <TabNavigation>
             <TabButton
-              active={activeTab === 'personal'}
+              $active={activeTab === 'personal'}
               onClick={() => setActiveTab('personal')}
             >
               Dane osobowe
             </TabButton>
             <TabButton
-              active={activeTab === 'orders'}
+              $active={activeTab === 'orders'}
               onClick={() => setActiveTab('orders')}
             >
               Zamówienia
             </TabButton>
             <TabButton
-              active={activeTab === 'security'}
+              $active={activeTab === 'security'}
               onClick={() => setActiveTab('security')}
             >
               Bezpieczeństwo

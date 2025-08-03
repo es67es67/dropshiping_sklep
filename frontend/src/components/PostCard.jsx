@@ -333,7 +333,7 @@ const PostCard = ({ post, theme, onLike, onComment, onUserClick }) => {
           onClick={handleLike}
           className={isLiked ? 'liked' : ''}
           theme={theme}
-          active={isLiked}
+                        $active={isLiked}
         >
           {isLiked ? '❤️' : '🤍'} {post.likes?.length || 0} Polubień
         </ActionButton>

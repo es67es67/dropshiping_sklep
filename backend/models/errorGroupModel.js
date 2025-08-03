@@ -5,8 +5,7 @@ const errorGroupSchema = new mongoose.Schema({
   hash: {
     type: String,
     required: true,
-    unique: true,
-    index: true
+    unique: true
   },
   message: {
     type: String,
@@ -125,7 +124,6 @@ const errorGroupSchema = new mongoose.Schema({
 });
 
 // Indeksy dla wydajności
-errorGroupSchema.index({ hash: 1 });
 errorGroupSchema.index({ status: 1, lastSeen: -1 });
 errorGroupSchema.index({ severity: 1, lastSeen: -1 });
 errorGroupSchema.index({ type: 1, lastSeen: -1 });

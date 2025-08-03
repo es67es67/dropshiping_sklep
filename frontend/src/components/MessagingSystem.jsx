@@ -67,14 +67,14 @@ const Tab = styled.button`
   flex: 1;
   padding: 1rem;
   border: none;
-  background: ${props => props.active ? props.theme.primary : 'transparent'};
-  color: ${props => props.active ? 'white' : props.theme.text};
+  background: ${props => props.$active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? 'white' : props.theme.text};
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 500;
   
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.primary}20;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}20;
   }
 `;
 
@@ -614,13 +614,13 @@ export default function MessagingSystem() {
         
         <TabContainer>
           <Tab 
-            active={activeTab === 'chats'} 
+            $active={activeTab === 'chats'} 
             onClick={() => setActiveTab('chats')}
           >
             💬 Czaty
           </Tab>
           <Tab 
-            active={activeTab === 'groups'} 
+            $active={activeTab === 'groups'} 
             onClick={() => setActiveTab('groups')}
           >
             👥 Grupy

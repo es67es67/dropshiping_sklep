@@ -97,16 +97,14 @@ const TabContainer = styled.div`
   overflow-x: auto;
 `;
 
-const Tab = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
+const Tab = styled.button`
   background: none;
   border: none;
   padding: 12px 20px;
-  color: ${props => props.active ? '#667eea' : props.theme.textSecondary};
-  font-weight: ${props => props.active ? '600' : '400'};
+  color: ${props => props.$active ? '#667eea' : props.theme.textSecondary};
+  font-weight: ${props => props.$active ? '600' : '400'};
   cursor: pointer;
-  border-bottom: 2px solid ${props => props.active ? '#667eea' : 'transparent'};
+  border-bottom: 2px solid ${props => props.$active ? '#667eea' : 'transparent'};
   transition: all 0.3s ease;
   white-space: nowrap;
   
@@ -311,7 +309,7 @@ const AdvancedFeatures = ({ theme }) => {
         {features.map(feature => (
           <Tab
             key={feature.id}
-            active={activeTab === feature.id}
+            $active={activeTab === feature.id}
             onClick={() => setActiveTab(feature.id)}
             theme={theme}
           >

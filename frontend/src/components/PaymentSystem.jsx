@@ -37,20 +37,18 @@ const TabContainer = styled.div`
   border-bottom: 2px solid ${props => props.theme.border};
 `;
 
-const Tab = styled.button.withConfig({
-  shouldForwardProp: (prop) => !['active', 'theme'].includes(prop)
-})`
+const Tab = styled.button`
   padding: 1rem 2rem;
   border: none;
-  background: ${props => props.active ? props.theme.primary : 'transparent'};
-  color: ${props => props.active ? 'white' : props.theme.text};
+  background: ${props => props.$active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? 'white' : props.theme.text};
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 500;
   border-radius: 8px 8px 0 0;
   
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.primary}20;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}20;
   }
 `;
 
@@ -523,13 +521,13 @@ export default function PaymentSystem() {
       
       <TabContainer>
         <Tab 
-          active={activeTab === 'payment'} 
+                      $active={activeTab === 'payment'} 
           onClick={() => setActiveTab('payment')}
         >
           💳 Nowa płatność
         </Tab>
         <Tab 
-          active={activeTab === 'history'} 
+                      $active={activeTab === 'history'} 
           onClick={() => setActiveTab('history')}
         >
           📋 Historia płatności

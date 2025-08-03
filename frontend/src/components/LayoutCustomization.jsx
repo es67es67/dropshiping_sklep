@@ -31,12 +31,10 @@ const TabsContainer = styled.div`
   }
 `;
 
-const Tab = styled.button.withConfig({
-  shouldForwardProp: (prop) => !['active', 'theme'].includes(prop)
-})`
+const Tab = styled.button`
   padding: 1rem 2rem;
-  background: ${props => props.active ? props.theme.primary : 'transparent'};
-  color: ${props => props.active ? 'white' : props.theme.text};
+  background: ${props => props.$active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? 'white' : props.theme.text};
   border: none;
   border-radius: 12px 12px 0 0;
   font-weight: 600;
@@ -44,7 +42,7 @@ const Tab = styled.button.withConfig({
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.border};
+    background: ${props => props.$active ? props.theme.primary : props.theme.border};
   }
 `;
 
@@ -554,13 +552,13 @@ export default function LayoutCustomization({ theme, onSettingsSaved }) {
 
       <TabsContainer>
         <Tab 
-          active={activeTab === 'portal'} 
+                      $active={activeTab === 'portal'} 
           onClick={() => setActiveTab('portal')}
         >
           🌐 Portal
         </Tab>
         <Tab 
-          active={activeTab === 'shop'} 
+                      $active={activeTab === 'shop'} 
           onClick={() => setActiveTab('shop')}
         >
           🏪 Sklep

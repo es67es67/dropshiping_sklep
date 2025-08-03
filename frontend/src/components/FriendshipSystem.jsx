@@ -63,10 +63,10 @@ const Tab = styled.button`
   padding: 12px 24px;
   border: none;
   background: none;
-  color: ${props => props.active ? props.theme.colors.primary : props.theme.colors.textSecondary};
+  color: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.textSecondary};
   cursor: pointer;
-  font-weight: ${props => props.active ? '600' : '400'};
-  border-bottom: 2px solid ${props => props.active ? props.theme.colors.primary : 'transparent'};
+  font-weight: ${props => props.$active ? '600' : '400'};
+  border-bottom: 2px solid ${props => props.$active ? props.theme.colors.primary : 'transparent'};
   transition: all 0.2s ease;
   
   &:hover {
@@ -455,31 +455,31 @@ const FriendshipSystem = ({ userId }) => {
 
       <TabContainer>
         <Tab 
-          active={activeTab === 'friends'} 
+          $active={activeTab === 'friends'} 
           onClick={() => setActiveTab('friends')}
         >
           Znajomi ({friends.length})
         </Tab>
         <Tab 
-          active={activeTab === 'pending'} 
+          $active={activeTab === 'pending'} 
           onClick={() => setActiveTab('pending')}
         >
           Oczekujące ({pendingRequests.length})
         </Tab>
         <Tab 
-          active={activeTab === 'sent'} 
+          $active={activeTab === 'sent'} 
           onClick={() => setActiveTab('sent')}
         >
           Wysłane ({sentRequests.length})
         </Tab>
         <Tab 
-          active={activeTab === 'suggestions'} 
+          $active={activeTab === 'suggestions'} 
           onClick={() => setActiveTab('suggestions')}
         >
           Sugestie ({suggestions.length})
         </Tab>
         <Tab 
-          active={activeTab === 'blocked'} 
+          $active={activeTab === 'blocked'} 
           onClick={() => setActiveTab('blocked')}
         >
           Zablokowani ({blockedUsers.length})

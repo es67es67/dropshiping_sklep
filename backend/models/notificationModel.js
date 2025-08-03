@@ -24,7 +24,22 @@ const notificationSchema = new mongoose.Schema({
       'friend_request',    // Zaproszenie do znajomych
       'friend_accepted',   // Akceptacja zaproszenia
       'post_like',         // Polubienie posta
-      'post_comment'       // Komentarz do posta
+      'post_comment',      // Komentarz do posta
+      'auction_bid',       // Nowa oferta w aukcji
+      'auction_outbid',    // Prześcignięcie w aukcji
+      'auction_ending',    // Kończenie aukcji
+      'auction_won',       // Wygrana aukcja
+      'auction_lost',      // Przegrana aukcja
+      'negotiation_offer', // Nowa propozycja cenowa
+      'negotiation_accepted', // Akceptacja propozycji
+      'negotiation_rejected', // Odrzucenie propozycji
+      'price_drop',        // Spadek ceny produktu
+      'back_in_stock',     // Produkt ponownie dostępny
+      'cart_reminder',     // Przypomnienie o koszyku
+      'wishlist_drop',     // Spadek ceny produktu z listy życzeń
+      'similar_product',   // Podobny produkt
+      'seller_message',    // Wiadomość od sprzedawcy
+      'buyer_message'      // Wiadomość od kupującego
     ],
     required: true
   },
@@ -57,10 +72,25 @@ const notificationSchema = new mongoose.Schema({
   data: {
     orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+    marketplaceProductId: { type: mongoose.Schema.Types.ObjectId, ref: 'MarketplaceProduct' },
     shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop' },
     paymentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Payment' },
+    auctionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Auction' },
+    negotiationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Negotiation' },
+    bidId: { type: mongoose.Schema.Types.ObjectId, ref: 'Bid' },
+    offerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Offer' },
+    sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    buyerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     url: { type: String }, // Link do powiązanej strony
-    image: { type: String } // Obraz powiadomienia
+    image: { type: String }, // Obraz powiadomienia
+    price: { type: Number }, // Cena w powiadomieniu
+    oldPrice: { type: Number }, // Stara cena
+    newPrice: { type: Number }, // Nowa cena
+    bidAmount: { type: Number }, // Kwota oferty
+    timeLeft: { type: String }, // Pozostały czas (dla aukcji)
+    productName: { type: String }, // Nazwa produktu
+    sellerName: { type: String }, // Nazwa sprzedawcy
+    buyerName: { type: String } // Nazwa kupującego
   },
   
   // Kanały dostarczania

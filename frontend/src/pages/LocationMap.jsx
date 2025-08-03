@@ -226,22 +226,20 @@ const LayerControl = styled.div`
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 `;
 
-const LayerButton = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
+const LayerButton = styled.button`
   display: block;
   width: 100%;
   padding: 8px 12px;
   margin: 2px 0;
   border: 1px solid #ddd;
-  background: ${props => props.active ? '#00D4AA' : 'white'};
-  color: ${props => props.active ? 'white' : '#333'};
+  background: ${props => props.$active ? '#00D4AA' : 'white'};
+  color: ${props => props.$active ? 'white' : '#333'};
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
   
   &:hover {
-    background: ${props => props.active ? '#00B894' : '#f5f5f5'};
+    background: ${props => props.$active ? '#00B894' : '#f5f5f5'};
   }
 `;
 
@@ -874,25 +872,25 @@ export default function LocationMap() {
 
           <LayerControl>
             <LayerButton 
-              active={currentLayer === 'województwo'} 
+              $active={currentLayer === 'województwo'} 
               onClick={() => handleLayerChange('województwo')}
             >
               Województwa
             </LayerButton>
             <LayerButton 
-              active={currentLayer === 'powiat'} 
+              $active={currentLayer === 'powiat'} 
               onClick={() => handleLayerChange('powiat')}
             >
               Powiaty
             </LayerButton>
             <LayerButton 
-              active={currentLayer === 'gmina'} 
+              $active={currentLayer === 'gmina'} 
               onClick={() => handleLayerChange('gmina')}
             >
               Gminy
             </LayerButton>
             <LayerButton 
-              active={currentLayer === 'miejscowość'} 
+              $active={currentLayer === 'miejscowość'} 
               onClick={() => handleLayerChange('miejscowość')}
             >
               Miejscowości

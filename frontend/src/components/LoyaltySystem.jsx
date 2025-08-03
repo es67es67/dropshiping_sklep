@@ -223,10 +223,10 @@ const Tab = styled.button`
   padding: 12px 24px;
   border: none;
   background: none;
-  color: ${props => props.active ? props.theme.colors.primary : props.theme.colors.textSecondary};
+  color: ${props => props.$active ? props.theme.colors.primary : props.theme.colors.textSecondary};
   cursor: pointer;
-  font-weight: ${props => props.active ? '600' : '400'};
-  border-bottom: 2px solid ${props => props.active ? props.theme.colors.primary : 'transparent'};
+  font-weight: ${props => props.$active ? '600' : '400'};
+  border-bottom: 2px solid ${props => props.$active ? props.theme.colors.primary : 'transparent'};
   transition: all 0.2s ease;
   
   &:hover {
@@ -397,25 +397,25 @@ const LoyaltySystem = ({ userId }) => {
 
       <TabContainer>
         <Tab 
-          active={activeTab === 'overview'} 
+          $active={activeTab === 'overview'} 
           onClick={() => setActiveTab('overview')}
         >
           Przegląd
         </Tab>
         <Tab 
-          active={activeTab === 'badges'} 
+          $active={activeTab === 'badges'} 
           onClick={() => setActiveTab('badges')}
         >
           Odznaki ({loyalty.badges.length})
         </Tab>
         <Tab 
-          active={activeTab === 'rewards'} 
+          $active={activeTab === 'rewards'} 
           onClick={() => setActiveTab('rewards')}
         >
           Nagrody
         </Tab>
         <Tab 
-          active={activeTab === 'history'} 
+          $active={activeTab === 'history'} 
           onClick={() => setActiveTab('history')}
         >
           Historia

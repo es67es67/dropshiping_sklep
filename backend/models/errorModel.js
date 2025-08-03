@@ -5,8 +5,7 @@ const errorSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
-    unique: true,
-    index: true
+    unique: true
   },
   message: {
     type: String,
@@ -97,8 +96,7 @@ const errorSchema = new mongoose.Schema({
   timestamp: {
     type: Date,
     required: true,
-    default: Date.now,
-    index: true
+    default: Date.now
   },
   resolvedAt: {
     type: Date

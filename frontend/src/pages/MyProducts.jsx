@@ -58,9 +58,9 @@ const ShopTabs = styled.div`
 
 const ShopTab = styled.button`
   padding: 0.75rem 1.5rem;
-  background: ${props => props.isActive ? props.theme.primary : props.theme.surface};
-  color: ${props => props.isActive ? 'white' : props.theme.text};
-  border: 2px solid ${props => props.isActive ? props.theme.primary : props.theme.border};
+  background: ${props => props.$active ? props.theme.primary : props.theme.surface};
+  color: ${props => props.$active ? 'white' : props.theme.text};
+  border: 2px solid ${props => props.$active ? props.theme.primary : props.theme.border};
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
@@ -69,7 +69,7 @@ const ShopTab = styled.button`
   white-space: nowrap;
   
   &:hover {
-    background: ${props => props.isActive ? props.theme.primary : props.theme.primary}20;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}20;
     transform: translateY(-1px);
   }
 `;
@@ -227,7 +227,7 @@ export default function MyProducts() {
           <ShopTab
             key={shop._id}
             data-testid="shop-tab"
-            isActive={selectedShop?._id === shop._id}
+                            $active={selectedShop?._id === shop._id}
             onClick={() => handleShopSelect(shop)}
           >
             🏪 {shop.name} ({shop.stats?.totalProducts || 0})

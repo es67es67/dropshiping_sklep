@@ -98,8 +98,8 @@ const TabsContainer = styled.div`
 
 const Tab = styled.button`
   padding: 1rem 2rem;
-  background: ${props => props.active ? props.theme.primary : 'transparent'};
-  color: ${props => props.active ? 'white' : props.theme.text};
+  background: ${props => props.$active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? 'white' : props.theme.text};
   border: none;
   border-radius: 12px 12px 0 0;
   font-weight: 600;
@@ -107,7 +107,7 @@ const Tab = styled.button`
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.border};
+    background: ${props => props.$active ? props.theme.primary : props.theme.border};
   }
 `;
 
@@ -478,25 +478,25 @@ export default function ShopManagement() {
 
       <TabsContainer>
         <Tab 
-          active={activeTab === 'overview'} 
+                      $active={activeTab === 'overview'} 
           onClick={() => setActiveTab('overview')}
         >
           📊 Przegląd
         </Tab>
         <Tab 
-          active={activeTab === 'products'} 
+                      $active={activeTab === 'products'} 
           onClick={() => setActiveTab('products')}
         >
           📦 Produkty
         </Tab>
         <Tab 
-          active={activeTab === 'orders'} 
+                      $active={activeTab === 'orders'} 
           onClick={() => setActiveTab('orders')}
         >
           📋 Zamówienia
         </Tab>
         <Tab 
-          active={activeTab === 'analytics'} 
+                      $active={activeTab === 'analytics'} 
           onClick={() => setActiveTab('analytics')}
         >
           📈 Analityka

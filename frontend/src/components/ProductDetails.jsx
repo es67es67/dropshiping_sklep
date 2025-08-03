@@ -66,7 +66,7 @@ const Thumbnail = styled.img`
   object-fit: cover;
   border-radius: 8px;
   cursor: pointer;
-  border: 2px solid ${props => props.active ? props.theme.primary : 'transparent'};
+  border: 2px solid ${props => props.$active ? props.theme.primary : 'transparent'};
   transition: all 0.2s;
   
   &:hover {
@@ -306,8 +306,8 @@ const TabButton = styled.button`
   padding: 1rem 2rem;
   font-size: 1rem;
   font-weight: 600;
-  color: ${props => props.active ? props.theme.primary : props.theme.textSecondary};
-  border-bottom: 2px solid ${props => props.active ? props.theme.primary : 'transparent'};
+  color: ${props => props.$active ? props.theme.primary : props.theme.textSecondary};
+  border-bottom: 2px solid ${props => props.$active ? props.theme.primary : 'transparent'};
   cursor: pointer;
   transition: all 0.2s;
   
@@ -740,7 +740,7 @@ export default function ProductDetails({ theme }) {
                   key={index}
                   src={image}
                   alt={`${product.name} - zdjęcie ${index + 1}`}
-                  active={index === selectedImage}
+                  $active={index === selectedImage}
                   onClick={() => setSelectedImage(index)}
                   theme={theme}
                 />
@@ -841,28 +841,28 @@ export default function ProductDetails({ theme }) {
         <TabsContainer theme={theme}>
           <TabButton 
             theme={theme}
-            active={activeTab === 'description'}
+            $active={activeTab === 'description'}
             onClick={() => handleTabChange('description')}
           >
             Opis
           </TabButton>
           <TabButton 
             theme={theme}
-            active={activeTab === 'specifications'}
+            $active={activeTab === 'specifications'}
             onClick={() => handleTabChange('specifications')}
           >
             Specyfikacja
           </TabButton>
           <TabButton 
             theme={theme}
-            active={activeTab === 'reviews'}
+            $active={activeTab === 'reviews'}
             onClick={() => handleTabChange('reviews')}
           >
             Recenzje ({reviews.length})
           </TabButton>
           <TabButton 
             theme={theme}
-            active={activeTab === 'shipping'}
+            $active={activeTab === 'shipping'}
             onClick={() => handleTabChange('shipping')}
           >
             Dostawa

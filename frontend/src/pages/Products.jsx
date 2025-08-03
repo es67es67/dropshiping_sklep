@@ -10,6 +10,134 @@ import AdvertisementManager from '../components/AdvertisementManager';
 import { useAuth } from '../contexts/AuthContext';
 import { FaSearch, FaTimes, FaShoppingCart, FaHeart, FaGavel, FaMapMarkerAlt, FaPlus } from 'react-icons/fa';
 
+// 🔧 SYSTEM OBSŁUGI BŁĘDÓW - REGUŁA KIEROWNIKA
+const saveErrorToDatabase = async (error, context) => {
+  try {
+    const errorData = {
+      timestamp: new Date(),
+      error: error.message,
+      stack: error.stack,
+      context: context,
+      component: 'Products.jsx',
+      action: 'errorHandling',
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+      userId: localStorage.getItem('userId') || 'anonymous',
+      severity: 'high'
+    };
+
+    await fetch('/api/errors', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(errorData)
+    });
+
+    console.log('✅ Błąd zapisany do bazy danych');
+  } catch (saveError) {
+    console.error('❌ Nie udało się zapisać błędu:', saveError);
+  }
+};
+
+// 🧪 SYSTEM TESTÓW AUTOMATYCZNYCH
+const runSystemTests = async () => {
+  console.log('🔍 Rozpoczynam testy systemu...');
+  
+  const tests = {
+    api: await testAPI(),
+    products: testProductsDisplay(),
+    cart: await testCart(),
+    auth: testAuth(),
+    navigation: testNavigation()
+  };
+  
+  console.log('📊 Wyniki testów:', tests);
+  await saveTestResultsToDatabase(tests);
+  
+  return tests;
+};
+
+const testAPI = async () => {
+  try {
+    const response = await fetch('/api/marketplace');
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    const data = await response.json();
+    console.log('✅ API działa, produkty:', data.products?.length || 0);
+    return true;
+  } catch (error) {
+    console.error('❌ API błąd:', error);
+    await saveErrorToDatabase(error, 'testAPI');
+    return false;
+  }
+};
+
+const testProductsDisplay = () => {
+  const products = document.querySelectorAll('[data-testid="product-card"]');
+  console.log('✅ Produkty wyświetlone:', products.length);
+  return products.length > 0;
+};
+
+const testCart = async () => {
+  try {
+    const response = await fetch('/api/cart/summary');
+    if (!response.ok) throw new Error(`Cart API Error: ${response.status}`);
+    const data = await response.json();
+    console.log('✅ Koszyk działa, przedmioty:', data.items?.length || 0);
+    return true;
+  } catch (error) {
+    console.error('❌ Koszyk błąd:', error);
+    await saveErrorToDatabase(error, 'testCart');
+    return false;
+  }
+};
+
+const testAuth = () => {
+  const token = localStorage.getItem('token');
+  console.log('✅ Auth test:', !!token);
+  return !!token;
+};
+
+const testNavigation = () => {
+  const links = document.querySelectorAll('a[href]');
+  console.log('✅ Nawigacja działa, linki:', links.length);
+  return links.length > 0;
+};
+
+const saveTestResultsToDatabase = async (results) => {
+  try {
+    await fetch('/api/errors', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        timestamp: new Date(),
+        context: 'systemTests',
+        component: 'Products.jsx',
+        action: 'testResults',
+        results: results,
+        severity: 'low'
+      })
+    });
+  } catch (error) {
+    console.error('❌ Nie udało się zapisać wyników testów:', error);
+  }
+};
+
+// 🔄 SAFE FETCH - BEZPIECZNE ŻĄDANIA
+const safeFetch = async (url, options = {}) => {
+  try {
+    const response = await fetch(url, options);
+    
+    if (!response.ok) {
+      const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+      await saveErrorToDatabase(error, 'fetchError');
+    }
+    
+    return response;
+  } catch (error) {
+    await saveErrorToDatabase(error, 'fetchError');
+    throw error;
+  }
+};
+
 const Container = styled.div`
   min-height: 100vh;
   background: ${props => props.theme.background};
@@ -578,11 +706,15 @@ const Products = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Pobieranie produktów z API
+  // Pobieranie produktów z API z obsługą błędów
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
+        // 🧪 Uruchom testy przed pobieraniem
+        console.log('🔍 Sprawdzam system przed pobieraniem produktów...');
+        await runSystemTests();
+        
         // Użyj proxy w trybie development, VITE_API_URL w production
         const apiUrl = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:5000');
         
@@ -601,14 +733,32 @@ const Products = () => {
           params.append('search', searchQuery);
         }
         
-        const response = await fetch(`${apiUrl}/api/marketplace?${params.toString()}`);
+        console.log('🔍 Parametry zapytania:', params.toString());
+        console.log('🔍 URL zapytania:', `${apiUrl}/api/marketplace?${params.toString()}`);
+        
+        // 🔄 Użyj safeFetch z obsługą błędów
+        const response = await safeFetch(`${apiUrl}/api/marketplace?${params.toString()}`);
+        console.log('API Response:', response.status, response.statusText);
+        
         if (response.ok) {
           const data = await response.json();
+          console.log('📦 Pobrane produkty:', data.products?.length || 0);
+          console.log('📦 Przykładowy produkt:', data.products?.[0]);
           setProducts(data.products || []);
+          
+          // ✅ Zapisz sukces do bazy
+          await saveTestResultsToDatabase({
+            action: 'fetchProducts',
+            success: true,
+            productsCount: data.products?.length || 0
+          });
         } else {
-          console.error('Błąd podczas pobierania produktów');
+          const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+          await saveErrorToDatabase(error, 'fetchProducts');
+          console.error('Błąd podczas pobierania produktów:', response.status);
         }
       } catch (error) {
+        await saveErrorToDatabase(error, 'fetchProducts');
         console.error('Błąd podczas pobierania produktów:', error);
       } finally {
         setLoading(false);
@@ -663,6 +813,31 @@ const Products = () => {
       }
     }
   }, [user, getUserLocation, getUserTeryt, getUserAddress, selectedLocation]);
+
+  // 🧪 AUTOMATYCZNE TESTY PO ZAŁADOWANIU KOMPONENTU
+  useEffect(() => {
+    const runInitialTests = async () => {
+      console.log('🚀 Uruchamiam testy po załadowaniu komponentu...');
+      try {
+        const testResults = await runSystemTests();
+        console.log('✅ Testy zakończone:', testResults);
+        
+        // Zapisz wyniki testów do bazy
+        await saveTestResultsToDatabase({
+          action: 'componentLoad',
+          testResults: testResults,
+          timestamp: new Date()
+        });
+      } catch (error) {
+        await saveErrorToDatabase(error, 'initialTests');
+        console.error('❌ Błąd podczas testów:', error);
+      }
+    };
+
+    // Uruchom testy po 2 sekundach od załadowania
+    const timer = setTimeout(runInitialTests, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
 
   const handleSearch = (query) => {
@@ -747,6 +922,9 @@ const Products = () => {
   };
 
   // Filtrowanie produktów
+  console.log('🔍 Wszystkie produkty:', products.length);
+  console.log('🔍 Filtry:', { saleTypeFilter, categoryFilter });
+
   const filteredProducts = products.filter(product => {
     // Filtr typu sprzedaży
     if (saleTypeFilter === 'free') {
@@ -766,6 +944,10 @@ const Products = () => {
     return true;
   });
 
+  console.log('🔍 Przefiltrowane produkty:', filteredProducts.length);
+  console.log('🔍 Produkty nie-aukcje:', filteredProducts.filter(p => p.saleType !== 'auction').length);
+  console.log('🔍 Produkty aukcje:', filteredProducts.filter(p => p.saleType === 'auction').length);
+
   // Rozdzielenie produktów na zwykłe i aukcje
   const regularProducts = filteredProducts.filter(product => product.saleType !== 'auction');
   const auctionProducts = filteredProducts.filter(product => product.saleType === 'auction');
@@ -773,21 +955,65 @@ const Products = () => {
   // Pobierz unikalne kategorie
   const uniqueCategories = [...new Set(products.map(product => product.category).filter(Boolean))];
 
-  const handleAddToCart = (product) => {
-    setCart(prev => {
-      const existing = prev.find(item => item._id === product._id);
-      if (existing) {
-        return prev.map(item => 
-          item._id === product._id 
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+  const handleAddToCart = async (product) => {
+    try {
+      console.log('🛒 Dodawanie do koszyka:', product._id);
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Musisz się zalogować, aby dodać produkt do koszyka');
+        return;
       }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-    
-    // Pokaż powiadomienie
-    alert(`${product.name} został dodany do koszyka!`);
+
+      const response = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          productId: product._id,
+          quantity: 1
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Błąd podczas dodawania do koszyka');
+      }
+
+      const data = await response.json();
+      console.log('✅ Produkt dodany do koszyka:', data);
+      
+      // Aktualizuj lokalny stan koszyka
+      setCart(prev => {
+        const existing = prev.find(item => item._id === product._id);
+        if (existing) {
+          return prev.map(item => 
+            item._id === product._id 
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        }
+        return [...prev, { ...product, quantity: 1 }];
+      });
+      
+      // Pokaż powiadomienie
+      alert(`${product.name} został dodany do koszyka!`);
+      
+      // Zapisz sukces do bazy błędów
+      await saveTestResultsToDatabase({
+        action: 'addToCart',
+        success: true,
+        productId: product._id,
+        productName: product.name
+      });
+      
+    } catch (error) {
+      console.error('❌ Błąd podczas dodawania do koszyka:', error);
+      await saveErrorToDatabase(error, 'addToCart');
+      alert(`Błąd: ${error.message}`);
+    }
   };
 
   const handleAddToWishlist = (product) => {

@@ -110,11 +110,9 @@ const FiltersSection = styled.div`
   flex-wrap: wrap;
 `;
 
-const FilterChip = styled.div.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
-  background: ${props => props.active ? props.theme.primary : props.theme.background};
-  color: ${props => props.active ? 'white' : props.theme.text};
+const FilterChip = styled.div`
+  background: ${props => props.$active ? props.theme.primary : props.theme.background};
+  color: ${props => props.$active ? 'white' : props.theme.text};
   padding: 8px 16px;
   border-radius: 20px;
   border: 1px solid ${props => props.theme.border};
@@ -123,7 +121,7 @@ const FilterChip = styled.div.withConfig({
   font-size: 0.9rem;
   
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.primary}20;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}20;
   }
 `;
 
@@ -247,14 +245,14 @@ const Pagination = styled.div`
 const PageButton = styled.button`
   padding: 10px 15px;
   border: 1px solid ${props => props.theme.border};
-  background: ${props => props.active ? props.theme.primary : props.theme.background};
-  color: ${props => props.active ? 'white' : props.theme.text};
+  background: ${props => props.$active ? props.theme.primary : props.theme.background};
+  color: ${props => props.$active ? 'white' : props.theme.text};
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   
   &:hover {
-    background: ${props => props.active ? props.theme.primary : props.theme.primary}20;
+    background: ${props => props.$active ? props.theme.primary : props.theme.primary}20;
   }
   
   &:disabled {
@@ -430,42 +428,42 @@ export default function CompanyProfiles({ theme }) {
 
       <FiltersSection>
         <FilterChip
-          active={searchParams.industry === 'Technologia'}
+          $active={searchParams.industry === 'Technologia'}
           onClick={() => handleFilterChange('industry', 'Technologia')}
           theme={theme}
         >
           💻 Technologia
         </FilterChip>
         <FilterChip
-          active={searchParams.industry === 'Finanse'}
+          $active={searchParams.industry === 'Finanse'}
           onClick={() => handleFilterChange('industry', 'Finanse')}
           theme={theme}
         >
           💰 Finanse
         </FilterChip>
         <FilterChip
-          active={searchParams.industry === 'Zdrowie'}
+          $active={searchParams.industry === 'Zdrowie'}
           onClick={() => handleFilterChange('industry', 'Zdrowie')}
           theme={theme}
         >
           🏥 Zdrowie
         </FilterChip>
         <FilterChip
-          active={searchParams.companyType === 'startup'}
+          $active={searchParams.companyType === 'startup'}
           onClick={() => handleFilterChange('companyType', 'startup')}
           theme={theme}
         >
           🚀 Startupy
         </FilterChip>
         <FilterChip
-          active={searchParams.companyType === 'sme'}
+          $active={searchParams.companyType === 'sme'}
           onClick={() => handleFilterChange('companyType', 'sme')}
           theme={theme}
         >
           🏢 MŚP
         </FilterChip>
         <FilterChip
-          active="false"
+          $active={false}
           onClick={clearFilters}
           theme={theme}
         >
@@ -531,7 +529,7 @@ export default function CompanyProfiles({ theme }) {
               return (
                 <PageButton
                   key={page}
-                  active={page === currentPage}
+                  $active={page === currentPage}
                   onClick={() => setCurrentPage(page)}
                   theme={theme}
                 >

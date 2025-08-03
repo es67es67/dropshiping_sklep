@@ -113,13 +113,11 @@ const ImageNavigation = styled.div`
   gap: 0.25rem;
 `;
 
-const ImageDot = styled.button.withConfig({
-  shouldForwardProp: (prop) => prop !== 'active'
-})`
+const ImageDot = styled.button`
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
-  background: ${props => props.active ? 'white' : 'rgba(255, 255, 255, 0.5)'};
+  background: ${props => props.$active ? 'white' : 'rgba(255, 255, 255, 0.5)'};
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -417,7 +415,7 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView, isMar
             {images.map((_, index) => (
               <ImageDot
                 key={index}
-                active={index === currentImageIndex}
+                $active={index === currentImageIndex}
                 onClick={() => handleImageChange(index)}
               />
             ))}
