@@ -8,8 +8,9 @@ import BidModal from '../components/BidModal';
 import PageTitle from '../components/PageTitle';
 import AdvertisementManager from '../components/AdvertisementManager';
 import LocationFilter from '../components/LocationFilter';
+import SidebarFilters from '../components/SidebarFilters';
 import { useAuth } from '../contexts/AuthContext';
-import { FaSearch, FaTimes, FaShoppingCart, FaHeart, FaGavel, FaMapMarkerAlt, FaPlus } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaShoppingCart, FaHeart, FaGavel, FaMapMarkerAlt, FaPlus, FaFilter } from 'react-icons/fa';
 
 // 🔧 SYSTEM OBSŁUGI BŁĘDÓW - REGUŁA KIEROWNIKA
 const saveErrorToDatabase = async (error, context) => {
@@ -683,6 +684,43 @@ const LocationSettingsButton = styled.button`
   }
 `;
 
+const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+  }
+`;
+
+const FiltersButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: ${props => props.theme.primary};
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.theme.primaryDark || '#0056b3'};
+    transform: translateY(-1px);
+  }
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem;
+  }
+`;
+
 const Products = ({ theme }) => {
   const { user, getUserLocation, getUserTeryt, getUserAddress } = useAuth();
   const [products, setProducts] = useState([]);
@@ -708,6 +746,7 @@ const Products = ({ theme }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [sortByLocation, setSortByLocation] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Pobieranie produktów z API z obsługą błędów
   useEffect(() => {
@@ -1170,126 +1209,34 @@ const Products = ({ theme }) => {
               </AddProductButton>
             </HeaderInfo>
             
-            {/* Search Bar */}
-            <SearchContainer>
-              <SearchIcon>
-                <FaSearch />
-              </SearchIcon>
-              <SearchInput
-                type="text"
-                placeholder="Szukaj produktów..."
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-              />
-              {searchQuery && (
-                <ClearButton
-                  onClick={() => handleSearch('')}
-                >
-                  <FaTimes />
-                </ClearButton>
-              )}
-            </SearchContainer>
+            <HeaderActions>
+              {/* Search Bar */}
+              <SearchContainer>
+                <SearchIcon>
+                  <FaSearch />
+                </SearchIcon>
+                <SearchInput
+                  type="text"
+                  placeholder="Szukaj produktów..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
+                {searchQuery && (
+                  <ClearButton
+                    onClick={() => handleSearch('')}
+                  >
+                    <FaTimes />
+                  </ClearButton>
+                )}
+              </SearchContainer>
+              
+              {/* Przycisk filtrów */}
+              <FiltersButton onClick={() => setSidebarOpen(true)}>
+                <FaFilter />
+                Filtry
+              </FiltersButton>
+            </HeaderActions>
           </HeaderFlex>
-          
-          {/* Filtry kategorii sprzedaży */}
-          <FilterContainer>
-            <FilterButton
-              active={saleTypeFilter === 'all'}
-              onClick={() => handleSaleTypeFilter('all')}
-            >
-              Wszystkie
-            </FilterButton>
-            <FilterButton
-              active={saleTypeFilter === 'fixed_price'}
-              onClick={() => handleSaleTypeFilter('fixed_price')}
-            >
-              💰 Cena stała
-            </FilterButton>
-            <FilterButton
-              active={saleTypeFilter === 'auction'}
-              onClick={() => handleSaleTypeFilter('auction')}
-            >
-              🔨 Aukcje
-            </FilterButton>
-            <FilterButton
-              active={saleTypeFilter === 'negotiation'}
-              onClick={() => handleSaleTypeFilter('negotiation')}
-            >
-              💬 Propozycje
-            </FilterButton>
-            <FilterButton
-              active={saleTypeFilter === 'free'}
-              onClick={() => handleSaleTypeFilter('free')}
-            >
-              🎁 Za darmo
-            </FilterButton>
-          </FilterContainer>
-          
-          {/* Filtry kategorii */}
-          <FilterContainer>
-            <FilterButton
-              active={categoryFilter === 'all'}
-              onClick={() => handleCategoryFilter('all')}
-            >
-              Wszystkie kategorie
-            </FilterButton>
-            {uniqueCategories.map(category => (
-              <FilterButton
-                key={category}
-                active={categoryFilter === category}
-                onClick={() => handleCategoryFilter(category)}
-              >
-                {category}
-              </FilterButton>
-            ))}
-          </FilterContainer>
-          
-          {/* 🎯 NOWY KOMPONENT: FILTR LOKALIZACJI */}
-          <LocationFilter 
-            onFilterChange={handleLocationFilterChange}
-            userLocation={userLocation}
-          />
-          
-          {/* Filtry lokalizacji */}
-          <FilterContainer>
-            <LocationFilterContainer>
-              <LocationButton
-                selected={!selectedLocation}
-                onClick={openLocationModal}
-              >
-                <FaMapMarkerAlt />
-                {selectedLocation ? selectedLocation.city : 'Wybierz lokalizację'}
-              </LocationButton>
-              {selectedLocation && (
-                <ClearLocationButton onClick={clearLocationFilter}>
-                  Wyczyść
-                </ClearLocationButton>
-              )}
-            </LocationFilterContainer>
-          </FilterContainer>
-          
-          {/* Przycisk wyczyszczenia wszystkich filtrów */}
-          {(selectedLocation || saleTypeFilter !== 'all' || categoryFilter !== 'all' || searchQuery) && (
-            <FilterContainer>
-              <ClearAllFiltersButton onClick={clearAllFilters}>
-                🗑️ Wyczyść wszystkie filtry
-              </ClearAllFiltersButton>
-            </FilterContainer>
-          )}
-          
-          {/* Opcja wyłączenia automatycznej lokalizacji */}
-          <FilterContainer>
-            <LocationSettingsButton 
-              onClick={() => {
-                const current = localStorage.getItem('autoLocation') !== 'false';
-                localStorage.setItem('autoLocation', (!current).toString());
-                window.location.reload();
-              }}
-            >
-              {localStorage.getItem('autoLocation') !== 'false' ? '🔒' : '🔓'} 
-              {localStorage.getItem('autoLocation') !== 'false' ? 'Wyłącz' : 'Włącz'} automatyczną lokalizację
-            </LocationSettingsButton>
-          </FilterContainer>
         </HeaderContent>
       </Header>
 
@@ -1471,6 +1418,24 @@ const Products = ({ theme }) => {
           </LocationModalContent>
         </LocationModal>
       )}
+
+      {/* Sidebar Filters */}
+      <SidebarFilters
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearch}
+        saleTypeFilter={saleTypeFilter}
+        onSaleTypeFilter={handleSaleTypeFilter}
+        categoryFilter={categoryFilter}
+        onCategoryFilter={handleCategoryFilter}
+        selectedLocation={selectedLocation}
+        onLocationSelect={openLocationModal}
+        onClearLocation={clearLocationFilter}
+        onClearAllFilters={clearAllFilters}
+        uniqueCategories={uniqueCategories}
+        hasActiveFilters={selectedLocation || saleTypeFilter !== 'all' || categoryFilter !== 'all' || searchQuery}
+      />
     </Container>
   );
 };
