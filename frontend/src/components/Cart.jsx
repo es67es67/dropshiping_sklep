@@ -542,6 +542,36 @@ const Cart = () => {
 
   const updateQuantity = async (itemId, newQuantity) => {
     try {
+      // Znajdź produkt w koszyku
+      const cartItem = cart.find(item => item._id === itemId);
+      if (!cartItem) {
+        console.error('Nie znaleziono produktu w koszyku');
+        return;
+      }
+
+      // Sprawdź stan magazynowy przed aktualizacją
+      const stockCheckResponse = await fetch('/api/marketplace/check-stock', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productId: cartItem.product._id,
+          quantity: newQuantity
+        })
+      });
+
+      if (!stockCheckResponse.ok) {
+        const stockError = await stockCheckResponse.json();
+        if (stockError.error === 'Niewystarczający stan magazynowy') {
+          alert(`Niewystarczający stan magazynowy. Dostępne: ${stockError.available} sztuk`);
+          return;
+        } else if (stockError.error === 'Produkt jest niedostępny') {
+          alert('Produkt jest niedostępny');
+          return;
+        }
+      }
+
       const response = await fetch('/api/cart/update', {
         method: 'PUT',
         headers: {
@@ -558,6 +588,7 @@ const Cart = () => {
       await fetchCart();
     } catch (err) {
       console.error('Błąd aktualizacji ilości:', err);
+      alert(`Błąd: ${err.message}`);
     }
   };
 

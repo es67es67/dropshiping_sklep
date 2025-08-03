@@ -659,6 +659,36 @@ const AddProduct = () => {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
       
+      // Najpierw uploaduj zdjęcia
+      let imageUrls = [];
+      
+      if (formData.images.length > 0) {
+        const formDataUpload = new FormData();
+        formData.images.forEach((img, index) => {
+          if (index === 0) {
+            formDataUpload.append('mainImage', img.file);
+          } else {
+            formDataUpload.append('images', img.file);
+          }
+        });
+        
+        const uploadResponse = await fetch(`${apiUrl}/api/marketplace/upload-images`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formDataUpload
+        });
+        
+        if (!uploadResponse.ok) {
+          const uploadError = await uploadResponse.json();
+          throw new Error(uploadError.error || 'Błąd podczas uploadu zdjęć');
+        }
+        
+        const uploadResult = await uploadResponse.json();
+        imageUrls = uploadResult.images;
+      }
+
       const productData = {
         name: formData.name,
         description: formData.description,
@@ -669,6 +699,7 @@ const AddProduct = () => {
         condition: formData.condition,
         saleType: formData.saleType,
         location: locationData,
+        images: imageUrls,
         tags: formData.tags,
         seller: user._id
       };

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const marketplaceProductController = require('../controllers/marketplaceProductController');
 const { authenticateToken } = require('../middleware/authMiddleware');
+const { uploadProduct } = require('../middleware/uploadMiddleware');
 
 // 🟡 MARKETPLACE API ROUTES: /api/marketplace
 // Zależności: MongoDB marketplaceproducts collection, auth middleware
@@ -236,8 +237,154 @@ router.delete('/:id/wishlist', authenticateToken, async (req, res) => {
 
 // Prywatne trasy (wymagają autoryzacji)
 router.post('/', authenticateToken, marketplaceProductController.createMarketplaceProduct);
-router.put('/:id', authenticateToken, marketplaceProductController.updateMarketplaceProduct);
+
+// Upload zdjęć dla nowego produktu
+router.post('/upload-images', authenticateToken, uploadProduct, async (req, res) => {
+  try {
+    const uploadedFiles = req.files;
+    const imageUrls = [];
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Upewnij się, że folder public/images/products istnieje
+    const productsImagesDir = path.join(__dirname, '..', 'public', 'images', 'products');
+    if (!fs.existsSync(productsImagesDir)) {
+      fs.mkdirSync(productsImagesDir, { recursive: true });
+    }
+    
+    // Przetwórz główne zdjęcie
+    if (uploadedFiles.mainImage) {
+      const uploadedFile = uploadedFiles.mainImage[0];
+      const originalPath = uploadedFile.path;
+      const fileName = `product_${Date.now()}_${Math.round(Math.random() * 1E9)}.jpg`;
+      const newPath = path.join(productsImagesDir, fileName);
+      
+      // Skopiuj plik do folderu products
+      fs.copyFileSync(originalPath, newPath);
+      
+      // Usuń oryginalny plik z uploads
+      fs.unlinkSync(originalPath);
+      
+      const mainImageUrl = `/images/products/${fileName}`;
+      imageUrls.push(mainImageUrl);
+    }
+    
+    // Przetwórz dodatkowe zdjęcia
+    if (uploadedFiles.images) {
+      uploadedFiles.images.forEach(file => {
+        const originalPath = file.path;
+        const fileName = `product_${Date.now()}_${Math.round(Math.random() * 1E9)}.jpg`;
+        const newPath = path.join(productsImagesDir, fileName);
+        
+        // Skopiuj plik do folderu products
+        fs.copyFileSync(originalPath, newPath);
+        
+        // Usuń oryginalny plik z uploads
+        fs.unlinkSync(originalPath);
+        
+        const imageUrl = `/images/products/${fileName}`;
+        imageUrls.push(imageUrl);
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Zdjęcia zostały uploadowane pomyślnie',
+      images: imageUrls
+    });
+    
+  } catch (error) {
+    console.error('Błąd podczas uploadu zdjęć:', error);
+    res.status(500).json({ error: 'Błąd podczas uploadu zdjęć' });
+  }
+});
+router.put('/:id', authenticateToken, marketplaceProductController.updateProduct);
 router.delete('/:id', authenticateToken, marketplaceProductController.deleteMarketplaceProduct);
+
+// Upload zdjęć dla produktów marketplace
+router.post('/:id/upload-images', authenticateToken, uploadProduct, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Sprawdź czy produkt istnieje i czy użytkownik jest właścicielem
+    const MarketplaceProduct = require('../models/marketplaceProductModel');
+    const product = await MarketplaceProduct.findById(id);
+    
+    if (!product) {
+      return res.status(404).json({ error: 'Produkt nie został znaleziony' });
+    }
+    
+    if (product.seller.toString() !== userId) {
+      return res.status(403).json({ error: 'Nie masz uprawnień do edycji tego produktu' });
+    }
+    
+    const uploadedFiles = req.files;
+    const imageUrls = [];
+    
+    // Upewnij się, że folder public/images/products istnieje
+    const productsImagesDir = path.join(__dirname, '..', 'public', 'images', 'products');
+    if (!fs.existsSync(productsImagesDir)) {
+      fs.mkdirSync(productsImagesDir, { recursive: true });
+    }
+    
+    // Przetwórz główne zdjęcie
+    if (uploadedFiles.mainImage) {
+      const uploadedFile = uploadedFiles.mainImage[0];
+      const originalPath = uploadedFile.path;
+      const fileName = `product_${Date.now()}_${Math.round(Math.random() * 1E9)}.jpg`;
+      const newPath = path.join(productsImagesDir, fileName);
+      
+      // Skopiuj plik do folderu products
+      fs.copyFileSync(originalPath, newPath);
+      
+      // Usuń oryginalny plik z uploads
+      fs.unlinkSync(originalPath);
+      
+      const mainImageUrl = `/images/products/${fileName}`;
+      imageUrls.push(mainImageUrl);
+    }
+    
+    // Przetwórz dodatkowe zdjęcia
+    if (uploadedFiles.images) {
+      uploadedFiles.images.forEach(file => {
+        const originalPath = file.path;
+        const fileName = `product_${Date.now()}_${Math.round(Math.random() * 1E9)}.jpg`;
+        const newPath = path.join(productsImagesDir, fileName);
+        
+        // Skopiuj plik do folderu products
+        fs.copyFileSync(originalPath, newPath);
+        
+        // Usuń oryginalny plik z uploads
+        fs.unlinkSync(originalPath);
+        
+        const imageUrl = `/images/products/${fileName}`;
+        imageUrls.push(imageUrl);
+      });
+    }
+    
+    // Zaktualizuj produkt z nowymi zdjęciami
+    product.images = [...(product.images || []), ...imageUrls];
+    if (imageUrls.length > 0 && !product.mainImage) {
+      product.mainImage = imageUrls[0];
+    }
+    
+    await product.save();
+    
+    res.json({
+      success: true,
+      message: 'Zdjęcia zostały dodane pomyślnie',
+      images: imageUrls,
+      product: product
+    });
+    
+  } catch (error) {
+    console.error('Błąd podczas uploadu zdjęć:', error);
+    res.status(500).json({ error: 'Błąd podczas uploadu zdjęć' });
+  }
+});
 
 // Ulubione produkty
 router.get('/user/favorites', authenticateToken, marketplaceProductController.getUserFavorites);

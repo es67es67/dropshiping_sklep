@@ -175,7 +175,17 @@ app.get('/favicon.ico', (req, res) => {
 
 // Serwowanie plików statycznych z folderu public
 app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.jpeg') || path.endsWith('.jpg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (path.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (path.endsWith('.gif')) {
+      res.setHeader('Content-Type', 'image/gif');
+    }
+  }
+}));
 console.log('📁 Skonfigurowano serwowanie plików statycznych:');
 console.log('   - /images ->', path.join(__dirname, 'public', 'images'));
 console.log('   - /uploads ->', path.join(__dirname, 'uploads'));

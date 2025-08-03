@@ -506,6 +506,9 @@ export default function ProductDetails({ theme }) {
   
   // Stany dla powiązanych produktów
   const [relatedProducts, setRelatedProducts] = useState([]);
+  
+  // Sprawdź czy użytkownik jest właścicielem produktu
+  const isOwner = user && product && product.seller?._id === user._id;
 
   useEffect(() => {
     fetchProduct();
@@ -789,7 +792,7 @@ export default function ProductDetails({ theme }) {
             <ContactButton theme={theme}>💬 Skontaktuj się</ContactButton>
           </SellerInfo>
           
-          {product.isActive && (product.stock > 0 || product.stock === undefined) && (
+          {product.isActive && (product.stock > 0 || product.stock === undefined) && !isOwner && (
             <PurchaseSection theme={theme}>
               <Label theme={theme}>Ilość:</Label>
               <QuantitySelector>
@@ -840,6 +843,50 @@ export default function ProductDetails({ theme }) {
                 {isInWishlist ? '❤️ W ulubionych' : '🤍 Dodaj do ulubionych'}
               </WishlistButton>
             </PurchaseSection>
+          )}
+          
+          {/* Przycisk edycji dla właściciela */}
+          {isOwner && (
+            <div style={{ marginTop: '1rem', padding: '1rem', background: '#f0f9ff', borderRadius: '8px', border: '1px solid #0ea5e9' }}>
+              <h4 style={{ margin: '0 0 0.5rem 0', color: '#0ea5e9' }}>🎛️ Zarządzanie produktem</h4>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => window.location.href = `/edit-product/${productId}`}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: '#0ea5e9',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  ✏️ Edytuj produkt
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm('Czy na pewno chcesz usunąć ten produkt?')) {
+                      // TODO: Implementacja usuwania produktu
+                      alert('Funkcja usuwania produktu będzie dostępna wkrótce');
+                    }
+                  }}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: '#dc2626',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  🗑️ Usuń produkt
+                </button>
+              </div>
+            </div>
           )}
         </Info>
       </ProductBox>

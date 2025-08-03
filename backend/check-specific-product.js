@@ -1,77 +1,62 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
-// Połączenie z MongoDB
-const MONGODB_URI = 'mongodb+srv://es67jw:xlnepf0D4JXZtGwT@cluster0.hku8kvd.mongodb.net/portal?retryWrites=true&w=majority&appName=Cluster0';
-
-// Model produktu marketplace
-const marketplaceProductSchema = new mongoose.Schema({
-  name: String,
-  description: String,
-  price: Number,
-  category: String,
-  seller: mongoose.Schema.Types.ObjectId,
-  isActive: Boolean,
-  stock: Number,
-  saleType: String,
-  negotiation: {
-    offers: [{
-      buyer: mongoose.Schema.Types.ObjectId,
-      amount: Number,
-      message: String,
-      status: String,
-      timestamp: Date
-    }]
-  }
+// Połączenie z bazą danych
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 });
 
-const MarketplaceProduct = mongoose.model('MarketplaceProduct', marketplaceProductSchema);
+const MarketplaceProduct = require('./models/marketplaceProductModel');
+const User = require('./models/userModel');
 
-async function checkProduct() {
+async function checkProduct(productId) {
   try {
-    console.log('🔌 Łączenie z MongoDB...');
-    await mongoose.connect(MONGODB_URI);
-    console.log('✅ Połączono z MongoDB');
-
-    const productId = '688c5b49951d90a2cd87631c';
-    console.log(`\n🔍 Sprawdzam produkt: ${productId}`);
-    console.log('=====================================');
-
-    const product = await MarketplaceProduct.findById(productId);
+    console.log('🔍 Sprawdzanie produktu:', productId);
+    
+    // Sprawdź czy ID jest poprawnym ObjectId
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      console.log('❌ Nieprawidłowy format ID produktu');
+      return;
+    }
+    
+    // Znajdź produkt
+    const product = await MarketplaceProduct.findById(productId)
+      .populate('seller', 'username firstName lastName _id');
     
     if (!product) {
       console.log('❌ Produkt nie został znaleziony');
       return;
     }
-
-    console.log('\n📦 Szczegóły produktu:');
-    console.log(`  Nazwa: ${product.name}`);
-    console.log(`  Cena: ${product.price} zł`);
-    console.log(`  Kategoria: ${product.category}`);
-    console.log(`  Typ sprzedaży: ${product.saleType}`);
-    console.log(`  Aktywny: ${product.isActive}`);
-    console.log(`  Stan: ${product.stock}`);
-    console.log(`  Sprzedawca: ${product.seller}`);
     
-    if (product.negotiation && product.negotiation.offers) {
-      console.log(`\n💼 Oferty negocjacyjne: ${product.negotiation.offers.length}`);
-      product.negotiation.offers.forEach((offer, index) => {
-        console.log(`  Oferta ${index + 1}:`);
-        console.log(`    Kupujący: ${offer.buyer}`);
-        console.log(`    Kwota: ${offer.amount} zł`);
-        console.log(`    Status: ${offer.status}`);
-        console.log(`    Wiadomość: ${offer.message || 'Brak'}`);
-        console.log(`    Data: ${offer.timestamp}`);
-      });
-    } else {
-      console.log('\n💼 Brak ofert negocjacyjnych');
+    console.log('✅ Produkt znaleziony:');
+    console.log('- ID:', product._id);
+    console.log('- Nazwa:', product.name);
+    console.log('- Cena:', product.price);
+    console.log('- Sprzedawca:', product.seller?.username || 'Brak');
+    console.log('- ID sprzedawcy:', product.seller?._id);
+    console.log('- Aktywny:', product.isActive);
+    console.log('- Dostępny:', product.isAvailable);
+    console.log('- Stan magazynowy:', product.stock);
+    
+    // Sprawdź czy produkt ma sprzedawcę
+    if (!product.seller) {
+      console.log('⚠️ Produkt nie ma przypisanego sprzedawcy!');
     }
-
-    console.log('\n🔌 Połączenie z MongoDB zamknięte');
+    
   } catch (error) {
-    console.error('❌ Błąd:', error);
+    console.error('❌ Błąd podczas sprawdzania produktu:', error);
   } finally {
-    await mongoose.disconnect();
+    mongoose.connection.close();
   }
 }
 
-checkProduct(); 
+// Sprawdź produkt z argumentu wiersza poleceń
+const productId = process.argv[2];
+if (!productId) {
+  console.log('❌ Podaj ID produktu jako argument');
+  console.log('Przykład: node check-specific-product.js 688fc725bf18c64303fcdde2');
+  process.exit(1);
+}
+
+checkProduct(productId); 

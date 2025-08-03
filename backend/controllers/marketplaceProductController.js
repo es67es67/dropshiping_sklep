@@ -319,31 +319,7 @@ exports.createMarketplaceProduct = async (req, res) => {
   }
 };
 
-// Aktualizacja produktu giełdy
-exports.updateMarketplaceProduct = async (req, res) => {
-  try {
-    const product = await MarketplaceProduct.findById(req.params.id);
-    
-    if (!product) {
-      return res.status(404).json({ error: 'Produkt nie został znaleziony' });
-    }
-    
-    // Sprawdź czy użytkownik jest właścicielem produktu
-    if (product.seller.toString() !== req.userId) {
-      return res.status(403).json({ error: 'Brak uprawnień do edycji tego produktu' });
-    }
-    
-    const updatedProduct = await MarketplaceProduct.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-    
-    res.json(updatedProduct);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+
 
 // Usuwanie produktu giełdy
 exports.deleteMarketplaceProduct = async (req, res) => {
@@ -885,5 +861,84 @@ exports.getLowStockProducts = async (req, res) => {
   } catch (error) {
     console.error('Błąd pobierania produktów z niskim stanem:', error);
     res.status(500).json({ error: 'Błąd serwera' });
+  }
+};
+
+// 🎯 EDYCJA PRODUKTU (tylko dla właściciela)
+exports.updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    
+    // Znajdź produkt
+    const product = await MarketplaceProduct.findById(id);
+    if (!product) {
+      return res.status(404).json({ error: 'Produkt nie został znaleziony' });
+    }
+    
+    // Sprawdź czy użytkownik jest właścicielem produktu
+    if (product.seller.toString() !== userId) {
+      return res.status(403).json({ error: 'Nie masz uprawnień do edycji tego produktu' });
+    }
+    
+    // Aktualizuj dane produktu
+    const {
+      name,
+      description,
+      price,
+      stock,
+      category,
+      brand,
+      condition,
+      saleType,
+      location,
+      tags,
+      images,
+      isActive,
+      isAvailable
+    } = req.body;
+    
+    // Aktualizuj tylko podane pola
+    if (name !== undefined) product.name = name;
+    if (description !== undefined) product.description = description;
+    if (price !== undefined) product.price = parseFloat(price);
+    if (stock !== undefined) {
+      product.stock = parseInt(stock);
+      // Jeśli stan magazynowy = 0, oznacz jako niedostępny
+      if (product.stock === 0) {
+        product.isAvailable = false;
+      } else if (product.stock > 0 && !product.isAvailable) {
+        product.isAvailable = true;
+      }
+    }
+    if (category !== undefined) product.category = category;
+    if (brand !== undefined) product.brand = brand;
+    if (condition !== undefined) product.condition = condition;
+    if (saleType !== undefined) product.saleType = saleType;
+    if (location !== undefined) product.location = location;
+    if (tags !== undefined) product.tags = tags;
+    if (isActive !== undefined) product.isActive = isActive;
+    if (isAvailable !== undefined) product.isAvailable = isAvailable;
+    if (images !== undefined) {
+      product.images = images;
+      product.mainImage = images && images.length > 0 ? images[0] : null;
+    }
+    
+    // Zapisz zmiany
+    await product.save();
+    
+    // Pobierz zaktualizowany produkt z danymi sprzedawcy
+    const updatedProduct = await MarketplaceProduct.findById(id)
+      .populate('seller', 'username firstName lastName avatar');
+    
+    res.json({
+      success: true,
+      message: 'Produkt został zaktualizowany pomyślnie',
+      product: updatedProduct
+    });
+    
+  } catch (error) {
+    console.error('Błąd aktualizacji produktu:', error);
+    res.status(500).json({ error: 'Błąd serwera podczas aktualizacji produktu' });
   }
 }; 

@@ -51,6 +51,7 @@ import TestShopsPage from './components/TestShopsPage';
 import TestComponent from './components/TestComponent';
 import TestImageComponent from './components/TestImage';
 import LocationMap from './pages/LocationMap';
+import EditProductPage from './pages/EditProductPage';
 import CompanyProfile from './pages/CompanyProfile';
 import CompanyProfiles from './pages/CompanyProfiles';
 import Product from './pages/Product';
@@ -323,6 +324,7 @@ function App() {
         <Route path="/teryt-features" element={<TerytFeatures theme={currentTheme} />} />
         <Route path="/product/:productId" element={<ProductDetails theme={currentTheme} />} />
         <Route path="/marketproduct/:productId" element={<ProductDetails theme={currentTheme} />} />
+        <Route path="/edit-product/:productId" element={<EditProductPage theme={currentTheme} />} />
         <Route path="/auction/:id" element={<AuctionDetails theme={currentTheme} />} />
         <Route path="/negotiation/:id" element={<NegotiationDetails theme={currentTheme} />} />
         <Route path="/free/:id" element={<FreeItemDetails theme={currentTheme} />} />

@@ -10,11 +10,11 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 const User = require('./models/userModel');
 
-async function checkUserToken() {
+async function checkLoginStatus() {
   try {
     const username = 'aaaaaaaaaaaaa';
     
-    console.log('🔍 Sprawdzanie tokenu użytkownika:', username);
+    console.log('🔍 Sprawdzanie stanu logowania użytkownika:', username);
     
     // Znajdź użytkownika
     const user = await User.findOne({ username });
@@ -28,6 +28,7 @@ async function checkUserToken() {
     console.log('- Username:', user.username);
     console.log('- Email:', user.email);
     console.log('- IsActive:', user.isActive);
+    console.log('- LastLogin:', user.lastLogin);
     
     // Wygeneruj token
     const token = jwt.sign(
@@ -38,7 +39,6 @@ async function checkUserToken() {
     
     console.log('\n🔑 Token wygenerowany:');
     console.log('- Token (pierwsze 50 znaków):', token.substring(0, 50) + '...');
-    console.log('- Token (pełny):', token);
     
     // Sprawdź czy token jest poprawny
     try {
@@ -53,16 +53,31 @@ async function checkUserToken() {
     
     console.log('\n📋 Instrukcje dla frontendu:');
     console.log('1. Otwórz konsolę przeglądarki (F12)');
-    console.log('2. Wklej ten kod:');
+    console.log('2. Wklej te komendy:');
     console.log(`localStorage.setItem('token', '${token}');`);
+    console.log(`localStorage.setItem('isLoggedIn', 'true');`);
+    console.log(`localStorage.setItem('user', '${JSON.stringify({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      isActive: user.isActive
+    })}');`);
     console.log('3. Odśwież stronę');
-    console.log('4. Spróbuj edytować produkt ponownie');
+    console.log('4. Sprawdź czy użytkownik jest zalogowany');
+    console.log('5. Spróbuj edytować produkt ponownie');
+    
+    console.log('\n🔍 Sprawdź w konsoli przeglądarki:');
+    console.log('- localStorage.getItem("token")');
+    console.log('- localStorage.getItem("isLoggedIn")');
+    console.log('- localStorage.getItem("user")');
     
   } catch (error) {
-    console.error('❌ Błąd podczas sprawdzania tokenu:', error);
+    console.error('❌ Błąd podczas sprawdzania stanu logowania:', error);
   } finally {
     mongoose.connection.close();
   }
 }
 
-checkUserToken(); 
+checkLoginStatus(); 

@@ -1081,6 +1081,11 @@ const Products = ({ theme }) => {
         return;
       }
 
+      // Sprawdź czy produkt jest już w koszyku
+      const existingCartItem = cart.find(item => item._id === product._id);
+      const currentQuantity = existingCartItem ? existingCartItem.quantity : 0;
+      const newQuantity = currentQuantity + 1;
+
       // Sprawdź stan magazynowy przed dodaniem
       const stockCheckResponse = await fetch('/api/marketplace/check-stock', {
         method: 'POST',
@@ -1089,14 +1094,14 @@ const Products = ({ theme }) => {
         },
         body: JSON.stringify({
           productId: product._id,
-          quantity: 1
+          quantity: newQuantity
         })
       });
 
       if (!stockCheckResponse.ok) {
         const stockError = await stockCheckResponse.json();
         if (stockError.error === 'Niewystarczający stan magazynowy') {
-          alert(`Niewystarczający stan magazynowy. Dostępne: ${stockError.available} sztuk`);
+          alert(`Niewystarczający stan magazynowy. Dostępne: ${stockError.available} sztuk. Masz już ${currentQuantity} w koszyku.`);
           return;
         } else if (stockError.error === 'Produkt jest niedostępny') {
           alert('Produkt jest niedostępny');

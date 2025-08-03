@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaHeart, FaEye, FaShoppingCart, FaStar, FaMapMarkerAlt, FaTruck, FaShieldAlt } from 'react-icons/fa';
+import { FaHeart, FaEye, FaShoppingCart, FaStar, FaMapMarkerAlt, FaTruck, FaShieldAlt, FaEdit } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 // 🟡 SHARED COMPONENT: ProductCard
 // Zależności: product data, React Router Link
@@ -301,6 +302,13 @@ const WishlistButton = styled.button`
 const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView, isMarketplace = false }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const { user } = useAuth();
+  
+  // Sprawdź czy użytkownik jest właścicielem produktu
+  const isOwner = user && (
+    (isMarketplace && product.seller?._id === user._id) ||
+    (!isMarketplace && product.shop?.owner === user._id)
+  );
 
   const {
     _id,
@@ -319,7 +327,7 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView, isMar
     tags = []
   } = product;
 
-  const displayImage = images[currentImageIndex] || mainImage || images[0] || '/placeholder-product.jpg';
+  const displayImage = images[currentImageIndex] || mainImage || images[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik04MCAxMDBDODAgODkuNTQ0NCA4OS41NDQ0IDgwIDEwMCA4MEMxMTAuNDU2IDgwIDEyMCA4OS41NDQ0IDEyMCAxMEMxMjAgMTEwLjQ1NiAxMTAuNDU2IDEyMCAxMDAgMTIwQzg5LjU0NDQgMTIwIDgwIDExMC40NTYgODAgMTAwWiIgZmlsbD0iI0NDQ0NDQyIvPgo8cGF0aCBkPSJNMTEwIDEwMEg5MFY5MEgxMTBWMTEwSDkwVjEwMFoiIGZpbGw9IiNDQ0NDQ0MiLz4KPC9zdmc+';
   
   // 🐛 DEBUG: Sprawdź czy zdjęcia są poprawnie przekazywane
   console.log(`🔍 DEBUG ProductCard - ${name}:`, {
@@ -374,6 +382,13 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView, isMar
     }
   };
 
+  const handleEdit = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Przekieruj do strony edycji produktu
+    window.location.href = `/edit-product/${_id}`;
+  };
+
   // Określ ścieżkę na podstawie typu sprzedaży
   const getProductPath = () => {
     if (!isMarketplace) return `/product/${_id}`;
@@ -418,6 +433,16 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView, isMar
 
       {/* Quick Actions */}
       <QuickActions>
+        {isOwner && (
+          <ActionButton
+            onClick={handleEdit}
+            hoverColor="#f0f9ff"
+            hoverTextColor="#0ea5e9"
+            title="Edytuj produkt"
+          >
+            <FaEdit className="text-sm" />
+          </ActionButton>
+        )}
         <ActionButton
           onClick={handleAddToWishlist}
           hoverColor="#fef2f2"
@@ -443,7 +468,7 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView, isMar
           alt={name}
           onError={(e) => {
             console.error(`❌ Błąd ładowania zdjęcia dla ${name}:`, displayImage);
-            e.target.src = '/placeholder-product.jpg';
+            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik04MCAxMDBDODAgODkuNTQ0NCA4OS41NDQ0IDgwIDEwMCA4MEMxMTAuNDU2IDgwIDEyMCA4OS41NDQ0IDEyMCAxMEMxMjAgMTEwLjQ1NiAxMTAuNDU2IDEyMCAxMDAgMTIwQzg5LjU0NDQgMTIwIDgwIDExMC40NTYgODAgMTAwWiIgZmlsbD0iI0NDQ0NDQyIvPgo8cGF0aCBkPSJNMTEwIDEwMEg5MFY5MEgxMTBWMTEwSDkwVjEwMFoiIGZpbGw9IiNDQ0NDQ0MiLz4KPC9zdmc+';
           }}
           onLoad={() => {
             console.log(`✅ Zdjęcie załadowane dla ${name}:`, displayImage);
