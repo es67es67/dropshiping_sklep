@@ -1,336 +1,104 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
-import { FaSearch, FaMapMarkerAlt, FaTimes, FaSpinner } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import locationService from '../services/locationService';
+import { FaMapMarkerAlt, FaSearch, FaTimes, FaSpinner } from 'react-icons/fa';
 
-// Styled components - prosty styl
-const AutocompleteContainer = styled.div`
-  position: relative;
-  width: 100%;
-  max-width: 600px;
-`;
-
-const InputContainer = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  background: ${props => props.theme === 'dark' ? '#2a2a2a' : '#fff'};
-  border: 1px solid ${props => props.theme === 'dark' ? '#444' : '#ddd'};
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  overflow: hidden;
-
-  &:focus-within {
-    border-color: ${props => props.theme === 'dark' ? '#007bff' : '#007bff'};
-    box-shadow: 0 0 0 3px ${props => props.theme === 'dark' ? 'rgba(0, 123, 255, 0.25)' : 'rgba(0, 123, 255, 0.25)'};
-  }
-`;
-
-const SearchIcon = styled.div`
-  position: absolute;
-  left: 12px;
-  color: ${props => props.theme === 'dark' ? '#888' : '#666'};
-  z-index: 2;
-  font-size: 14px;
-`;
-
-const ClearButton = styled.button`
-  position: absolute;
-  right: 8px;
-  background: none;
-  border: none;
-  color: ${props => props.theme === 'dark' ? '#888' : '#666'};
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  z-index: 2;
-
-  &:hover {
-    background: ${props => props.theme === 'dark' ? '#444' : '#f0f0f0'};
-    color: ${props => props.theme === 'dark' ? '#fff' : '#333'};
-  }
-`;
-
-const AutocompleteInput = styled.input`
-  width: 100%;
-  padding: 12px 40px 12px 36px;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  background: transparent;
-  color: ${props => props.theme === 'dark' ? '#fff' : '#333'};
-
-  &::placeholder {
-    color: ${props => props.theme === 'dark' ? '#888' : '#999'};
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-const Dropdown = styled.div`
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: ${props => props.theme === 'dark' ? '#2a2a2a' : '#fff'};
-  border: 1px solid ${props => props.theme === 'dark' ? '#444' : '#ddd'};
-  border-radius: 8px;
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-`;
-
-const DropdownItem = styled.div`
-  padding: 12px 16px;
-  cursor: pointer;
-  border-bottom: 1px solid ${props => props.theme === 'dark' ? '#333' : '#f0f0f0'};
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${props => props.theme === 'dark' ? '#3a3a3a' : '#f8f9fa'};
-  }
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &.selected {
-    background: ${props => props.theme === 'dark' ? '#007bff20' : '#e3f2fd'};
-    border-left: 3px solid #007bff;
-  }
-`;
-
-const ItemIcon = styled.div`
-  color: ${props => props.theme === 'dark' ? '#007bff' : '#007bff'};
-  font-size: 16px;
-  width: 20px;
-  text-align: center;
-`;
-
-const ItemContent = styled.div`
-  flex: 1;
-  min-width: 0;
-`;
-
-const ItemName = styled.div`
-  font-weight: 500;
-  color: ${props => props.theme === 'dark' ? '#fff' : '#333'};
-  margin-bottom: 2px;
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const ItemDetails = styled.div`
-  font-size: 12px;
-  color: ${props => props.theme === 'dark' ? '#888' : '#666'};
-  line-height: 1.3;
-`;
-
-const LoadingSpinner = styled.div`
-  padding: 16px;
-  text-align: center;
-  color: ${props => props.theme === 'dark' ? '#888' : '#666'};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 13px;
-`;
-
-const NoResults = styled.div`
-  padding: 16px;
-  text-align: center;
-  color: ${props => props.theme === 'dark' ? '#888' : '#666'};
-  font-size: 13px;
-`;
-
-const ErrorMessage = styled.div`
-  padding: 8px 12px;
-  margin-top: 4px;
-  background: ${props => props.theme === 'dark' ? '#dc354520' : '#f8d7da'};
-  color: ${props => props.theme === 'dark' ? '#ff6b6b' : '#721c24'};
-  border-radius: 4px;
-  font-size: 12px;
-  border-left: 3px solid #dc3545;
-`;
-
-/**
- * Prosty komponent autouzupełniania dla danych TERYT z bazy MongoDB
- * @param {Object} props - Właściwości komponentu
- * @param {string} props.type - Typ danych ('cities', 'municipalities', 'counties', 'voivodeships', 'streets')
- * @param {string} props.value - Wartość pola
- * @param {Function} props.onChange - Funkcja wywoływana przy zmianie wartości
- * @param {Function} props.onSelect - Funkcja wywoływana przy wyborze elementu
- * @param {string} props.placeholder - Placeholder dla pola
- * @param {string} props.theme - Motyw ('light' lub 'dark')
- * @param {boolean} props.disabled - Czy pole jest wyłączone
- * @param {string} props.className - Dodatkowe klasy CSS
- * @param {boolean} props.enableNavigation - Czy włączyć nawigację po wyborze
- * @param {boolean} props.showClearButton - Czy pokazać przycisk czyszczenia
- */
 const LocationAutocomplete = ({
-  type = 'cities',
   value = '',
   onChange,
-  onSelect,
-  placeholder = 'Wpisz nazwę...',
-  theme = 'light',
-  disabled = false,
-  className = '',
-  enableNavigation = true,
-  showClearButton = true
+  placeholder = "Wprowadź lokalizację", 
+  theme,
+  onLocationSelect,
+  className,
+  disabled = false
 }) => {
-  const navigate = useNavigate();
-  const [query, setQuery] = useState(value);
-  const [results, setResults] = useState([]);
+  const [inputValue, setInputValue] = useState(value);
+  const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [error, setError] = useState(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  
+  const [searchType, setSearchType] = useState('all'); // all, miejscowość, gmina, powiat, województwo, ulica
   const inputRef = useRef(null);
-  const dropdownRef = useRef(null);
+  const suggestionsRef = useRef(null);
 
-  // Wyszukiwanie w bazie MongoDB
-  const debouncedSearch = useCallback(
-    locationService.createDebouncedSearch(async (searchQuery) => {
-      if (!searchQuery || searchQuery.length < 2) {
-        setResults([]);
-        setIsOpen(false);
+  // Debounce dla wyszukiwania
+  const debounceTimeout = useRef(null);
+
+  // Typy wyszukiwania
+  const searchTypes = [
+    { value: 'all', label: '🔍 Wszystko', icon: '🔍' },
+    { value: 'miejscowość', label: '🏘️ Miejscowość', icon: '🏘️' },
+    { value: 'gmina', label: '🏛️ Gmina', icon: '🏛️' },
+    { value: 'powiat', label: '🏢 Powiat', icon: '🏢' },
+    { value: 'województwo', label: '🗺️ Województwo', icon: '🗺️' },
+    { value: 'ulica', label: '🛣️ Ulica', icon: '🛣️' }
+  ];
+
+  // Wyszukiwanie z debounce
+  const searchLocations = useCallback(async (query, type = 'all') => {
+    if (!query || query.length < 2) {
+      setSuggestions([]);
         return;
       }
 
-      try {
-        setIsLoading(true);
-        setError(null);
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams({
+        q: query,
+        type: type,
+        limit: '10'
+      });
 
-        let searchResults = [];
-        switch (type) {
-          case 'cities':
-            searchResults = await locationService.searchCities(searchQuery, 10);
-            break;
-          case 'municipalities':
-            searchResults = await locationService.searchMunicipalities(searchQuery, 10);
-            break;
-          case 'counties':
-            searchResults = await locationService.searchCounties(searchQuery, 10);
-            break;
-          case 'voivodeships':
-            searchResults = await locationService.searchVoivodeships(searchQuery, 10);
-            break;
-          case 'streets':
-            // Wyszukiwanie ulic w bazie
-            searchResults = await locationService.searchStreets(searchQuery, 10);
-            break;
-          default:
-            searchResults = await locationService.searchCities(searchQuery, 10);
-        }
+      const response = await fetch(`/api/locations/search?${params}`);
+      const data = await response.json();
 
-        console.log(`🔍 Wyszukiwanie ${type}:`, searchQuery, 'Wyniki:', searchResults);
-
-        setResults(searchResults);
-        setIsOpen(searchResults.length > 0);
-        setSelectedIndex(-1);
-      } catch (err) {
-        console.error('Błąd wyszukiwania:', err);
-        setError(err.message);
-        setResults([]);
-        setIsOpen(false);
+      if (response.ok) {
+        setSuggestions(data.locations || []);
+      } else {
+        console.error('Błąd wyszukiwania:', data.error);
+        setSuggestions([]);
+      }
+    } catch (error) {
+      console.error('Błąd wyszukiwania:', error);
+      setSuggestions([]);
       } finally {
         setIsLoading(false);
       }
-    }, 200), // Opóźnienie 200ms
-    [type]
-  );
+  }, []);
 
-  // Handle input change
+  // Debounced search
+  const debouncedSearch = useCallback((query, type) => {
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+    
+    debounceTimeout.current = setTimeout(() => {
+      searchLocations(query, type);
+    }, 300); // 300ms debounce
+  }, [searchLocations]);
+
+  // Obsługa zmiany inputu
   const handleInputChange = (e) => {
     const newValue = e.target.value;
-    console.log(`📝 Input change [${type}]:`, newValue);
-    setQuery(newValue);
-    onChange?.(newValue);
-    
-    // Wyszukiwanie po wpisaniu minimum 2 znaków
-    if (newValue.length >= 2) {
-      console.log(`🚀 Rozpoczynam wyszukiwanie [${type}]:`, newValue);
-      debouncedSearch(newValue);
-    } else {
-      setResults([]);
-      setIsOpen(false);
-    }
-  };
-
-  // Handle clear button
-  const handleClear = () => {
-    setQuery('');
-    setResults([]);
-    setIsOpen(false);
-    setError(null);
-    onChange?.('');
-    inputRef.current?.focus();
-  };
-
-  // Handle item selection
-  const handleItemSelect = (item) => {
-    console.log(`✅ Wybrano element [${type}]:`, item);
-    setQuery(item.name);
-    onChange?.(item.name);
-    onSelect?.(item);
-    setIsOpen(false);
+    setInputValue(newValue);
     setSelectedIndex(-1);
-
-    // Nawigacja między stronami po wyborze
-    if (enableNavigation && item.code) {
-      setTimeout(() => {
-        switch (type) {
-          case 'cities':
-            navigate(`/cities/${item.code}`, { 
-              state: { selectedCity: item } 
-            });
-            break;
-          case 'municipalities':
-            navigate(`/municipalities/${item.code}`, { 
-              state: { selectedMunicipality: item } 
-            });
-            break;
-          case 'counties':
-            navigate(`/counties/${item.code}`, { 
-              state: { selectedCounty: item } 
-            });
-            break;
-          case 'voivodeships':
-            navigate(`/voivodeships/${item.code}`, { 
-              state: { selectedVoivodeship: item } 
-            });
-            break;
-        }
-      }, 100);
+    setShowSuggestions(true);
+    
+    // Wywołaj onChange dla parent component
+    if (onChange) {
+      onChange(e);
     }
+
+    // Wyszukaj z debounce
+    debouncedSearch(newValue, searchType);
   };
 
-  // Handle keyboard navigation
+  // Obsługa klawiszy
   const handleKeyDown = (e) => {
-    if (!isOpen) return;
-
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
         setSelectedIndex(prev => 
-          prev < results.length - 1 ? prev + 1 : prev
+          prev < suggestions.length - 1 ? prev + 1 : prev
         );
         break;
       case 'ArrowUp':
@@ -339,27 +107,112 @@ const LocationAutocomplete = ({
         break;
       case 'Enter':
         e.preventDefault();
-        if (selectedIndex >= 0 && results[selectedIndex]) {
-          handleItemSelect(results[selectedIndex]);
+        if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+          handleSuggestionSelect(suggestions[selectedIndex]);
         }
         break;
       case 'Escape':
-        setIsOpen(false);
+        setShowSuggestions(false);
         setSelectedIndex(-1);
         break;
     }
   };
 
-  // Handle click outside
+  // Wybór sugestii
+  const handleSuggestionSelect = (suggestion) => {
+    const displayValue = formatLocationDisplay(suggestion);
+    setInputValue(displayValue);
+    setShowSuggestions(false);
+    setSelectedIndex(-1);
+    
+    // Wywołaj callback dla parent
+    if (onLocationSelect) {
+      onLocationSelect(suggestion);
+    }
+    
+    // Wywołaj onChange
+    if (onChange) {
+      const event = {
+        target: {
+          name: 'location',
+          value: displayValue
+        }
+      };
+      onChange(event);
+    }
+  };
+
+  // Formatowanie wyświetlania lokalizacji
+  const formatLocationDisplay = (location) => {
+    switch (location.type) {
+      case 'miejscowość':
+        return `${location.name}, ${location.gmina?.name || ''}, ${location.powiat?.name || ''}`;
+      case 'gmina':
+        return `${location.name} (gmina), ${location.powiat?.name || ''}`;
+      case 'powiat':
+        return `${location.name} (powiat), ${location.wojewodztwo?.name || ''}`;
+      case 'województwo':
+        return `${location.name} (województwo)`;
+      case 'ulica':
+        return `${location.name}, ${location.miejscowosc?.name || ''}`;
+      default:
+        return location.name;
+    }
+  };
+
+  // Renderowanie sugestii
+  const renderSuggestions = () => {
+    if (!showSuggestions || suggestions.length === 0) return null;
+
+    return (
+      <SuggestionsContainer>
+        <SearchTypeSelector>
+          {searchTypes.map(type => (
+            <TypeButton
+              key={type.value}
+              active={searchType === type.value}
+              onClick={() => {
+                setSearchType(type.value);
+                debouncedSearch(inputValue, type.value);
+              }}
+            >
+              {type.icon} {type.label}
+            </TypeButton>
+          ))}
+        </SearchTypeSelector>
+        
+        <SuggestionsList ref={suggestionsRef}>
+          {suggestions.map((suggestion, index) => (
+            <SuggestionItem
+              key={suggestion._id}
+              selected={index === selectedIndex}
+              onClick={() => handleSuggestionSelect(suggestion)}
+              onMouseEnter={() => setSelectedIndex(index)}
+            >
+              <SuggestionIcon>
+                <FaMapMarkerAlt />
+              </SuggestionIcon>
+              <SuggestionContent>
+                <SuggestionName>{suggestion.name}</SuggestionName>
+                <SuggestionDetails>
+                  {suggestion.type} • {suggestion.code}
+                  {suggestion.gmina?.name && ` • ${suggestion.gmina.name}`}
+                  {suggestion.powiat?.name && ` • ${suggestion.powiat.name}`}
+                </SuggestionDetails>
+              </SuggestionContent>
+            </SuggestionItem>
+          ))}
+        </SuggestionsList>
+      </SuggestionsContainer>
+    );
+  };
+
+  // Click outside handler
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        inputRef.current && 
-        !inputRef.current.contains(event.target) &&
-        dropdownRef.current && 
-        !dropdownRef.current.contains(event.target)
-      ) {
-        setIsOpen(false);
+      if (inputRef.current && !inputRef.current.contains(event.target) &&
+          suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
+        setShowSuggestions(false);
         setSelectedIndex(-1);
       }
     };
@@ -368,146 +221,224 @@ const LocationAutocomplete = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Update query when value prop changes
+  // Update input value when prop changes
   useEffect(() => {
-    setQuery(value);
+    setInputValue(value);
   }, [value]);
 
-  // Render item details based on type
-  const renderItemDetails = (item) => {
-    switch (type) {
-      case 'cities':
-        return (
-          <>
-            <ItemName>{item.name}</ItemName>
-            <ItemDetails>
-              {item.municipalityName}, {item.countyName}, {item.voivodeshipName}
-              {item.population && ` • ${item.population.toLocaleString()} mieszkańców`}
-            </ItemDetails>
-          </>
-        );
-      case 'municipalities':
-        return (
-          <>
-            <ItemName>{item.name}</ItemName>
-            <ItemDetails>
-              {item.countyName}, {item.voivodeshipName}
-            </ItemDetails>
-          </>
-        );
-      case 'counties':
-        return (
-          <>
-            <ItemName>{item.name}</ItemName>
-            <ItemDetails>
-              {item.voivodeshipName}
-            </ItemDetails>
-          </>
-        );
-      case 'voivodeships':
-        return (
-          <>
-            <ItemName>{item.name}</ItemName>
-          </>
-        );
-      case 'streets':
-        return (
-          <>
-            <ItemName>{item.name}</ItemName>
-            <ItemDetails>
-              {item.municipalityName}, {item.countyName}, {item.voivodeshipName}
-            </ItemDetails>
-          </>
-        );
-      default:
-        return <ItemName>{item.name}</ItemName>;
-    }
-  };
-
-  // Get placeholder based on type
-  const getPlaceholder = () => {
-    switch (type) {
-      case 'cities':
-        return 'Wpisz nazwę miasta...';
-      case 'municipalities':
-        return 'Wpisz nazwę gminy...';
-      case 'counties':
-        return 'Wpisz nazwę powiatu...';
-      case 'voivodeships':
-        return 'Wpisz nazwę województwa...';
-      case 'streets':
-        return 'Wpisz nazwę ulicy...';
-      default:
-        return placeholder;
-    }
-  };
-
   return (
-    <AutocompleteContainer className={className}>
-      <InputContainer theme={theme}>
-        <SearchIcon theme={theme}>
-          <FaSearch />
-        </SearchIcon>
-        <AutocompleteInput
+    <Container className={className}>
+      <InputContainer>
+        <InputIcon>
+          <FaMapMarkerAlt />
+        </InputIcon>
+        <Input
           ref={inputRef}
           type="text"
-          value={query}
+          value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => {
-            if (results.length > 0) setIsOpen(true);
-          }}
-          placeholder={getPlaceholder()}
-          theme={theme}
+          onFocus={() => setShowSuggestions(true)}
+          placeholder={placeholder}
           disabled={disabled}
-          autoComplete="off"
-          spellCheck="false"
+          theme={theme}
         />
-        {showClearButton && query && (
-          <ClearButton theme={theme} onClick={handleClear}>
+        {isLoading && (
+          <LoadingIcon>
+            <FaSpinner className="spinner" />
+          </LoadingIcon>
+        )}
+        {inputValue && !isLoading && (
+          <ClearButton
+            onClick={() => {
+              setInputValue('');
+              setSuggestions([]);
+              setShowSuggestions(false);
+              if (onChange) {
+                onChange({ target: { name: 'location', value: '' } });
+              }
+            }}
+          >
             <FaTimes />
           </ClearButton>
         )}
       </InputContainer>
 
-      {isOpen && (
-        <Dropdown ref={dropdownRef} theme={theme}>
-          {isLoading ? (
-            <LoadingSpinner theme={theme}>
-              <FaSpinner className="fa-spin" />
-              Wyszukiwanie...
-            </LoadingSpinner>
-          ) : results.length > 0 ? (
-            results.map((item, index) => (
-              <DropdownItem
-                key={item.code || index}
-                theme={theme}
-                onClick={() => handleItemSelect(item)}
-                className={index === selectedIndex ? 'selected' : ''}
-              >
-                <ItemIcon theme={theme}>
-                  <FaMapMarkerAlt />
-                </ItemIcon>
-                <ItemContent>
-                  {renderItemDetails(item)}
-                </ItemContent>
-              </DropdownItem>
-            ))
-          ) : (
-            <NoResults theme={theme}>
-              Brak wyników dla "{query}"
-            </NoResults>
-          )}
-        </Dropdown>
-      )}
-
-      {error && (
-        <ErrorMessage theme={theme}>
-          {error}
-        </ErrorMessage>
-      )}
-    </AutocompleteContainer>
+      {renderSuggestions()}
+    </Container>
   );
 };
+
+// Styled Components
+const Container = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const InputContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: ${props => props.theme?.inputBackground || '#ffffff'};
+  border: 2px solid ${props => props.theme?.inputBorder || '#e1e5e9'};
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  
+  &:focus-within {
+    border-color: ${props => props.theme?.primaryColor || '#007bff'};
+    box-shadow: 0 0 0 3px ${props => props.theme?.primaryColor || '#007bff'}20;
+  }
+`;
+
+const InputIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: ${props => props.theme?.textSecondary || '#6c757d'};
+  font-size: 16px;
+`;
+
+const Input = styled.input`
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 12px 16px;
+  font-size: 14px;
+  background: transparent;
+  color: ${props => props.theme?.textPrimary || '#212529'};
+  
+  &::placeholder {
+    color: ${props => props.theme?.textSecondary || '#6c757d'};
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const LoadingIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: ${props => props.theme?.primaryColor || '#007bff'};
+  
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+`;
+
+const ClearButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: ${props => props.theme?.textSecondary || '#6c757d'};
+  cursor: pointer;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: ${props => props.theme?.dangerColor || '#dc3545'};
+  }
+`;
+
+const SuggestionsContainer = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: ${props => props.theme?.background || '#ffffff'};
+  border: 2px solid ${props => props.theme?.inputBorder || '#e1e5e9'};
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 400px;
+  overflow: hidden;
+`;
+
+const SearchTypeSelector = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid ${props => props.theme?.borderColor || '#e1e5e9'};
+  background: ${props => props.theme?.backgroundSecondary || '#f8f9fa'};
+`;
+
+const TypeButton = styled.button`
+  padding: 4px 8px;
+  border: 1px solid ${props => props.active ? props.theme?.primaryColor || '#007bff' : props.theme?.borderColor || '#e1e5e9'};
+  background: ${props => props.active ? props.theme?.primaryColor || '#007bff' : 'transparent'};
+  color: ${props => props.active ? '#ffffff' : props.theme?.textPrimary || '#212529'};
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: ${props => props.active ? props.theme?.primaryColor || '#007bff' : props.theme?.backgroundHover || '#f8f9fa'};
+  }
+`;
+
+const SuggestionsList = styled.div`
+  max-height: 300px;
+  overflow-y: auto;
+`;
+
+const SuggestionItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  background: ${props => props.selected ? props.theme?.backgroundHover || '#f8f9fa' : 'transparent'};
+  
+  &:hover {
+    background: ${props => props.theme?.backgroundHover || '#f8f9fa'};
+  }
+  
+  &:not(:last-child) {
+    border-bottom: 1px solid ${props => props.theme?.borderColor || '#e1e5e9'};
+  }
+`;
+
+const SuggestionIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  color: ${props => props.theme?.primaryColor || '#007bff'};
+  font-size: 14px;
+`;
+
+const SuggestionContent = styled.div`
+  flex: 1;
+`;
+
+const SuggestionName = styled.div`
+  font-weight: 500;
+  color: ${props => props.theme?.textPrimary || '#212529'};
+  margin-bottom: 2px;
+`;
+
+const SuggestionDetails = styled.div`
+  font-size: 12px;
+  color: ${props => props.theme?.textSecondary || '#6c757d'};
+`;
 
 export default LocationAutocomplete; 

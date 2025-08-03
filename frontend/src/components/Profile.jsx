@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PageTitle from '../components/PageTitle';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
+import LocationAutocomplete from './LocationAutocomplete';
 
 const Container = styled.div`
   max-width: 1000px;
@@ -593,10 +594,62 @@ export default function Profile() {
     });
   };
 
+  // Nowa funkcja do obsługi wyboru lokalizacji
+  const handleLocationSelect = (location) => {
+    console.log('Wybrana lokalizacja w profilu:', location);
+    
+    // Formatuj wyświetlaną wartość
+    let displayValue = location.name;
+    if (location.gmina?.name) {
+      displayValue += `, ${location.gmina.name}`;
+    }
+    if (location.powiat?.name) {
+      displayValue += `, ${location.powiat.name}`;
+    }
+    if (location.wojewodztwo?.name) {
+      displayValue += `, ${location.wojewodztwo.name}`;
+    }
+    
+    // Zaktualizuj dane użytkownika
+    setUserData(prev => ({
+      ...prev,
+      location: displayValue,
+      // Dodaj dane TERYT do userData
+      terytData: {
+        code: location.code,
+        type: location.type,
+        gmina: location.gmina,
+        powiat: location.powiat,
+        wojewodztwo: location.wojewodztwo
+      }
+    }));
+  };
+
   const handleSave = async () => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const token = localStorage.getItem('token');
+      
+      // Przygotuj dane do wysłania
+      const dataToSend = {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        phone: userData.phone,
+        bio: userData.bio,
+        location: userData.location
+      };
+
+      // Dodaj dane TERYT jeśli są dostępne
+      if (userData.terytData) {
+        dataToSend.terytData = {
+          code: userData.terytData.code,
+          type: userData.terytData.type,
+          gmina: userData.terytData.gmina,
+          powiat: userData.terytData.powiat,
+          wojewodztwo: userData.terytData.wojewodztwo
+        };
+      }
       
       const response = await fetch(`${apiUrl}/api/users/profile`, {
         method: 'PUT',
@@ -604,13 +657,16 @@ export default function Profile() {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(userData)
+        body: JSON.stringify(dataToSend)
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Nie udało się zaktualizować profilu');
       }
+
+      const result = await response.json();
+      console.log('Profil zaktualizowany:', result);
 
       setIsEditing(false);
       setSuccess('Profil został zaktualizowany pomyślnie!');
@@ -691,14 +747,23 @@ export default function Profile() {
       
       <FormRow>
         <Label>Lokalizacja</Label>
-        <Input
-          type="text"
-          name="location"
-          value={userData.location}
-          onChange={handleInputChange}
-          disabled={!isEditing}
-          placeholder="Wprowadź lokalizację"
-        />
+        {isEditing ? (
+          <LocationAutocomplete
+            value={userData.location}
+            onChange={handleInputChange}
+            onLocationSelect={handleLocationSelect}
+            placeholder="Wprowadź lokalizację..."
+            disabled={!isEditing}
+          />
+        ) : (
+          <Input
+            type="text"
+            name="location"
+            value={userData.location}
+            disabled={true}
+            placeholder="Nie ustawiono lokalizacji"
+          />
+        )}
       </FormRow>
       
       {isEditing ? (
