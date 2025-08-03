@@ -784,3 +784,106 @@ exports.rejectOffer = async (req, res) => {
     res.status(500).json({ error: 'Błąd podczas odrzucania oferty' });
   }
 }; 
+
+// Sprawdź stan magazynowy przed dodaniem do koszyka
+exports.checkStock = async (req, res) => {
+  try {
+    const { productId, quantity = 1 } = req.body;
+    
+    const product = await MarketplaceProduct.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Produkt nie został znaleziony' });
+    }
+    
+    // Sprawdź czy produkt jest aktywny
+    if (!product.isActive) {
+      return res.status(400).json({ error: 'Produkt jest niedostępny' });
+    }
+    
+    // Sprawdź stan magazynowy
+    if (product.stock < quantity) {
+      return res.status(400).json({ 
+        error: 'Niewystarczający stan magazynowy',
+        available: product.stock,
+        requested: quantity
+      });
+    }
+    
+    res.json({
+      success: true,
+      available: product.stock,
+      requested: quantity
+    });
+  } catch (error) {
+    console.error('Błąd sprawdzania stanu magazynowego:', error);
+    res.status(500).json({ error: 'Błąd serwera' });
+  }
+};
+
+// Aktualizuj stan magazynowy po zakupie
+exports.updateStock = async (req, res) => {
+  try {
+    const { productId, quantity, operation = 'decrease' } = req.body;
+    
+    const product = await MarketplaceProduct.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Produkt nie został znaleziony' });
+    }
+    
+    let newStock;
+    if (operation === 'decrease') {
+      if (product.stock < quantity) {
+        return res.status(400).json({ 
+          error: 'Niewystarczający stan magazynowy',
+          available: product.stock,
+          requested: quantity
+        });
+      }
+      newStock = product.stock - quantity;
+    } else if (operation === 'increase') {
+      newStock = product.stock + quantity;
+    } else {
+      return res.status(400).json({ error: 'Nieprawidłowa operacja' });
+    }
+    
+    // Aktualizuj stan magazynowy
+    product.stock = Math.max(0, newStock);
+    
+    // Jeśli stan magazynowy = 0, oznacz produkt jako niedostępny
+    if (product.stock === 0) {
+      product.isAvailable = false;
+    }
+    
+    await product.save();
+    
+    res.json({
+      success: true,
+      newStock: product.stock,
+      isAvailable: product.isAvailable
+    });
+  } catch (error) {
+    console.error('Błąd aktualizacji stanu magazynowego:', error);
+    res.status(500).json({ error: 'Błąd serwera' });
+  }
+};
+
+// Pobierz produkty z niskim stanem magazynowym
+exports.getLowStockProducts = async (req, res) => {
+  try {
+    const { threshold = 5 } = req.query;
+    
+    const products = await MarketplaceProduct.find({
+      stock: { $lte: parseInt(threshold) },
+      isActive: true
+    }).select('name stock price seller');
+    
+    res.json({
+      products,
+      count: products.length,
+      threshold: parseInt(threshold)
+    });
+  } catch (error) {
+    console.error('Błąd pobierania produktów z niskim stanem:', error);
+    res.status(500).json({ error: 'Błąd serwera' });
+  }
+}; 

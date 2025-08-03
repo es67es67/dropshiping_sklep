@@ -39,4 +39,7 @@ router.delete('/coupon', cartController.removeCoupon);
 // Aktualizacja dostawy
 router.put('/shipping', cartController.updateShipping);
 
+// Aktualizacja stanów magazynowych po zakupie
+router.post('/update-stock', cartController.updateStockAfterPurchase);
+
 module.exports = router; 

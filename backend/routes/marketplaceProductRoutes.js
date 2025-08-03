@@ -12,6 +12,11 @@ const { authenticateToken } = require('../middleware/authMiddleware');
 router.get('/', marketplaceProductController.getMarketplaceProducts);
 router.get('/search', marketplaceProductController.searchMarketplaceProducts);
 
+// Endpointy stanów magazynowych
+router.post('/check-stock', marketplaceProductController.checkStock);
+router.post('/update-stock', authenticateToken, marketplaceProductController.updateStock);
+router.get('/low-stock', authenticateToken, marketplaceProductController.getLowStockProducts);
+
 // Endpoint do naprawy saleType
 router.post('/fix-sale-type', async (req, res) => {
   try {

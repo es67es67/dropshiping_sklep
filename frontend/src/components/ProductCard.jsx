@@ -534,6 +534,11 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView, isMar
               Gwarancja
             </Feature>
           )}
+          {/* Wyświetl stan magazynowy */}
+          <Feature>
+            <FaShieldAlt />
+            {stock > 0 ? `${stock} sztuk` : 'Niedostępny'}
+          </Feature>
         </Features>
 
         <ActionButtons>
