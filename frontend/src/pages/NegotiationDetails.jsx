@@ -509,6 +509,17 @@ const NegotiationDetails = ({ theme }) => {
             <PriceValue>{formatPrice(product.price)}</PriceValue>
           </PriceSection>
 
+          {product.location?.city && (
+            <div style={{ marginBottom: '1rem' }}>
+              <span style={{ fontWeight: '600', color: theme.text }}>📍 Lokalizacja:</span>
+              <span style={{ color: theme.textSecondary }}>
+                {product.location.city}
+                {product.location.voivodeship && `, ${product.location.voivodeship}`}
+                {product.location.county && product.location.county !== product.location.city && `, ${product.location.county}`}
+              </span>
+            </div>
+          )}
+
           <SellerInfo>
             <SellerName>📞 Kontakt do sprzedawcy</SellerName>
             <ContactButton>

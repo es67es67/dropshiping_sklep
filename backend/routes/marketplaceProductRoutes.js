@@ -75,6 +75,9 @@ router.post('/fix-sale-type', async (req, res) => {
   }
 });
 
+// 🎯 NOWY ENDPOINT: PRODUKTY LOKALNE (musi być przed /:id)
+router.get('/local', authenticateToken, marketplaceProductController.getLocalProducts);
+
 // Publiczne trasy (z parametrami)
 router.get('/:id', marketplaceProductController.getMarketplaceProduct);
 

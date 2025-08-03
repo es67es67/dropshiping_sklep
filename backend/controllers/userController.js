@@ -307,6 +307,9 @@ exports.getProfile = async (req, res) => {
 // Aktualizacja profilu użytkownika
 exports.updateProfile = async (req, res) => {
   try {
+    console.log('🔄 Aktualizacja profilu użytkownika:', req.userId);
+    console.log('📊 Dane do aktualizacji:', req.body);
+    
     const updates = req.body;
     
     // Usuń pola, których nie można aktualizować
@@ -315,14 +318,40 @@ exports.updateProfile = async (req, res) => {
     delete updates.username;
     delete updates.role;
 
+    // Usuń pole location jeśli to string (nie ObjectId)
+    if (updates.location && typeof updates.location === 'string') {
+      console.log('⚠️ Usuwam pole location (string) - używaj terytData');
+      delete updates.location;
+    }
+
+    // Obsługa terytData - zapisz jako teryt
+    if (updates.terytData) {
+      // Mapuj dane z frontend na strukturę modelu
+      updates.teryt = {
+        voivodeshipCode: updates.terytData.wojewodztwo?.code || '',
+        countyCode: updates.terytData.powiat?.code || '',
+        municipalityCode: updates.terytData.gmina?.code || '',
+        tercCode: updates.terytData.gmina?.code || '', // Kod gminy jako TERC
+        simcCode: updates.terytData.code || '', // Kod miejscowości jako SIMC
+        ulicCode: '', // Puste na razie
+        fullCode: `${updates.terytData.wojewodztwo?.code || ''}${updates.terytData.powiat?.code || ''}${updates.terytData.gmina?.code || ''}`
+      };
+      delete updates.terytData;
+      console.log('🗺️ Zapisywanie danych TERYT:', updates.teryt);
+    }
+
+    console.log('✅ Finalne dane do aktualizacji:', updates);
+
     const user = await User.findByIdAndUpdate(
       req.userId,
       updates,
       { new: true, runValidators: true }
     ).select('-password');
 
+    console.log('✅ Profil zaktualizowany pomyślnie');
     res.json(user);
   } catch (err) {
+    console.error('❌ Błąd aktualizacji profilu:', err.message);
     res.status(500).json({ error: err.message });
   }
 };

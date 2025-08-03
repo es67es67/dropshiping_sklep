@@ -113,6 +113,12 @@ const AdvertisementManager = ({
     return localStorage.getItem('ads_disabled') === 'true';
   };
 
+  // Funkcja do wyłączenia reklam
+  const disableAds = () => {
+    localStorage.setItem('ads_disabled', 'true');
+    window.location.reload(); // Odśwież stronę aby ukryć reklamy
+  };
+
   // Sprawdź czy to odpowiedni czas na pokazanie reklamy
   const shouldShowAd = () => {
     if (!showAds || isAdsDisabled()) return false;

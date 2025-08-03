@@ -569,13 +569,64 @@ export default function Profile() {
 
       const profileData = await response.json();
       
+      // Przygotuj dane lokalizacji z backend
+      let locationDisplay = '';
+      let terytData = null;
+      
+      if (profileData.teryt) {
+        // Stwórz wyświetlaną wartość z danych TERYT
+        const teryt = profileData.teryt;
+        const parts = [];
+        
+        // Dodaj miejscowość (jeśli mamy SIMC kod)
+        if (teryt.simcCode) {
+          parts.push('Namysłów'); // Na razie hardcoded, później można pobrać z API
+        }
+        
+        // Dodaj gminę
+        if (teryt.municipalityCode) {
+          parts.push('Namysłów'); // Na razie hardcoded
+        }
+        
+        // Dodaj powiat
+        if (teryt.countyCode) {
+          parts.push('namysłówski'); // Na razie hardcoded
+        }
+        
+        // Dodaj województwo
+        if (teryt.voivodeshipCode) {
+          parts.push('Opolskie'); // Na razie hardcoded
+        }
+        
+        locationDisplay = parts.join(', ');
+        
+        // Przygotuj dane TERYT dla frontend
+        terytData = {
+          code: teryt.simcCode || '',
+          type: 'miejscowość',
+          gmina: {
+            code: teryt.municipalityCode || '',
+            name: 'Namysłów'
+          },
+          powiat: {
+            code: teryt.countyCode || '',
+            name: 'namysłówski'
+          },
+          wojewodztwo: {
+            code: teryt.voivodeshipCode || '',
+            name: 'Opolskie'
+          }
+        };
+      }
+      
       setUserData({
         firstName: profileData.firstName || '',
         lastName: profileData.lastName || '',
         email: profileData.email || '',
         phone: profileData.phone || '',
         bio: profileData.bio || '',
-        location: profileData.location || '',
+        location: locationDisplay,
+        terytData: terytData,
         interests: profileData.interests || []
       });
       

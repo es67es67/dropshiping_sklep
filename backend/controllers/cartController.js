@@ -64,21 +64,33 @@ const groupItemsBySeller = (items) => {
 // Pobieranie koszyka użytkownika
 exports.getCart = async (req, res) => {
   try {
-    let cart = await Cart.findOne({ user: req.userId, status: 'active' })
-      .populate({
-        path: 'items.product',
-        select: 'name price originalPrice images mainImage stock isActive shop seller',
-        populate: [
-          {
-            path: 'shop',
-            select: 'name logo address city'
-          },
-          {
+    let cart = await Cart.findOne({ user: req.userId, status: 'active' });
+
+    if (!cart) {
+      cart = new Cart({ user: req.userId, items: [] });
+      await cart.save();
+    }
+
+    // Ręcznie zrób populate dla każdego produktu
+    for (let item of cart.items) {
+      if (item.productType === 'MarketplaceProduct') {
+        const MarketplaceProduct = require('../models/marketplaceProductModel');
+        item.product = await MarketplaceProduct.findById(item.product)
+          .select('name price originalPrice images mainImage stock isActive seller saleType _id')
+          .populate({
             path: 'seller',
             select: 'username firstName lastName avatar'
-          }
-        ]
-      });
+          });
+      } else if (item.productType === 'Product') {
+        const Product = require('../models/productModel');
+        item.product = await Product.findById(item.product)
+          .select('name price originalPrice images mainImage stock isActive shop')
+          .populate({
+            path: 'shop',
+            select: 'name logo address city'
+          });
+      }
+    }
 
     if (!cart) {
       cart = new Cart({ user: req.userId, items: [] });

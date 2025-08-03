@@ -768,6 +768,14 @@ export default function ProductDetails({ theme }) {
           {product.brand && <div><Label theme={theme}>Marka:</Label> {product.brand}</div>}
           <div><Label theme={theme}>Stan:</Label> {product.condition}</div>
           <div><Label theme={theme}>Dostępność:</Label> {product.isActive ? 'Dostępny' : 'Niedostępny'} ({product.stock} szt.)</div>
+          {product.location?.city && (
+            <div>
+              <Label theme={theme}>📍 Lokalizacja:</Label> 
+              {product.location.city}
+              {product.location.voivodeship && `, ${product.location.voivodeship}`}
+              {product.location.county && product.location.county !== product.location.city && `, ${product.location.county}`}
+            </div>
+          )}
           {product.tags && product.tags.length > 0 && (
             <div><Label theme={theme}>Tagi:</Label> {product.tags.join(', ')}</div>
           )}

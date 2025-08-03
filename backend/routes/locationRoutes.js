@@ -3,10 +3,276 @@ const router = express.Router();
 const locationController = require('../controllers/locationController');
 const authMiddleware = require('../middleware/authMiddleware');
 const Location = require('../models/locationModel');
-const Simc = require('../models/simcModel');
-const Terc = require('../models/tercModel');
+const Wojewodztwo = require('../models/wojewodztwoModel');
+const Powiat = require('../models/powiatModel');
+const Gmina = require('../models/gminaModel');
+const Miejscowosc = require('../models/miejscowoscModel');
 const Ulic = require('../models/ulicModel');
 const mongoose = require('mongoose'); // Dodane dla debug-simc
+
+// GET /api/locations/search - Wyszukaj miejscowości (MUSI BYĆ NA POCZĄTKU!)
+router.get('/search', async (req, res) => {
+  try {
+    const { q, type = 'miejscowość', limit = 10 } = req.query;
+    
+    console.log('🔍 === DEBUG WYSZUKIWANIA ===');
+    console.log(`Query: ${q}`);
+    console.log(`Type: ${type}`);
+    console.log(`Limit: ${limit}`);
+    
+    if (!q || q.length < 2) {
+      console.log('❌ Query za krótkie');
+      return res.json({ locations: [] });
+    }
+    
+    console.log(`🔍 Wyszukiwanie: ${q}, typ: ${type}`);
+    
+    let locations = [];
+    
+    // Mapowanie typów na modele
+    const typeMapping = {
+      'all': 'all',
+      'miejscowość': 'miejscowosci',
+      'gmina': 'gminy', 
+      'powiat': 'powiaty',
+      'wojewodztwo': 'wojewodztwa',
+      'ulica': 'ulice'
+    };
+    
+    const collection = typeMapping[type] || 'miejscowosci';
+    
+    console.log(`📊 Używam kolekcji: ${collection}`);
+    
+    // Wyszukiwanie w odpowiedniej kolekcji
+    switch (collection) {
+      case 'all':
+        console.log(`🔍 Wyszukuję we wszystkich kolekcjach: ${q}`);
+        
+        // Wyszukaj we wszystkich kolekcjach równolegle (od początku)
+        const [miejscowosciResults, gminyResults, powiatyResults, wojewodztwaResults, uliceResults] = await Promise.all([
+          Miejscowosc.find({ name: { $regex: `^${q}`, $options: 'i' } }).limit(3).sort({ name: 1 }),
+          Gmina.find({ name: { $regex: `^${q}`, $options: 'i' } }).limit(2).sort({ name: 1 }),
+          Powiat.find({ name: { $regex: `^${q}`, $options: 'i' } }).limit(2).sort({ name: 1 }),
+          Wojewodztwo.find({ name: { $regex: `^${q}`, $options: 'i' } }).limit(1).sort({ name: 1 }),
+          Ulic.find({ name: { $regex: `^${q}`, $options: 'i' } }).limit(2).sort({ name: 1 })
+        ]);
+        
+        console.log(`📊 Znaleziono: ${miejscowosciResults.length} miejscowości, ${gminyResults.length} gmin, ${powiatyResults.length} powiatów, ${wojewodztwaResults.length} województw, ${uliceResults.length} ulic`);
+        
+        // Pobierz nazwy dla miejscowości
+        const gminaCodes = [...new Set(miejscowosciResults.map(item => item.gminaCode))];
+        const powiatCodes = [...new Set(miejscowosciResults.map(item => item.powiatCode))];
+        const wojewodztwoCodes = [...new Set(miejscowosciResults.map(item => item.wojewodztwoCode))];
+        
+        const [gminyData, powiatyData, wojewodztwaData] = await Promise.all([
+          Gmina.find({ code: { $in: gminaCodes } }).select('code name'),
+          Powiat.find({ code: { $in: powiatCodes } }).select('code name'),
+          Wojewodztwo.find({ code: { $in: wojewodztwoCodes } }).select('code name')
+        ]);
+        
+        // Utwórz mapy dla szybkiego dostępu
+        const gminyMap = new Map(gminyData.map(g => [g.code, g.name]));
+        const powiatyMap = new Map(powiatyData.map(p => [p.code, p.name]));
+        const wojewodztwaMap = new Map(wojewodztwaData.map(w => [w.code, w.name]));
+        
+        // Połącz wyniki
+        locations = [
+          ...miejscowosciResults.map(item => ({
+            _id: item._id,
+            code: item.code,
+            name: item.name,
+            type: 'miejscowość',
+            wojewodztwo: { 
+              code: item.wojewodztwoCode,
+              name: wojewodztwaMap.get(item.wojewodztwoCode) || item.wojewodztwoCode
+            },
+            powiat: { 
+              code: item.powiatCode,
+              name: powiatyMap.get(item.powiatCode) || item.powiatCode
+            },
+            gmina: { 
+              code: item.gminaCode,
+              name: gminyMap.get(item.gminaCode) || item.gminaCode
+            }
+          })),
+          ...gminyResults.map(item => ({
+            _id: item._id,
+            code: item.code,
+            name: item.name,
+            type: 'gmina',
+            wojewodztwo: { 
+              code: item.wojewodztwoCode,
+              name: wojewodztwaMap.get(item.wojewodztwoCode) || item.wojewodztwoCode
+            },
+            powiat: { 
+              code: item.powiatCode,
+              name: powiatyMap.get(item.powiatCode) || item.powiatCode
+            }
+          })),
+          ...powiatyResults.map(item => ({
+            _id: item._id,
+            code: item.code,
+            name: item.name,
+            type: 'powiat',
+            wojewodztwo: { 
+              code: item.wojewodztwoCode,
+              name: wojewodztwaMap.get(item.wojewodztwoCode) || item.wojewodztwoCode
+            }
+          })),
+          ...wojewodztwaResults.map(item => ({
+            _id: item._id,
+            code: item.code,
+            name: item.name,
+            type: 'województwo'
+          })),
+          ...uliceResults.map(item => ({
+            _id: item._id,
+            code: item.symUlic,
+            name: item.name,
+            type: 'ulica',
+            wojewodztwo: { code: item.wojewodztwoCode },
+            powiat: { code: item.powiatCode },
+            gmina: { code: item.gminaCode },
+            miejscowosc: { code: item.simcCode }
+          }))
+        ];
+        break;
+        
+      case 'miejscowosci':
+        console.log(`🔍 Wyszukuję w miejscowościach: ${q}`);
+        
+        const miejscowosciResultsSingle = await Miejscowosc.find({
+          name: { $regex: `^${q}`, $options: 'i' }
+        })
+        .limit(parseInt(limit))
+        .sort({ name: 1 });
+        
+        console.log(`📊 Znaleziono ${miejscowosciResultsSingle.length} wyników w miejscowościach`);
+        
+        // Pobierz nazwy dla miejscowości
+        const gminaCodesSingle = [...new Set(miejscowosciResultsSingle.map(item => item.gminaCode))];
+        const powiatCodesSingle = [...new Set(miejscowosciResultsSingle.map(item => item.powiatCode))];
+        const wojewodztwoCodesSingle = [...new Set(miejscowosciResultsSingle.map(item => item.wojewodztwoCode))];
+        
+        const [gminyDataSingle, powiatyDataSingle, wojewodztwaDataSingle] = await Promise.all([
+          Gmina.find({ code: { $in: gminaCodesSingle } }).select('code name'),
+          Powiat.find({ code: { $in: powiatCodesSingle } }).select('code name'),
+          Wojewodztwo.find({ code: { $in: wojewodztwoCodesSingle } }).select('code name')
+        ]);
+        
+        // Utwórz mapy dla szybkiego dostępu
+        const gminyMapSingle = new Map(gminyDataSingle.map(g => [g.code, g.name]));
+        const powiatyMapSingle = new Map(powiatyDataSingle.map(p => [p.code, p.name]));
+        const wojewodztwaMapSingle = new Map(wojewodztwaDataSingle.map(w => [w.code, w.name]));
+        
+        locations = miejscowosciResultsSingle.map(item => ({
+          _id: item._id,
+          code: item.code,
+          name: item.name,
+          type: 'miejscowość',
+          wojewodztwo: { 
+            code: item.wojewodztwoCode,
+            name: wojewodztwaMapSingle.get(item.wojewodztwoCode) || item.wojewodztwoCode
+          },
+          powiat: { 
+            code: item.powiatCode,
+            name: powiatyMapSingle.get(item.powiatCode) || item.powiatCode
+          },
+          gmina: { 
+            code: item.gminaCode,
+            name: gminyMapSingle.get(item.gminaCode) || item.gminaCode
+          }
+        }));
+        break;
+        
+      case 'gminy':
+        console.log(`🔍 Wyszukuję w gminach: ${q}`);
+        const gminyResultsSingle = await Gmina.find({
+          name: { $regex: `^${q}`, $options: 'i' }
+        })
+        .limit(parseInt(limit))
+        .sort({ name: 1 });
+        
+        console.log(`📊 Znaleziono ${gminyResultsSingle.length} wyników w gminach`);
+        
+        locations = gminyResultsSingle.map(item => ({
+          _id: item._id,
+          code: item.code,
+          name: item.name,
+          type: 'gmina',
+          wojewodztwo: { code: item.wojewodztwoCode },
+          powiat: { code: item.powiatCode }
+        }));
+        break;
+        
+      case 'powiaty':
+        console.log(`🔍 Wyszukuję w powiatach: ${q}`);
+        const powiatyResultsSingle = await Powiat.find({
+          name: { $regex: `^${q}`, $options: 'i' }
+        })
+        .limit(parseInt(limit))
+        .sort({ name: 1 });
+        
+        console.log(`📊 Znaleziono ${powiatyResultsSingle.length} wyników w powiatach`);
+        
+        locations = powiatyResultsSingle.map(item => ({
+          _id: item._id,
+          code: item.code,
+          name: item.name,
+          type: 'powiat',
+          wojewodztwo: { code: item.wojewodztwoCode }
+        }));
+        break;
+        
+      case 'wojewodztwa':
+        console.log(`🔍 Wyszukuję w województwach: ${q}`);
+        const wojewodztwaResultsSingle = await Wojewodztwo.find({
+          name: { $regex: `^${q}`, $options: 'i' }
+        })
+        .limit(parseInt(limit))
+        .sort({ name: 1 });
+        
+        console.log(`📊 Znaleziono ${wojewodztwaResultsSingle.length} wyników w województwach`);
+        
+        locations = wojewodztwaResultsSingle.map(item => ({
+          _id: item._id,
+          code: item.code,
+          name: item.name,
+          type: 'województwo'
+        }));
+        break;
+        
+      case 'ulice':
+        console.log(`🔍 Wyszukuję w ulicach: ${q}`);
+        const uliceResultsSingle = await Ulic.find({
+          name: { $regex: `^${q}`, $options: 'i' }
+        })
+        .limit(parseInt(limit))
+        .sort({ name: 1 });
+        
+        console.log(`📊 Znaleziono ${uliceResultsSingle.length} wyników w ulicach`);
+        
+        locations = uliceResultsSingle.map(item => ({
+          _id: item._id,
+          code: item.symUlic,
+          name: item.name,
+          type: 'ulica',
+          wojewodztwo: { code: item.wojewodztwoCode },
+          powiat: { code: item.powiatCode },
+          gmina: { code: item.gminaCode },
+          miejscowosc: { code: item.simcCode }
+        }));
+        break;
+    }
+    
+    console.log(`✅ Znaleziono ${locations.length} wyników`);
+    console.log(`✅ Wysyłam odpowiedź:`, JSON.stringify(locations.slice(0, 2), null, 2));
+    res.json({ locations });
+  } catch (error) {
+    console.error('❌ Błąd wyszukiwania lokalizacji:', error);
+    res.status(500).json({ message: 'Błąd serwera' });
+  }
+});
 
 // Tymczasowy endpoint do sprawdzenia danych SIMC (musi być na początku)
 router.get('/debug-simc', async (req, res) => {
@@ -128,111 +394,6 @@ router.get('/search/municipalities', async (req, res) => {
     res.json({ municipalities: formattedMunicipalities });
   } catch (error) {
     console.error('Błąd wyszukiwania gmin:', error);
-    res.status(500).json({ message: 'Błąd serwera' });
-  }
-});
-
-// GET /api/locations/search - Wyszukaj miejscowości (musi być przed /:id)
-router.get('/search', async (req, res) => {
-  try {
-    const { q, type = 'miejscowość', limit = 10 } = req.query;
-    
-    if (!q || q.length < 2) {
-      return res.json({ locations: [] });
-    }
-    
-    console.log(`🔍 Wyszukiwanie: ${q}, typ: ${type}`);
-    
-    let locations = [];
-    
-    // Mapowanie typów na kolekcje
-    const typeMapping = {
-      'miejscowość': 'simc',
-      'gmina': 'terc', 
-      'powiat': 'terc',
-      'wojewodztwo': 'terc',
-      'ulica': 'ulic'
-    };
-    
-    const collection = typeMapping[type] || 'simc';
-    
-    console.log(`📊 Używam kolekcji: ${collection}`);
-    
-    // Wyszukiwanie w odpowiedniej kolekcji
-    switch (collection) {
-      case 'simc':
-        console.log(`🔍 Wyszukuję w SIMC: ${q}`);
-        const simcResults = await Simc.find({
-          name: { $regex: q, $options: 'i' }
-        })
-        .limit(parseInt(limit))
-        .sort({ name: 1 });
-        
-        console.log(`📊 Znaleziono ${simcResults.length} wyników w SIMC`);
-        
-        locations = simcResults.map(item => ({
-          _id: item._id,
-          code: item.code,
-          name: item.name,
-          type: 'miejscowość',
-          wojewodztwo: { code: item.wojewodztwoCode },
-          powiat: { code: item.powiatCode },
-          gmina: { code: item.gminaCode },
-          tercCode: item.tercCode
-        }));
-        break;
-        
-      case 'terc':
-        let tercQuery = { name: { $regex: q, $options: 'i' } };
-        
-        // Filtrowanie według typu dla TERC
-        if (type === 'gmina') {
-          tercQuery.type = { $in: ['gmina miejska', 'gmina wiejska', 'gmina miejsko-wiejska'] };
-        } else if (type === 'powiat') {
-          tercQuery.type = 'powiat';
-        } else if (type === 'wojewodztwo') {
-          tercQuery.type = 'województwo';
-        }
-        
-        const tercResults = await Terc.find(tercQuery)
-        .limit(parseInt(limit))
-        .sort({ name: 1 });
-        
-        locations = tercResults.map(item => ({
-          _id: item._id,
-          code: item.code,
-          name: item.name,
-          type: item.type,
-          wojewodztwo: { code: item.wojewodztwoCode },
-          powiat: { code: item.powiatCode },
-          gmina: { code: item.gminaCode }
-        }));
-        break;
-        
-      case 'ulic':
-        const ulicResults = await Ulic.find({
-          name: { $regex: q, $options: 'i' }
-        })
-        .limit(parseInt(limit))
-        .sort({ name: 1 });
-        
-        locations = ulicResults.map(item => ({
-          _id: item._id,
-          code: item.code,
-          name: item.name,
-          type: 'ulica',
-          wojewodztwo: { code: item.wojewodztwoCode },
-          powiat: { code: item.powiatCode },
-          gmina: { code: item.gminaCode },
-          miejscowosc: { code: item.simcCode }
-        }));
-        break;
-    }
-    
-    console.log(`✅ Znaleziono ${locations.length} wyników`);
-    res.json({ locations });
-  } catch (error) {
-    console.error('Błąd wyszukiwania lokalizacji:', error);
     res.status(500).json({ message: 'Błąd serwera' });
   }
 });

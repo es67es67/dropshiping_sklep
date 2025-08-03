@@ -7,6 +7,7 @@ import AuctionCard from '../components/AuctionCard';
 import BidModal from '../components/BidModal';
 import PageTitle from '../components/PageTitle';
 import AdvertisementManager from '../components/AdvertisementManager';
+import LocationFilter from '../components/LocationFilter';
 import { useAuth } from '../contexts/AuthContext';
 import { FaSearch, FaTimes, FaShoppingCart, FaHeart, FaGavel, FaMapMarkerAlt, FaPlus } from 'react-icons/fa';
 
@@ -682,7 +683,7 @@ const LocationSettingsButton = styled.button`
   }
 `;
 
-const Products = () => {
+const Products = ({ theme }) => {
   const { user, getUserLocation, getUserTeryt, getUserAddress } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -705,6 +706,8 @@ const Products = () => {
   const [locationSearch, setLocationSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
+  const [sortByLocation, setSortByLocation] = useState(false);
 
   // Pobieranie produktów z API z obsługą błędów
   useEffect(() => {
@@ -718,26 +721,51 @@ const Products = () => {
         // Użyj proxy w trybie development, VITE_API_URL w production
         const apiUrl = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:5000');
         
-        // Buduj parametry zapytania
+        // 🎯 NOWA LOGIKA: WYBIERZ ENDPOINT NA PODSTAWIE FILTRA
+        let endpoint = '/api/marketplace';
         const params = new URLSearchParams();
-        if (saleTypeFilter !== 'all') {
-          params.append('saleType', saleTypeFilter);
-        }
-        if (categoryFilter !== 'all') {
-          params.append('category', categoryFilter);
-        }
-        if (selectedLocation) {
-          params.append('location', selectedLocation.city);
-        }
-        if (searchQuery) {
-          params.append('search', searchQuery);
+        
+        // Jeśli filtr lokalny jest aktywny, użyj endpointu lokalnych produktów
+        if (locationFilter === 'local') {
+          endpoint = '/api/marketplace/local';
+        } else {
+          // Standardowe parametry dla wszystkich produktów
+          if (saleTypeFilter !== 'all') {
+            params.append('saleType', saleTypeFilter);
+          }
+          if (categoryFilter !== 'all') {
+            params.append('category', categoryFilter);
+          }
+          if (selectedLocation) {
+            params.append('location', selectedLocation.city);
+          }
+          if (searchQuery) {
+            params.append('search', searchQuery);
+          }
+          
+          // 🎯 NOWY PARAMETR: SORTOWANIE PO LOKALIZACJI
+          if (sortByLocation) {
+            params.append('sortByLocation', 'true');
+          }
         }
         
         console.log('🔍 Parametry zapytania:', params.toString());
-        console.log('🔍 URL zapytania:', `${apiUrl}/api/marketplace?${params.toString()}`);
+        console.log('🔍 URL zapytania:', `${apiUrl}${endpoint}?${params.toString()}`);
+        
+        // 🎯 DODAJ TOKEN AUTORYZACYJNY DLA ENDPOINTU LOKALNYCH PRODUKTÓW
+        const fetchOptions = {};
+        if (endpoint === '/api/marketplace/local') {
+          const token = localStorage.getItem('token');
+          if (token) {
+            fetchOptions.headers = {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            };
+          }
+        }
         
         // 🔄 Użyj safeFetch z obsługą błędów
-        const response = await safeFetch(`${apiUrl}/api/marketplace?${params.toString()}`);
+        const response = await safeFetch(`${apiUrl}${endpoint}?${params.toString()}`, fetchOptions);
         console.log('API Response:', response.status, response.statusText);
         
         if (response.ok) {
@@ -746,6 +774,12 @@ const Products = () => {
           console.log('📦 Przykładowy produkt:', data.products?.[0]);
           setProducts(data.products || []);
           
+          // 🎯 ZAPISZ LOKALIZACJĘ UŻYTKOWNIKA (jeśli dostępna)
+          if (data.userLocation) {
+            setUserLocation(data.userLocation);
+            console.log('📍 Lokalizacja użytkownika:', data.userLocation);
+          }
+          
           // ✅ Zapisz sukces do bazy
           await saveTestResultsToDatabase({
             action: 'fetchProducts',
@@ -753,9 +787,44 @@ const Products = () => {
             productsCount: data.products?.length || 0
           });
         } else {
-          const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
-          await saveErrorToDatabase(error, 'fetchProducts');
-          console.error('Błąd podczas pobierania produktów:', response.status);
+          // 🎯 FALLBACK: Jeśli endpoint /local nie działa, użyj zwykłego endpointu
+          if (endpoint === '/api/marketplace/local' && response.status === 401) {
+            console.log('⚠️ Endpoint /local nie działa (401), używam fallback...');
+            
+            // Użyj zwykłego endpointu z filtrowaniem po lokalizacji
+            const fallbackParams = new URLSearchParams();
+            if (saleTypeFilter !== 'all') {
+              fallbackParams.append('saleType', saleTypeFilter);
+            }
+            if (categoryFilter !== 'all') {
+              fallbackParams.append('category', categoryFilter);
+            }
+            if (searchQuery) {
+              fallbackParams.append('search', searchQuery);
+            }
+            if (sortByLocation) {
+              fallbackParams.append('sortByLocation', 'true');
+            }
+            
+            const fallbackResponse = await safeFetch(`${apiUrl}/api/marketplace?${fallbackParams.toString()}`);
+            if (fallbackResponse.ok) {
+              const fallbackData = await fallbackResponse.json();
+              console.log('📦 Pobrane produkty (fallback):', fallbackData.products?.length || 0);
+              setProducts(fallbackData.products || []);
+              
+              if (fallbackData.userLocation) {
+                setUserLocation(fallbackData.userLocation);
+              }
+            } else {
+              const error = new Error(`HTTP ${fallbackResponse.status}: ${fallbackResponse.statusText}`);
+              await saveErrorToDatabase(error, 'fetchProducts_fallback');
+              console.error('Błąd podczas pobierania produktów (fallback):', fallbackResponse.status);
+            }
+          } else {
+            const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+            await saveErrorToDatabase(error, 'fetchProducts');
+            console.error('Błąd podczas pobierania produktów:', response.status);
+          }
         }
       } catch (error) {
         await saveErrorToDatabase(error, 'fetchProducts');
@@ -766,7 +835,7 @@ const Products = () => {
     };
 
     fetchProducts();
-  }, [saleTypeFilter, categoryFilter, selectedLocation, searchQuery]);
+  }, [saleTypeFilter, categoryFilter, selectedLocation, searchQuery, locationFilter, sortByLocation]);
 
   // Ustaw domyślną lokalizację użytkownika przy pierwszym załadowaniu (opcjonalnie)
   useEffect(() => {
@@ -861,6 +930,14 @@ const Products = () => {
 
   const handleCategoryFilter = (category) => {
     setCategoryFilter(category);
+  };
+
+  // 🎯 NOWA FUNKCJA: OBSŁUGA FILTRA LOKALIZACJI
+  const handleLocationFilterChange = ({ filter, sortByLocation: sortByLoc }) => {
+    setLocationFilter(filter);
+    setSortByLocation(sortByLoc);
+    
+    console.log('🎯 Zmieniono filtr lokalizacji:', { filter, sortByLocation: sortByLoc });
   };
 
   // Funkcje do obsługi lokalizacji
@@ -1166,6 +1243,12 @@ const Products = () => {
               </FilterButton>
             ))}
           </FilterContainer>
+          
+          {/* 🎯 NOWY KOMPONENT: FILTR LOKALIZACJI */}
+          <LocationFilter 
+            onFilterChange={handleLocationFilterChange}
+            userLocation={userLocation}
+          />
           
           {/* Filtry lokalizacji */}
           <FilterContainer>

@@ -49,6 +49,7 @@ import PostCreate from './components/PostCreate';
 import Messages from './components/Messages';
 import TestShopsPage from './components/TestShopsPage';
 import TestComponent from './components/TestComponent';
+import TestImageComponent from './components/TestImage';
 import LocationMap from './pages/LocationMap';
 import CompanyProfile from './pages/CompanyProfile';
 import CompanyProfiles from './pages/CompanyProfiles';
@@ -171,6 +172,7 @@ function App() {
     const routes = (
       <Routes>
         <Route path="/test-route" element={<div>TEST ROUTE DZIAŁA</div>} />
+        <Route path="/test-images" element={<TestImageComponent />} />
         <Route path="/test-shop-page" element={
           <div style={{ 
             padding: '2rem', 
@@ -244,7 +246,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/products" element={<Navigate to="/market" replace />} />
-        <Route path="/market" element={<Products />} />
+        <Route path="/market" element={<Products theme={currentTheme} />} />
         <Route path="/shops" element={
           <ProtectedRoute>
             <ShopList />

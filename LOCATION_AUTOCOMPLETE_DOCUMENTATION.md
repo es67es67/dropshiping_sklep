@@ -192,6 +192,8 @@ const simcResults = await Simc.find({
 ## 📊 Metryki Wydajności
 
 ### Przed optymalizacją
+
+
 - **Zapytania:** ~50 na minutę (przy szybkim pisaniu)
 - **Rozmiar odpowiedzi:** ~50KB (100 wyników)
 - **Czas odpowiedzi:** ~200ms

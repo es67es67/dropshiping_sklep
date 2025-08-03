@@ -150,11 +150,16 @@ app.use((req, res, next) => {
   const originalEnd = res.end;
   
   res.end = function(chunk, encoding) {
-    // Usuń restrykcyjne nagłówki przed wysłaniem odpowiedzi
-    res.removeHeader('Content-Security-Policy');
-    res.removeHeader('X-Content-Type-Options');
-    res.removeHeader('X-Frame-Options');
-    res.removeHeader('X-XSS-Protection');
+    try {
+      // Usuń restrykcyjne nagłówki przed wysłaniem odpowiedzi
+      res.removeHeader('Content-Security-Policy');
+      res.removeHeader('X-Content-Type-Options');
+      res.removeHeader('X-Frame-Options');
+      res.removeHeader('X-XSS-Protection');
+    } catch (error) {
+      // Ignoruj błędy jeśli nagłówki już zostały wysłane
+      console.log('⚠️ Nie można usunąć nagłówków - już wysłane');
+    }
     
     // Wywołaj oryginalną metodę end
     return originalEnd.call(this, chunk, encoding);
@@ -168,8 +173,12 @@ app.get('/favicon.ico', (req, res) => {
   res.status(204).end(); // No content
 });
 
-// Statyczne pliki (zdjęcia)
+// Serwowanie plików statycznych z folderu public
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+console.log('📁 Skonfigurowano serwowanie plików statycznych:');
+console.log('   - /images ->', path.join(__dirname, 'public', 'images'));
+console.log('   - /uploads ->', path.join(__dirname, 'uploads'));
 
 // Socket.IO dla funkcji społecznościowych
 io.on('connection', (socket) => {
@@ -281,7 +290,7 @@ safeUse('/api/auctions', auctionRoutes, 'auctionRoutes');
 safeUse('/api/errors', errorRoutes, 'errorRoutes');
 
 // Uruchom serwer po zarejestrowaniu routes
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => {
   console.log(`🚀 Serwer działa na porcie ${PORT}`);
   

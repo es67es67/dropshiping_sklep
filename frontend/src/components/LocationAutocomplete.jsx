@@ -146,15 +146,15 @@ const LocationAutocomplete = ({
   const formatLocationDisplay = (location) => {
     switch (location.type) {
       case 'miejscowość':
-        return `${location.name}, ${location.gmina?.name || ''}, ${location.powiat?.name || ''}`;
+        return `${location.name}`;
       case 'gmina':
-        return `${location.name} (gmina), ${location.powiat?.name || ''}`;
+        return `${location.name} (gmina)`;
       case 'powiat':
-        return `${location.name} (powiat), ${location.wojewodztwo?.name || ''}`;
+        return `${location.name} (powiat)`;
       case 'województwo':
         return `${location.name} (województwo)`;
       case 'ulica':
-        return `${location.name}, ${location.miejscowosc?.name || ''}`;
+        return `${location.name} (ulica)`;
       default:
         return location.name;
     }
@@ -195,9 +195,10 @@ const LocationAutocomplete = ({
               <SuggestionContent>
                 <SuggestionName>{suggestion.name}</SuggestionName>
                 <SuggestionDetails>
-                  {suggestion.type} • {suggestion.code}
-                  {suggestion.gmina?.name && ` • ${suggestion.gmina.name}`}
-                  {suggestion.powiat?.name && ` • ${suggestion.powiat.name}`}
+                  {suggestion.type}
+                  {suggestion.gmina?.name && ` • Gmina: ${suggestion.gmina.name}`}
+                  {suggestion.powiat?.name && ` • Powiat: ${suggestion.powiat.name}`}
+                  {suggestion.wojewodztwo?.name && ` • Woj.: ${suggestion.wojewodztwo.name}`}
                 </SuggestionDetails>
               </SuggestionContent>
             </SuggestionItem>

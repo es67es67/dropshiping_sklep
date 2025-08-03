@@ -91,6 +91,9 @@ const ImageContainer = styled.div`
   width: 100%;
   height: 200px;
   overflow: hidden;
+  background: #f0f0f0; /* 🐛 DEBUG: Dodaj tło żeby zobaczyć kontener */
+  border: 1px solid red; /* 🐛 DEBUG: Dodaj ramkę żeby zobaczyć kontener */
+  z-index: 1; /* 🐛 DEBUG: Dodaj z-index */
 `;
 
 const ProductImage = styled.img`
@@ -98,6 +101,14 @@ const ProductImage = styled.img`
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  position: relative; /* 🐛 DEBUG: Dodaj position */
+  z-index: 2; /* 🐛 DEBUG: Dodaj z-index */
+  
+  /* 🐛 DEBUG: Dodaj style debugowania */
+  &:not([src]), &[src=""], &[src="/placeholder-product.jpg"] {
+    background: #ff0000;
+    border: 2px solid blue;
+  }
   
   ${Card}:hover & {
     transform: scale(1.05);
@@ -309,6 +320,29 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView, isMar
   } = product;
 
   const displayImage = images[currentImageIndex] || mainImage || images[0] || '/placeholder-product.jpg';
+  
+  // 🐛 DEBUG: Sprawdź czy zdjęcia są poprawnie przekazywane
+  console.log(`🔍 DEBUG ProductCard - ${name}:`, {
+    images: images,
+    mainImage: mainImage,
+    displayImage: displayImage,
+    currentImageIndex: currentImageIndex
+  });
+  
+  // 🐛 DEBUG: Sprawdź czy zdjęcie jest dostępne
+  React.useEffect(() => {
+    if (displayImage && displayImage !== '/placeholder-product.jpg') {
+      const img = new Image();
+      img.onload = () => {
+        console.log(`✅ Zdjęcie dostępne: ${displayImage}`);
+      };
+      img.onerror = () => {
+        console.error(`❌ Zdjęcie niedostępne: ${displayImage}`);
+      };
+      img.src = displayImage;
+    }
+  }, [displayImage]);
+  
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
   const isInStock = stock > 0;
 
@@ -407,6 +441,13 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView, isMar
         <ProductImage
           src={displayImage}
           alt={name}
+          onError={(e) => {
+            console.error(`❌ Błąd ładowania zdjęcia dla ${name}:`, displayImage);
+            e.target.src = '/placeholder-product.jpg';
+          }}
+          onLoad={() => {
+            console.log(`✅ Zdjęcie załadowane dla ${name}:`, displayImage);
+          }}
         />
         
         {/* Image Navigation Dots */}
@@ -465,7 +506,14 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist, onQuickView, isMar
             />
           )}
           <ShopName>{shop.name}</ShopName>
-          {shop.address?.city && (
+          {/* Wyświetl lokalizację produktu dla giełdy lub lokalizację sklepu */}
+          {(isMarketplace && product.location?.city) ? (
+            <LocationInfo>
+              <FaMapMarkerAlt />
+              {product.location.city}
+              {product.location.voivodeship && `, ${product.location.voivodeship}`}
+            </LocationInfo>
+          ) : shop.address?.city && (
             <LocationInfo>
               <FaMapMarkerAlt />
               {shop.address.city}

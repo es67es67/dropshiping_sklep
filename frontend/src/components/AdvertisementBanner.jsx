@@ -6,16 +6,16 @@ const BannerContainer = styled.div`
   width: 100%;
   background: linear-gradient(135deg, #00D4AA 0%, #007AFF 100%);
   color: white;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  margin: 1rem 0;
-  box-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  box-shadow: 0 2px 10px rgba(0, 212, 170, 0.2);
   position: relative;
   overflow: hidden;
   
   @media (max-width: 768px) {
-    padding: 0.8rem 1rem;
-    margin: 0.5rem 0;
+    padding: 0.4rem 0.8rem;
+    margin: 0.3rem 0;
   }
 `;
 
@@ -36,22 +36,22 @@ const BannerText = styled.div`
 `;
 
 const BannerTitle = styled.h3`
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.3rem 0;
   
   @media (max-width: 768px) {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 `;
 
 const BannerSubtitle = styled.p`
-  font-size: 1rem;
+  font-size: 0.85rem;
   margin: 0;
   opacity: 0.9;
   
   @media (max-width: 768px) {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 `;
 
@@ -69,16 +69,17 @@ const BannerActions = styled.div`
 const BannerButton = styled(Link)`
   background: rgba(255, 255, 255, 0.2);
   color: white;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
   text-decoration: none;
   font-weight: 600;
+  font-size: 0.85rem;
   transition: all 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   
   &:hover {
     background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     text-decoration: none;
     color: white;
   }
@@ -86,7 +87,8 @@ const BannerButton = styled(Link)`
   @media (max-width: 768px) {
     width: 100%;
     text-align: center;
-    padding: 1rem;
+    padding: 0.8rem;
+    font-size: 0.8rem;
   }
 `;
 
@@ -94,9 +96,9 @@ const CloseButton = styled.button`
   background: none;
   border: none;
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.3rem;
   opacity: 0.7;
   transition: opacity 0.3s ease;
   
@@ -105,13 +107,29 @@ const CloseButton = styled.button`
   }
 `;
 
+const DisableAdsButton = styled.button`
+  background: none;
+  border: none;
+  color: white;
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+  text-decoration: underline;
+  
+  &:hover {
+    opacity: 1;
+  }
+`;
+
 const BannerIcon = styled.span`
-  font-size: 2rem;
-  margin-right: 1rem;
+  font-size: 1.3rem;
+  margin-right: 0.8rem;
   
   @media (max-width: 768px) {
-    font-size: 1.5rem;
-    margin-right: 0.5rem;
+    font-size: 1.1rem;
+    margin-right: 0.4rem;
   }
 `;
 
@@ -179,6 +197,15 @@ const AdvertisementBanner = ({
     localStorage.setItem(`banner_${variant}_closed`, 'true');
   };
 
+  const handleDisableAds = () => {
+    localStorage.setItem('ads_disabled', 'true');
+    setIsVisible(false);
+    // Odśwież stronę po krótkim opóźnieniu
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  };
+
   // Sprawdź czy banner był już zamknięty
   useEffect(() => {
     const wasClosed = localStorage.getItem(`banner_${variant}_closed`);
@@ -211,6 +238,9 @@ const AdvertisementBanner = ({
             </CloseButton>
           )}
         </BannerActions>
+        <DisableAdsButton onClick={handleDisableAds}>
+          Wyłącz reklamy
+        </DisableAdsButton>
       </BannerContent>
     </BannerContainer>
   );

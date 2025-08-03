@@ -15,6 +15,9 @@ router.get('/search', productController.searchProducts);
 router.get('/category/:category', productController.getProductsByCategory);
 router.get('/shop/:shopId', productController.getProductsByShop);
 
+// 🎯 NOWY ENDPOINT: PRODUKTY LOKALNE
+router.get('/local', authenticateToken, productController.getLocalProducts);
+
 // Chronione trasy (wymagają autoryzacji) - MUSZĄ BYĆ PRZED trasami z parametrami
 router.post('/', authenticateToken, productController.createProduct);
 router.post('/user', authenticateToken, productController.createUserProduct);

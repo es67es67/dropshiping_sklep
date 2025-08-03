@@ -78,11 +78,10 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-// UWAGA: Ten endpoint obsługuje TYLKO produkty sklepowe (kolekcja 'products').
-// Nie obsługuje produktów giełdowych (marketplaceproducts)!
+// Pobieranie pojedynczego produktu
 exports.getProduct = async (req, res) => {
   try {
-    console.log('🔍 Pobieranie produktu sklepowego o ID:', req.params.id);
+    console.log('🔍 Pobieranie produktu o ID:', req.params.id);
     
     const product = await Product.findById(req.params.id)
       .populate('shop', 'name logo description address')
@@ -93,7 +92,7 @@ exports.getProduct = async (req, res) => {
     
     if (!product) {
       console.log('❌ Produkt nie został znaleziony');
-      return res.status(404).json({ error: 'Produkt sklepu nie został znaleziony' });
+      return res.status(404).json({ error: 'Produkt nie został znaleziony' });
     }
     
     // Jeśli produkt nie ma seller, ustaw go na podstawie właściciela sklepu
@@ -561,6 +560,95 @@ exports.addProductReview = async (req, res) => {
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Już dodałeś recenzję do tego produktu' });
     }
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// 🎯 NOWY ENDPOINT: PRODUKTY LOKALNE (dla produktów sklepowych)
+exports.getLocalProducts = async (req, res) => {
+  try {
+    const { location, radius = '50', page = 1, limit = 12 } = req.query;
+    
+    if (!req.userId) {
+      return res.status(401).json({ error: 'Wymagana autoryzacja' });
+    }
+    
+    // Pobierz lokalizację użytkownika
+    const user = await User.findById(req.userId).select('teryt address');
+    if (!user) {
+      return res.status(404).json({ error: 'Użytkownik nie znaleziony' });
+    }
+    
+    // 🎯 ALGORYTM WYSZUKIWANIA LOKALNYCH PRODUKTÓW SKLEPOWYCH
+    let locationQuery = {};
+    
+    if (user.teryt) {
+      // Użyj danych TERYT użytkownika
+      const userTeryt = user.teryt;
+      
+      // Wyszukaj produkty w tej samej lokalizacji
+      locationQuery = {
+        $or: [
+          // Dokładnie ta sama lokalizacja
+          {
+            'location.city': user.address?.city,
+            'location.terytCode': userTeryt.fullCode
+          },
+          // Ta sama gmina
+          {
+            'location.municipality': userTeryt.municipalityCode
+          },
+          // Ten sam powiat
+          {
+            'location.county': userTeryt.countyCode
+          },
+          // To samo województwo
+          {
+            'location.voivodeship': userTeryt.voivodeshipCode
+          }
+        ]
+      };
+    } else if (user.address?.city) {
+      // Użyj danych adresowych
+      locationQuery = {
+        'location.city': new RegExp(user.address.city, 'i')
+      };
+    }
+    
+    const skip = (page - 1) * limit;
+    
+    // Pobierz produkty lokalne
+    const products = await Product.find({
+      isActive: true,
+      ...locationQuery
+    })
+    .populate('shop', 'name logo address')
+    .populate('seller', 'username firstName lastName')
+    .skip(skip)
+    .limit(parseInt(limit));
+    
+    const total = await Product.countDocuments({
+      isActive: true,
+      ...locationQuery
+    });
+    
+    console.log(`🎯 Znaleziono ${products.length} lokalnych produktów sklepowych dla użytkownika ${req.userId}`);
+    
+    res.json({
+      products,
+      userLocation: {
+        city: user.address?.city,
+        teryt: user.teryt
+      },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    console.error('❌ Błąd podczas pobierania lokalnych produktów sklepowych:', err);
     res.status(500).json({ error: err.message });
   }
 };

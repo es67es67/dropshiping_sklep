@@ -2,6 +2,34 @@ const MarketplaceProduct = require('../models/marketplaceProductModel');
 const User = require('../models/userModel');
 const Offer = require('../models/offerModel');
 
+// 🎯 ALGORYTM SORTOWANIA PO LOKALIZACJI
+const calculateLocationScore = (productLocation, userLocation) => {
+  if (!productLocation || !userLocation) return 0;
+  
+  // Najwyższy priorytet: dokładnie ta sama lokalizacja
+  if (productLocation.city === userLocation.city) return 100;
+  
+  // Wysoki priorytet: ta sama gmina
+  if (productLocation.municipality === userLocation.municipality) return 80;
+  
+  // Średni priorytet: ten sam powiat
+  if (productLocation.county === userLocation.county) return 60;
+  
+  // Niski priorytet: to samo województwo
+  if (productLocation.voivodeship === userLocation.voivodeship) return 40;
+  
+  return 0; // Brak dopasowania
+};
+
+// 🎯 FUNKCJA SORTOWANIA PRODUKTÓW PO LOKALIZACJI
+const sortByLocation = (products, userLocation) => {
+  return products.sort((a, b) => {
+    const aScore = calculateLocationScore(a.location, userLocation);
+    const bScore = calculateLocationScore(b.location, userLocation);
+    return bScore - aScore; // Najwyższy priorytet pierwszy
+  });
+};
+
 // Pobieranie wszystkich produktów giełdy z filtrowaniem
 exports.getMarketplaceProducts = async (req, res) => {
   try {
@@ -16,7 +44,8 @@ exports.getMarketplaceProducts = async (req, res) => {
       order = 'desc',
       location,
       condition,
-      saleType
+      saleType,
+      sortByLocation: sortByLocationParam = 'false'
     } = req.query;
 
     const skip = (page - 1) * limit;
@@ -54,11 +83,34 @@ exports.getMarketplaceProducts = async (req, res) => {
     const sortOptions = {};
     sortOptions[sort] = order === 'desc' ? -1 : 1;
     
-    const products = await MarketplaceProduct.find(query)
+    let products = await MarketplaceProduct.find(query)
       .populate('seller', 'username firstName lastName avatar')
       .sort(sortOptions)
       .skip(skip)
       .limit(parseInt(limit));
+    
+    // 🎯 SORTOWANIE PO LOKALIZACJI (jeśli włączone)
+    if (sortByLocationParam === 'true' && req.userId) {
+      try {
+        // Pobierz lokalizację użytkownika
+        const user = await User.findById(req.userId).select('teryt address');
+        if (user && (user.teryt || user.address)) {
+          const userLocation = {
+            city: user.address?.city || '',
+            municipality: user.teryt?.municipalityCode || '',
+            county: user.teryt?.countyCode || '',
+            voivodeship: user.teryt?.voivodeshipCode || ''
+          };
+          
+          // Sortuj produkty po lokalizacji
+          products = sortByLocation(products, userLocation);
+          
+          console.log('🎯 Produkty posortowane po lokalizacji użytkownika');
+        }
+      } catch (error) {
+        console.log('⚠️ Błąd sortowania po lokalizacji:', error.message);
+      }
+    }
     
     const total = await MarketplaceProduct.countDocuments(query);
     
@@ -73,6 +125,101 @@ exports.getMarketplaceProducts = async (req, res) => {
     });
   } catch (err) {
     console.error('❌ Błąd podczas pobierania produktów giełdy:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// 🎯 NOWY ENDPOINT: PRODUKTY LOKALNE
+exports.getLocalProducts = async (req, res) => {
+  try {
+    const { location, radius = '50', page = 1, limit = 12 } = req.query;
+    
+    if (!req.userId) {
+      return res.status(401).json({ error: 'Wymagana autoryzacja' });
+    }
+    
+    // Pobierz lokalizację użytkownika
+    const user = await User.findById(req.userId).select('teryt address');
+    if (!user) {
+      return res.status(404).json({ error: 'Użytkownik nie znaleziony' });
+    }
+    
+    // 🎯 ALGORYTM WYSZUKIWANIA LOKALNYCH PRODUKTÓW
+    let locationQuery = {};
+    
+    if (user.teryt) {
+      // Użyj danych TERYT użytkownika
+      const userTeryt = user.teryt;
+      
+      // 🎯 PRECYZYJNE WYSZUKIWANIE LOKALNYCH PRODUKTÓW
+      locationQuery = {
+        $or: [
+          // Dokładnie ta sama lokalizacja (miasto + kod TERYT)
+          {
+            'location.city': user.address?.city,
+            'location.terytCode': userTeryt.fullCode
+          },
+          // Ta sama gmina (bardziej precyzyjne niż powiat)
+          {
+            'location.municipality': userTeryt.municipalityCode,
+            'location.county': userTeryt.countyCode
+          }
+        ]
+      };
+    } else if (user.address?.city) {
+      // Użyj danych adresowych - tylko dokładne dopasowanie miasta
+      locationQuery = {
+        'location.city': user.address.city
+      };
+    }
+    
+    const skip = (page - 1) * limit;
+    
+    // Pobierz produkty lokalne
+    let products = await MarketplaceProduct.find({
+      isActive: true,
+      isAvailable: true,
+      ...locationQuery
+    })
+    .populate('seller', 'username firstName lastName avatar')
+    .skip(skip)
+    .limit(parseInt(limit));
+    
+    // 🎯 SORTOWANIE PO BLISKOŚCI LOKALIZACJI
+    if (user.teryt || user.address) {
+      const userLocation = {
+        city: user.address?.city || '',
+        municipality: user.teryt?.municipalityCode || '',
+        county: user.teryt?.countyCode || '',
+        voivodeship: user.teryt?.voivodeshipCode || ''
+      };
+      
+      products = sortByLocation(products, userLocation);
+    }
+    
+    const total = await MarketplaceProduct.countDocuments({
+      isActive: true,
+      isAvailable: true,
+      ...locationQuery
+    });
+    
+    console.log(`🎯 Znaleziono ${products.length} lokalnych produktów dla użytkownika ${req.userId}`);
+    
+    res.json({
+      products,
+      userLocation: {
+        city: user.address?.city,
+        teryt: user.teryt
+      },
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    console.error('❌ Błąd podczas pobierania lokalnych produktów:', err);
     res.status(500).json({ error: err.message });
   }
 };

@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { FaShoppingCart, FaTrash, FaMinus, FaPlus, FaStore, FaTruck, FaCreditCard } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import AdvertisementManager from './AdvertisementManager';
+import { Link } from 'react-router-dom';
 
 // 🟡 SHARED COMPONENT: Cart
 // Zależności: AuthContext, /api/cart endpoints
@@ -521,6 +522,24 @@ const Cart = () => {
     }
   };
 
+  // 🎯 FUNKCJA GENEROWANIA LINKÓW DO PRODUKTÓW
+  const getProductLink = (product) => {
+    if (!product || !product._id) return '/market';
+    
+    // Sprawdź typ sprzedaży i wygeneruj odpowiedni link
+    switch (product.saleType) {
+      case 'auction':
+        return `/auction/${product._id}`;
+      case 'negotiation':
+        return `/negotiation/${product._id}`;
+      case 'free':
+        return `/free/${product._id}`;
+      case 'fixed_price':
+      default:
+        return `/marketproduct/${product._id}`;
+    }
+  };
+
   const updateQuantity = async (itemId, newQuantity) => {
     try {
       const response = await fetch('/api/cart/update', {
@@ -735,21 +754,27 @@ const Cart = () => {
             <ProductGrid>
               {sellerGroup.items.map((item) => (
                 <ProductCard key={item._id}>
-                  <img
-                    src={item.product.mainImage || item.product.images?.[0] || '/placeholder-product.jpg'}
-                    alt={item.product.name}
-                    className="product-image"
-                    onError={(e) => {
-                      e.target.src = '/placeholder-product.jpg';
-                    }}
-                  />
-                  <div className="product-info">
-                    <h4 className="product-name">{item.product.name}</h4>
-                    <p className="product-price">{item.price.toFixed(2)} zł</p>
-                    {item.originalPrice && item.originalPrice > item.price && (
-                      <p className="product-original-price">{item.originalPrice.toFixed(2)} zł</p>
-                    )}
-                  </div>
+                  <Link to={getProductLink(item.product)} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <img
+                      src={item.product.mainImage || item.product.images?.[0] || '/placeholder-product.jpg'}
+                      alt={item.product.name}
+                      className="product-image"
+                      onError={(e) => {
+                        console.log('❌ Błąd ładowania obrazu:', item.product.mainImage || item.product.images?.[0]);
+                        e.target.src = '/placeholder-product.jpg';
+                      }}
+                      onLoad={() => {
+                        console.log('✅ Obraz załadowany:', item.product.mainImage || item.product.images?.[0]);
+                      }}
+                    />
+                    <div className="product-info">
+                      <h4 className="product-name">{item.product.name}</h4>
+                      <p className="product-price">{item.price.toFixed(2)} zł</p>
+                      {item.originalPrice && item.originalPrice > item.price && (
+                        <p className="product-original-price">{item.originalPrice.toFixed(2)} zł</p>
+                      )}
+                    </div>
+                  </Link>
                   <div className="quantity-controls">
                     <button
                       className="quantity-btn"
