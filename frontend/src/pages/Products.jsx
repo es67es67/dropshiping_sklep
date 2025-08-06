@@ -721,6 +721,47 @@ const FiltersButton = styled.button`
   }
 `;
 
+// Dodane: Banner lokalizacji
+const LocationBanner = styled.div`
+  background: linear-gradient(135deg, rgb(16, 185, 129) 0%, rgb(5, 150, 105) 100%);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+`;
+
+const LocationBannerText = styled.span`
+  flex: 1;
+`;
+
+const LocationClearButton = styled.button`
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: auto;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+`;
+
 const Products = ({ theme }) => {
   const { user, getUserLocation, getUserTeryt, getUserAddress } = useAuth();
   const [products, setProducts] = useState([]);
@@ -1027,6 +1068,19 @@ const Products = ({ theme }) => {
 
   const clearLocationFilter = () => {
     setSelectedLocation(null);
+    setUserLocation(null);
+  };
+
+  // Dodane: Funkcja do otwierania sidebar z focusem na lokalizacji
+  const openLocationSidebar = () => {
+    setSidebarOpen(true);
+    // Opcjonalnie: można dodać scroll do sekcji lokalizacji w sidebar
+    setTimeout(() => {
+      const locationSection = document.querySelector('[data-section="location"]');
+      if (locationSection) {
+        locationSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 300);
   };
 
   const clearAllFilters = () => {
@@ -1273,6 +1327,29 @@ const Products = ({ theme }) => {
         {/* Komponent reklamowy dla strony produktów */}
         <AdvertisementManager location="products" showAds={true} />
         
+        {/* Banner lokalizacji - zawsze wyświetlaj */}
+        <LocationBanner onClick={openLocationSidebar}>
+          <FaMapMarkerAlt />
+          <LocationBannerText>
+            Przeglądasz produkty z: <strong>
+              {selectedLocation 
+                ? `${selectedLocation.city}, ${selectedLocation.municipality}, ${selectedLocation.county}, ${selectedLocation.voivodeship}`.replace(/, ,/g, ', ').replace(/^, /, '').replace(/, $/, '')
+                : userLocation 
+                  ? `${userLocation.city || 'Nieznane miasto'}, ${userLocation.voivodeship || 'Nieznane województwo'}`
+                  : 'Cała Polska'
+              }
+            </strong>
+          </LocationBannerText>
+          {(selectedLocation || userLocation) && (
+            <LocationClearButton onClick={(e) => {
+              e.stopPropagation();
+              clearLocationFilter();
+            }}>
+              Wyczyść
+            </LocationClearButton>
+          )}
+        </LocationBanner>
+
         <ProductList
           products={filteredProducts.filter(p => p.saleType !== 'auction')}
           loading={loading}

@@ -247,7 +247,7 @@ const SidebarFilters = ({
         </FilterSection>
 
         {/* Lokalizacja */}
-        <FilterSection>
+        <FilterSection data-section="location">
           <SectionTitle>
             <FaMapMarkerAlt />
             Lokalizacja
